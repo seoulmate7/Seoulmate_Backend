@@ -1,4 +1,4 @@
-package com.nexus.seoulmate.test;
+package com.nexus.seoulmate.domain.test;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
