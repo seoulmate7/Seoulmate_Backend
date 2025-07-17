@@ -1,4 +1,4 @@
-package com.nexus.seoulmate.test;
+package com.nexus.seoulmate.domain.test;
 
 import com.nexus.seoulmate.exception.Response;
 import com.nexus.seoulmate.exception.status.SuccessStatus;
