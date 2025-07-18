@@ -42,6 +42,9 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MemberLanguage> languages = new ArrayList<>();
 
+    @ManyToMany
+    private List<Hobby> hobbies = new ArrayList<>();
+
     @Column(nullable = false)
     private String univCertificate;
 
@@ -62,7 +65,7 @@ public class Member {
     private SignupProcess signupProcess;
 
     public Member(String email, String password, String firstName, String lastName,
-                  LocalDate DOB, Country countryId, String bio, String profileImage,
+                  LocalDate DOB, Country countryId, String bio, String profileImage, List hobbies,
                   String univCertificate, University univId, List languages, SignupProcess signupProcess){
         this.email = email;
         this.password = password;
@@ -72,6 +75,7 @@ public class Member {
         this.countryId = countryId;
         this.bio = bio;
         this.profileImage = profileImage;
+        this.hobbies = hobbies;
         this.univCertificate = univCertificate;
         this.univId = univId;
         this.languages = languages;
