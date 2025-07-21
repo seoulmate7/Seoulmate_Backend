@@ -1,5 +1,6 @@
 package com.nexus.seoulmate.domain.member.domain;
 
+import com.nexus.seoulmate.domain.member.domain.enums.HobbyCategory;
 import jakarta.persistence.*;
 
 @Entity
