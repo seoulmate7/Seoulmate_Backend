@@ -2,10 +2,7 @@ package com.nexus.seoulmate.mock;
 
 import com.nexus.seoulmate.domain.member.domain.Hobby;
 import com.nexus.seoulmate.domain.member.domain.Member;
-import com.nexus.seoulmate.domain.member.domain.enums.AuthProvider;
-import com.nexus.seoulmate.domain.member.domain.enums.Countries;
-import com.nexus.seoulmate.domain.member.domain.enums.HobbyCategory;
-import com.nexus.seoulmate.domain.member.domain.enums.University;
+import com.nexus.seoulmate.domain.member.domain.enums.*;
 import com.nexus.seoulmate.domain.member.repository.HobbyRepository;
 import com.nexus.seoulmate.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +45,6 @@ public class MemberTestDataInitializer implements CommandLineRunner {
 
             Member member = Member.createGoogleUser(
                     "test@example.com",
-                    "oauth2",
                     "길동",
                     "홍",
                     LocalDate.of(1990, 1, 1),
@@ -59,6 +55,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
                     "https://example.com/cert.jpg",
                     University.SOOKMYUNG,
                     languages,
+                    VerificationStatus.VERIFIED,
                     AuthProvider.GOOGLE
             );
             memberRepository.save(member);
