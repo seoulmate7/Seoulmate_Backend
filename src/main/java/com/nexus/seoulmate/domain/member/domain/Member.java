@@ -57,11 +57,13 @@ public class Member {
     @Column(nullable = false)
     private String univCertificate;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private University univ;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private VerificationState isVerified;
+    private VerificationStatus isVerified;
 
     @Column(nullable = false)
     private boolean isDeleted;
@@ -78,8 +80,8 @@ public class Member {
     @Column(nullable = false)
     private UserStatus userStatus;
 
-    public static void createGoogleUser(String email, String password, String firstName, String lastName,
-                                        LocalDate DOB, Countries country, String bio, String profileImage, List hobbies,
+    public static Member createGoogleUser(String email, String password, String firstName, String lastName,
+                                        LocalDate DOB, Countries country, String bio, String profileImage, List<Hobby> hobbies,
                                         String univCertificate, University univ, Map<String, Integer> languages,
                                         AuthProvider authProvider){
         Member user = new Member();
@@ -95,10 +97,11 @@ public class Member {
         user.univCertificate = univCertificate;
         user.univ = univ;
         user.languages = languages;
-        user.isVerified = VerificationState.SUBMITTED;
+        user.isVerified = VerificationStatus.SUBMITTED;
         user.isDeleted = false;
         user.role = Role.USER;
         user.authProvider = authProvider;
         user.userStatus = UserStatus.ACTIVE;
+        return user;
     }
 }
