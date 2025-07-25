@@ -67,5 +67,5 @@ public class Meeting {
     private LocalDateTime updated;
 
     @Column(name = "language_level")
-    private LanguageLevel languageLevel;
+    private int languageLevel;
 }
