@@ -1,9 +1,9 @@
 package com.nexus.seoulmate.meeting.domain;
 
+import com.nexus.seoulmate.domain.member.domain.Member;
+import com.nexus.seoulmate.domain.member.domain.enums.Languages;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,6 +14,8 @@ import java.time.LocalTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class Meeting {
 
     @Id
@@ -24,11 +26,11 @@ public class Meeting {
     private String title;
 
     @Column(name = "host_message")
-    private String message;
+    private String hostMessage;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id")
-//    private User userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private Member userId;
 
     private String category;
 
@@ -57,7 +59,9 @@ public class Meeting {
 
     private String image;
 
-    private Language language;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Languages language;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -67,5 +71,5 @@ public class Meeting {
     private LocalDateTime updated;
 
     @Column(name = "language_level")
-    private int languageLevel;
+    private Integer languageLevel;
 }

@@ -1,6 +1,6 @@
 package com.nexus.seoulmate.meeting.api.dto.request;
 
-import com.nexus.seoulmate.meeting.domain.Language;
+import com.nexus.seoulmate.domain.member.domain.enums.Languages;
 
 public record MeetingUpdateReq(
         String title,
@@ -11,7 +11,7 @@ public record MeetingUpdateReq(
         String start_time,
         int min_participants,
         int max_participants,
-        Language language,
+        Languages language,
         String host_message,
         int price
         ) {
