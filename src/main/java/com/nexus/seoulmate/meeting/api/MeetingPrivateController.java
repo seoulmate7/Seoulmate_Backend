@@ -5,6 +5,7 @@ import com.nexus.seoulmate.meeting.api.dto.request.privateReq.MeetingUpdatePriva
 import com.nexus.seoulmate.meeting.api.dto.response.MeetingDetailPrivateRes;
 import com.nexus.seoulmate.meeting.api.dto.response.MeetingRes;
 import com.nexus.seoulmate.meeting.application.privateMeeting.PrivateMeetingService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ public class MeetingPrivateController {
 
     private final PrivateMeetingService privateMeetingService;
 
-    // private 모임 생성
+    @Operation(summary = "private 모임 생성 API")
     @PostMapping
     public ResponseEntity<MeetingRes> createMeeting(@RequestBody MeetingCreatePrivateReq req,
                                                     @RequestHeader("userId") Long userId){
@@ -24,14 +25,14 @@ public class MeetingPrivateController {
         return ResponseEntity.ok(res);
     }
 
-    // private 모임 상세 조회
+    @Operation(summary = "private 모임 상세 조회 API")
     @GetMapping("/{meetingId}")
     public ResponseEntity<MeetingDetailPrivateRes> getPrivateMeetingDetail(@PathVariable Long meetingId,
                                                                            @RequestHeader("userId") Long userId){
         return ResponseEntity.ok(privateMeetingService.getPrivateMeetingDetail(meetingId, userId));
     }
 
-    // private 모임 수정
+    @Operation(summary = "private 모임 수정 API")
     @PutMapping("/{meetingId}")
     public ResponseEntity<MeetingRes> updateMeeting(@PathVariable Long meetingId,
                                                     @RequestBody MeetingUpdatePrivateReq req,
@@ -40,7 +41,7 @@ public class MeetingPrivateController {
         return ResponseEntity.ok(res);
     }
 
-    // private 모임 삭제
+    @Operation(summary = "private 모임 삭제 API")
     @DeleteMapping("/{meetingId}")
     public ResponseEntity<MeetingRes> deleteMeeting(@PathVariable Long meetingId,
                                                     @RequestHeader("userId") Long userId){
