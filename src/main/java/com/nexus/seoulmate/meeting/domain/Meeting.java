@@ -72,4 +72,36 @@ public class Meeting {
 
     @Column(name = "language_level")
     private Integer languageLevel;
+
+    // private 모임 update 메서드
+    public void updatePrivateMeeting(String title, String image, String location, String category,
+                                     LocalDate meetingDay, LocalTime startTime, int minParticipants,
+                                     int maxParticipants, Languages language, String hostMessage, int price){
+        this.title = title;
+        this.image = image;
+        this.location = location;
+        this.category = category;
+        this.meetingDay = meetingDay;
+        this.startTime = startTime;
+        this.minParticipants = minParticipants;
+        this.maxParticipants = maxParticipants;
+        this.language = language;
+        this.hostMessage = hostMessage;
+        this.price = price;
+    }
+
+    // official 모임 update 메서드
+    public void updateOfficialMeeting(String title, String image, String location, String category,
+                                      LocalDate meetingDay, LocalTime startTime,
+                                      int maxParticipants, String hostMessage, int price){
+        this.title = title;
+        this.image = image;
+        this.location = location;
+        this.category = category;
+        this.meetingDay = meetingDay;
+        this.startTime = startTime;
+        this.maxParticipants = maxParticipants;
+        this.hostMessage = hostMessage;
+        this.price = price;
+    }
 }

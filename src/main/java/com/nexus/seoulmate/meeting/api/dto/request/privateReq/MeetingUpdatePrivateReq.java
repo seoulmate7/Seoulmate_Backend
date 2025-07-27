@@ -1,8 +1,8 @@
-package com.nexus.seoulmate.meeting.api.dto.request;
+package com.nexus.seoulmate.meeting.api.dto.request.privateReq;
 
 import com.nexus.seoulmate.domain.member.domain.enums.Languages;
 
-public record MeetingUpdateReq(
+public record MeetingUpdatePrivateReq(
         String title,
         String image,
         String location,
@@ -14,5 +14,5 @@ public record MeetingUpdateReq(
         Languages language,
         String host_message,
         int price
-        ) {
+) {
 }

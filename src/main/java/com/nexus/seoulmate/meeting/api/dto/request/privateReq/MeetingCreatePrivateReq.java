@@ -1,8 +1,8 @@
-package com.nexus.seoulmate.meeting.api.dto.request;
+package com.nexus.seoulmate.meeting.api.dto.request.privateReq;
 
 import com.nexus.seoulmate.domain.member.domain.enums.Languages;
 
-public record MeetingCreateReq(
+public record MeetingCreatePrivateReq(
         String meeting_day,
         String start_time,
         String location,
