@@ -4,12 +4,12 @@ import com.nexus.seoulmate.domain.member.domain.Member;
 import com.nexus.seoulmate.domain.member.domain.enums.Role;
 import com.nexus.seoulmate.domain.member.repository.MemberRepository;
 import com.nexus.seoulmate.exception.CustomException;
+import com.nexus.seoulmate.exception.Response;
 import com.nexus.seoulmate.exception.status.ErrorStatus;
 import com.nexus.seoulmate.exception.status.SuccessStatus;
 import com.nexus.seoulmate.meeting.api.dto.request.officiaReq.MeetingCreateOfficialReq;
 import com.nexus.seoulmate.meeting.api.dto.request.officiaReq.MeetingUpdateOfficialReq;
 import com.nexus.seoulmate.meeting.api.dto.response.MeetingDetailOfficialRes;
-import com.nexus.seoulmate.meeting.api.dto.response.MeetingRes;
 import com.nexus.seoulmate.meeting.domain.Meeting;
 import com.nexus.seoulmate.meeting.domain.MeetingType;
 import com.nexus.seoulmate.meeting.domain.repository.MeetingRepository;
@@ -31,7 +31,7 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
 
     @Override
     @Transactional
-    public MeetingRes createMeeting(MeetingCreateOfficialReq req, Long userId){
+    public Response<Long> createMeeting(MeetingCreateOfficialReq req, Long userId){
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
 
@@ -62,10 +62,10 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
                 .build();
 
         meetingRepository.save(meeting);
-        return MeetingRes.from(meeting.getId(), SuccessStatus.CREATE_MEETING);
+        return Response.success(SuccessStatus.CREATE_MEETING, meeting.getId());
     }
 
-    public MeetingDetailOfficialRes getOfficialMeetingDetail(Long meetingId) {
+    public Response<MeetingDetailOfficialRes> getOfficialMeetingDetail(Long meetingId) {
         Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
@@ -75,7 +75,7 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
 
         int compatibilityScore = 85; // 추후 알고리즘 개발 후 수정
 
-        return new MeetingDetailOfficialRes(
+        MeetingDetailOfficialRes dto = new MeetingDetailOfficialRes(
                 meeting.getId(),
                 meeting.getMeetingType().name(),
                 meeting.getImage(),
@@ -89,11 +89,12 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
                 meeting.getPrice(),
                 compatibilityScore
         );
+        return Response.success(SuccessStatus.READ_MEETING_DETAIL, dto);
     }
 
     @Override
     @Transactional
-    public MeetingRes updateMeeting(Long meetingId, MeetingUpdateOfficialReq req, Long userId){
+    public Response<Long> updateMeeting(Long meetingId, MeetingUpdateOfficialReq req, Long userId){
         Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
@@ -122,12 +123,12 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
                     req.price()
             );
 
-        return MeetingRes.from(meeting.getId(), SuccessStatus.UPDATE_MEETING);
+        return Response.success(SuccessStatus.UPDATE_MEETING, meeting.getId());
     }
 
     @Override
     @Transactional
-    public MeetingRes deleteMeeting(Long meetingId, Long userId){
+    public Response<Long> deleteMeeting(Long meetingId, Long userId){
         Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
@@ -141,6 +142,6 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
 
         meetingRepository.delete(meeting);
 
-        return MeetingRes.from(meeting.getId(), SuccessStatus.DELETE_MEETING);
+        return Response.success(SuccessStatus.DELETE_MEETING, meeting.getId());
     }
 }

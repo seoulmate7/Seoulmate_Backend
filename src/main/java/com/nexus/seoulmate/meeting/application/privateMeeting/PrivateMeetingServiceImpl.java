@@ -4,12 +4,12 @@ import com.nexus.seoulmate.domain.member.domain.Member;
 import com.nexus.seoulmate.domain.member.domain.enums.Role;
 import com.nexus.seoulmate.domain.member.repository.MemberRepository;
 import com.nexus.seoulmate.exception.CustomException;
+import com.nexus.seoulmate.exception.Response;
 import com.nexus.seoulmate.exception.status.ErrorStatus;
 import com.nexus.seoulmate.exception.status.SuccessStatus;
 import com.nexus.seoulmate.meeting.api.dto.request.privateReq.MeetingCreatePrivateReq;
 import com.nexus.seoulmate.meeting.api.dto.request.privateReq.MeetingUpdatePrivateReq;
 import com.nexus.seoulmate.meeting.api.dto.response.MeetingDetailPrivateRes;
-import com.nexus.seoulmate.meeting.api.dto.response.MeetingRes;
 import com.nexus.seoulmate.meeting.domain.Meeting;
 import com.nexus.seoulmate.meeting.domain.MeetingType;
 import com.nexus.seoulmate.meeting.domain.repository.MeetingRepository;
@@ -31,7 +31,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
 
     @Override
     @Transactional
-    public MeetingRes createMeeting(MeetingCreatePrivateReq req, Long userId) {
+    public Response<Long> createMeeting(MeetingCreatePrivateReq req, Long userId) {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
 
@@ -62,10 +62,10 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
                 .build();
 
         meetingRepository.save(meeting);
-        return MeetingRes.from(meeting.getId(), SuccessStatus.CREATE_MEETING);
+        return Response.success(SuccessStatus.CREATE_MEETING, meeting.getId());
     }
 
-    public MeetingDetailPrivateRes getPrivateMeetingDetail(Long meetingId, Long userId) {
+    public Response<MeetingDetailPrivateRes> getPrivateMeetingDetail(Long meetingId, Long userId) {
         Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
@@ -78,7 +78,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
         // 궁합 정보
         int compatibilityScore = 85; // 추후 알고리즘 개발 후 수정
 
-        return new MeetingDetailPrivateRes(
+        MeetingDetailPrivateRes dto = new MeetingDetailPrivateRes(
                 meeting.getId(),
                 meeting.getMeetingType().toString(),
                 meeting.getImage(),
@@ -99,10 +99,11 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
                 meeting.getPrice(),
                 compatibilityScore // 궁합 추후 수정
         );
+        return Response.success(SuccessStatus.READ_MEETING_DETAIL, dto);
     }
     @Override
     @Transactional
-    public MeetingRes updateMeeting(Long meetingId, MeetingUpdatePrivateReq req, Long userId) {
+    public Response<Long> updateMeeting(Long meetingId, MeetingUpdatePrivateReq req, Long userId) {
         Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
@@ -132,12 +133,12 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
                 req.price()
         );
 
-        return MeetingRes.from(meeting.getId(), SuccessStatus.UPDATE_MEETING);
+        return Response.success(SuccessStatus.UPDATE_MEETING, meeting.getId());
     }
 
     @Override
     @Transactional
-    public MeetingRes deleteMeeting(Long meetingId, Long userId) {
+    public Response<Long> deleteMeeting(Long meetingId, Long userId) {
         Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
@@ -150,6 +151,6 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
         }
 
         meetingRepository.delete(meeting);
-        return MeetingRes.from(meeting.getId(), SuccessStatus.DELETE_MEETING);
+        return Response.success(SuccessStatus.DELETE_MEETING, meeting.getId());
     }
 }
