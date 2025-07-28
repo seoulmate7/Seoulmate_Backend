@@ -22,3 +22,9 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: trace
+
+fluent:
+  api:
+    key: ${fluent.api.key}
+    username: ${fluent.api.username}
+    password: ${fluent.api.password}

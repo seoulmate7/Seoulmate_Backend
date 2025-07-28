@@ -32,6 +32,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // fluent.me 사용 (음성인식)
+    implementation 'com.google.cloud:google-cloud-storage:2.28.0' // google bucket 사용
 }
 
 tasks.named('test') {
