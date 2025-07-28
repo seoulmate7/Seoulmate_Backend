@@ -5,6 +5,7 @@ import com.nexus.seoulmate.domain.member.domain.enums.Role;
 import com.nexus.seoulmate.domain.member.repository.MemberRepository;
 import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.exception.status.SuccessStatus;
 import com.nexus.seoulmate.meeting.api.dto.request.officiaReq.MeetingCreateOfficialReq;
 import com.nexus.seoulmate.meeting.api.dto.request.officiaReq.MeetingUpdateOfficialReq;
 import com.nexus.seoulmate.meeting.api.dto.response.MeetingDetailOfficialRes;
@@ -61,7 +62,7 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
                 .build();
 
         meetingRepository.save(meeting);
-        return new MeetingRes(meeting.getId(), "모임이 성공적으로 생성되었습니다.");
+        return MeetingRes.from(meeting.getId(), SuccessStatus.CREATE_MEETING);
     }
 
     public MeetingDetailOfficialRes getOfficialMeetingDetail(Long meetingId) {
@@ -121,7 +122,7 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
                     req.price()
             );
 
-        return new MeetingRes(meeting.getId(), "모임이 성공적으로 수정되었습니다.");
+        return MeetingRes.from(meeting.getId(), SuccessStatus.UPDATE_MEETING);
     }
 
     @Override
@@ -140,6 +141,6 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
 
         meetingRepository.delete(meeting);
 
-        return new MeetingRes(meetingId, "모임이 성공적으로 삭제되었습니다.");
+        return MeetingRes.from(meeting.getId(), SuccessStatus.DELETE_MEETING);
     }
 }

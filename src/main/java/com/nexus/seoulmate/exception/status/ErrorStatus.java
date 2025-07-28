@@ -28,7 +28,7 @@ public enum ErrorStatus {
     FLUENT_RESULT_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "Fluent API 채점 결과 파싱에 실패했습니다."),
     FLUENT_AUDIO_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "음성 파일 업로드에 실패했습니다."),
     FLUENT_OVERALL_POINT_NOT_FOUND(HttpStatus.NOT_FOUND, "FLUENT 404", "overall_points를 찾을 수 없습니다."),
-    FLUENT_OVERALL_POINT_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "overall_points 파싱에 실패했습니다.");
+    FLUENT_OVERALL_POINT_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "overall_points 파싱에 실패했습니다."),
 
 
     // Member
