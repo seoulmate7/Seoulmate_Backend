@@ -41,8 +41,11 @@ public class HobbyDataInitializer {
                             .hobbyName(hobbyName)
                             .hobbyCategory(category)
                             .build());
+                    System.out.println("취미 리스트 생성 완료");
+                } else {
+                    System.out.println("취미 리스트가 이미 존재합니다.");
                 }
-            } System.out.println("취미 리스트 생성 완료");
+            }
         }
     }
 
