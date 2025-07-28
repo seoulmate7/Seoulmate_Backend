@@ -28,8 +28,16 @@ public enum ErrorStatus {
     FLUENT_RESULT_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "Fluent API 채점 결과 파싱에 실패했습니다."),
     FLUENT_AUDIO_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "음성 파일 업로드에 실패했습니다."),
     FLUENT_OVERALL_POINT_NOT_FOUND(HttpStatus.NOT_FOUND, "FLUENT 404", "overall_points를 찾을 수 없습니다."),
-    FLUENT_OVERALL_POINT_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "overall_points 파싱에 실패했습니다.");
+    FLUENT_OVERALL_POINT_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "overall_points 파싱에 실패했습니다."),
 
+
+    // Member
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404", "사용자를 찾을 수 없습니다."),
+
+    // Meeting
+    MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING404", "모임을 찾을 수 없습니다."),
+    INVALID_MEETING_TYPE(HttpStatus.BAD_REQUEST, "MEETINGTYPE400", "모임 타입이 유효하지 않습니다."),
+    INVALID_LANGUAGE(HttpStatus.BAD_REQUEST, "COMMON400", "유효하지 않은 언어입니다.");
 
     private final HttpStatus status;
     private final String code;

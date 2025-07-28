@@ -38,3 +38,4 @@ out/
 
 ### yml ###
 src/**/application-prod.yml
+src/**/application-dev.yml
