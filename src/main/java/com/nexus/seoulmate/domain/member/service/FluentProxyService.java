@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexus.seoulmate.config.FluentApiProperties;
 import com.nexus.seoulmate.domain.member.domain.enums.Languages;
+import com.nexus.seoulmate.exception.CustomException;
+import com.nexus.seoulmate.exception.status.ErrorStatus;
 import org.springframework.http.*;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import com.google.cloud.storage.*;
@@ -59,23 +62,27 @@ public class FluentProxyService {
 
     // 1. 로그인
     public String getAccessToken(String apiKey, String username, String password){
-        String url = "https://thefluent.me/api/swagger/login";
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("x-api-key", apiKey);
-        headers.setBasicAuth(username, password);
+        try{
+            String url = "https://thefluent.me/api/swagger/login";
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("x-api-key", apiKey);
+            headers.setBasicAuth(username, password);
 
-        HttpEntity<Void> request = new HttpEntity<>(headers);
+            HttpEntity<Void> request = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                request,
-                String.class
-        );
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    request,
+                    String.class
+            );
 
-        // JSON 응답에서 토큰만 추출
-        String jsonResponse = response.getBody();
-        return extractTokenFromJson(jsonResponse);
+            // JSON 응답에서 토큰만 추출
+            String jsonResponse = response.getBody();
+            return extractTokenFromJson(jsonResponse);
+        } catch (RestClientException e) {
+            throw new CustomException(ErrorStatus.FLUENT_LOGIN_FAILED);
+        }
     }
 
     // JSON 에서 토큰 추출
@@ -87,10 +94,9 @@ public class FluentProxyService {
             if (root.has("token")) {
                 return root.get("token").asText();
             }
-            
-            throw new RuntimeException("토큰을 찾을 수 없습니다: " + jsonResponse);
+            throw new CustomException(ErrorStatus.FLUENT_TOKEN_NOT_FOUND);
         } catch (Exception e) {
-            throw new RuntimeException("토큰 파싱 실패: " + jsonResponse, e);
+            throw new CustomException(ErrorStatus.FLUENT_TOKEN_PARSE_FAILED);
         }
     }
 
@@ -98,47 +104,55 @@ public class FluentProxyService {
     private String createPost(String token, String postLanguageId, String postTitle, String postContent){
         String url = "https://thefluent.me/api/swagger/post";
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("x-access-token", token);
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("x-access-token", token);
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("post_language_id", postLanguageId);
-        body.put("post_title", postTitle);
-        body.put("post_content", postContent);
+            Map<String, Object> body = new HashMap<>();
+            body.put("post_language_id", postLanguageId);
+            body.put("post_title", postTitle);
+            body.put("post_content", postContent);
 
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                url,
-                request,
-                String.class
-        );
-        return response.getBody();
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    url,
+                    request,
+                    String.class
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            throw new CustomException(ErrorStatus.POST_CREATE_FAILED);
+        }
     }
 
     // 3. 포스트 조회
     public String getAllPosts(String token, Integer page, Integer perPage) {
-        String url = "https://thefluent.me/api/swagger/post"; // 실제 엔드포인트
-        if (page != null || perPage != null) {
-            StringBuilder sb = new StringBuilder(url);
-            sb.append("?");
-            if (page != null) sb.append("page=").append(page).append("&");
-            if (perPage != null) sb.append("per_page=").append(perPage);
-            url = sb.toString().replaceAll("&$", "");
+        try {
+            String url = "https://thefluent.me/api/swagger/post"; // 실제 엔드포인트
+            if (page != null || perPage != null) {
+                StringBuilder sb = new StringBuilder(url);
+                sb.append("?");
+                if (page != null) sb.append("page=").append(page).append("&");
+                if (perPage != null) sb.append("per_page=").append(perPage);
+                url = sb.toString().replaceAll("&$", "");
+            }
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("x-access-token", token);
+
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    request,
+                    String.class
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            throw new CustomException(ErrorStatus.GET_POSTS_FAILED);
         }
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("x-access-token", token);
-
-        HttpEntity<Void> request = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                request,
-                String.class
-        );
-        return response.getBody();
     }
 
     // 4. 오디오 파일 버킷에 업로드
@@ -152,33 +166,37 @@ public class FluentProxyService {
             // storage.createAcl(blobId, Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER)); // 파일에 공개 권한 부여
             return "https://storage.googleapis.com/" + bucketName + "/" + fileName;
         } catch (IOException e){
-            throw new RuntimeException("GCS 업로드 실패", e);
+            throw new CustomException(ErrorStatus.FLUENT_AUDIO_UPLOAD_FAILED);
         }
     }
 
     // 5. 음성 파일 제출하기 (결과 얻기) - POST /swagger/score/{post_id}
     public String getScore(String token, String postId, String audioUrl){
-        String url = "https://thefluent.me/api/swagger/score/" + postId;
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("x-access-token", token);
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        try {
+            String url = "https://thefluent.me/api/swagger/score/" + postId;
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("audio_provided", audioUrl);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("x-access-token", token);
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+            Map<String, Object> body = new HashMap<>();
+            body.put("audio_provided", audioUrl);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                url,
-                request,
-                String.class
-        );
-        
-        // JSON 응답에서 overall_points만 추출
-        String jsonResponse = response.getBody();
-        return extractOverallPointsFromJson(jsonResponse);
-        // return response.getBody(); <- 기존 전체 결과 불러오기
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    url,
+                    request,
+                    String.class
+            );
+
+            // JSON 응답에서 overall_points만 추출
+            String jsonResponse = response.getBody();
+            return extractOverallPointsFromJson(jsonResponse);
+            // return response.getBody(); <- 기존 전체 결과 불러오기
+        } catch (Exception e) {
+            throw new CustomException(ErrorStatus.FLUENT_RESULT_PARSE_FAILED);
+        }
     }
 
     // JSON에서 overall_points 추출
@@ -199,10 +217,9 @@ public class FluentProxyService {
                     }
                 }
             }
-
-            throw new RuntimeException("overall_points를 찾을 수 없습니다: " + jsonResponse);
+            throw new CustomException(ErrorStatus.FLUENT_OVERALL_POINT_NOT_FOUND);
         } catch (Exception e) {
-            throw new RuntimeException("overall_points 파싱 실패: " + jsonResponse, e);
+            throw new CustomException(ErrorStatus.FLUENT_OVERALL_POINT_PARSE_FAILED);
         }
     }
 }

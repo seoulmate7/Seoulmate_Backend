@@ -14,9 +14,22 @@ public enum ErrorStatus {
     FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON404", "찾을 수 없는 리소스입니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON404", "사용자를 찾을 수 없습니다"),
-    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "COMMON405", "허용되지 않는 HTTP Method입니다.");
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "COMMON405", "허용되지 않는 HTTP Method입니다."),
 
     // 도메인별로
+    // Member
+    // Fluent 관련 예외
+    FLUENT_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "FLUENT 401", "Fluent API 로그인에 실패했습니다."),
+    FLUENT_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "FLUENT 404", "Fluent API 토큰을 찾을 수 없습니다."),
+    FLUENT_TOKEN_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "Fluent API 토큰 파싱에 실패했습니다."),
+    POST_CREATE_FAILED(HttpStatus.BAD_REQUEST, "FLUENT 400", "Fluent API 게시물 생성에 실패했습니다."),
+    GET_POSTS_FAILED(HttpStatus.BAD_REQUEST, "FLUENT 400", "Fluent API 게시물 조회에 실패했습니다."),
+    // FLUENT_SCORE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "Fluent API 채점 요청에 실패했습니다."),
+    FLUENT_RESULT_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "Fluent API 채점 결과 파싱에 실패했습니다."),
+    FLUENT_AUDIO_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "음성 파일 업로드에 실패했습니다."),
+    FLUENT_OVERALL_POINT_NOT_FOUND(HttpStatus.NOT_FOUND, "FLUENT 404", "overall_points를 찾을 수 없습니다."),
+    FLUENT_OVERALL_POINT_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "overall_points 파싱에 실패했습니다.");
+
 
     private final HttpStatus status;
     private final String code;
