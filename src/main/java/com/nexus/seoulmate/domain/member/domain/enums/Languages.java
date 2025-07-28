@@ -1,6 +1,11 @@
 package com.nexus.seoulmate.domain.member.domain.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.nexus.seoulmate.exception.CustomException;
+import com.nexus.seoulmate.exception.status.ErrorStatus;
+
+import java.util.stream.Stream;
 
 public enum Languages {
     ENGLISH("ENGLISH"),
@@ -26,5 +31,14 @@ public enum Languages {
     @JsonValue
     public String getDisplayName(){
         return displayName;
+    }
+
+    // 역직렬화
+    @JsonCreator
+    public static Languages fromDisplayName(String input){
+        return Stream.of(Languages.values())
+                .filter(lang -> lang.displayName.equalsIgnoreCase(input) || lang.name().equalsIgnoreCase(input))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorStatus.INVALID_LANGUAGE));
     }
 }

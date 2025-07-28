@@ -60,7 +60,7 @@ public class Meeting {
     private String image;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true) // official 에서 언어 제한 없음
     private Languages language;
 
     @CreationTimestamp

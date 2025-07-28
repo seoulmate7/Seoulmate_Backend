@@ -41,7 +41,7 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
         // 날짜, 시간 포맷 지정
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH);
         LocalDate meetingDay = LocalDate.parse(req.meeting_day(), dateTimeFormatter);
-        LocalTime startTime = LocalTime.parse(req.start_time(), dateTimeFormatter);
+        LocalTime startTime = LocalTime.parse(req.start_time());
 
         Meeting meeting = Meeting.builder()
                 .meetingType(MeetingType.OFFICIAL)
@@ -65,7 +65,7 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
     }
 
     public MeetingDetailOfficialRes getOfficialMeetingDetail(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
+        Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
         if(meeting.getMeetingType() != MeetingType.OFFICIAL){
@@ -93,7 +93,7 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
     @Override
     @Transactional
     public MeetingRes updateMeeting(Long meetingId, MeetingUpdateOfficialReq req, Long userId){
-        Meeting meeting = meetingRepository.findById(meetingId)
+        Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
         // 작성자 확인
@@ -107,7 +107,7 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH);
         LocalDate meetingDay = LocalDate.parse(req.meeting_day(), dateTimeFormatter);
-        LocalTime startTime = LocalTime.parse(req.start_time(), dateTimeFormatter);
+        LocalTime startTime = LocalTime.parse(req.start_time());
 
             meeting.updateOfficialMeeting(
                     req.title(),
@@ -127,7 +127,7 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
     @Override
     @Transactional
     public MeetingRes deleteMeeting(Long meetingId, Long userId){
-        Meeting meeting = meetingRepository.findById(meetingId)
+        Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
         if(!meeting.getUserId().getUserId().equals(userId)){

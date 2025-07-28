@@ -65,7 +65,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
     }
 
     public MeetingDetailPrivateRes getPrivateMeetingDetail(Long meetingId, Long userId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
+        Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
         if(meeting.getMeetingType() != MeetingType.PRIVATE){
@@ -102,7 +102,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
     @Override
     @Transactional
     public MeetingRes updateMeeting(Long meetingId, MeetingUpdatePrivateReq req, Long userId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
+        Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
         if (!meeting.getUserId().getUserId().equals(userId)) {
@@ -137,7 +137,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
     @Override
     @Transactional
     public MeetingRes deleteMeeting(Long meetingId, Long userId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
+        Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
         if (!meeting.getUserId().getUserId().equals(userId)) {
