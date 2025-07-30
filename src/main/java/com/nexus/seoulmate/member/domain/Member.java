@@ -1,6 +1,5 @@
 package com.nexus.seoulmate.member.domain;
 
-import com.nexus.seoulmate.domain.member.domain.enums.*;
 import com.nexus.seoulmate.member.domain.enums.*;
 import jakarta.persistence.*;
 import lombok.Getter;
