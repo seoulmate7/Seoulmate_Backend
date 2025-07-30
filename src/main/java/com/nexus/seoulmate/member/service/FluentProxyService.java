@@ -1,9 +1,9 @@
-package com.nexus.seoulmate.domain.member.service;
+package com.nexus.seoulmate.member.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexus.seoulmate.config.FluentApiProperties;
-import com.nexus.seoulmate.domain.member.domain.enums.Languages;
+import com.nexus.seoulmate.member.domain.enums.Languages;
 import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.exception.status.ErrorStatus;
 import org.springframework.http.*;

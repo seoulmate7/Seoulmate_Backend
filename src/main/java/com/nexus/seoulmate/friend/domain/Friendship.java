@@ -1,6 +1,6 @@
-package com.nexus.seoulmate.domain.friend.domain;
+package com.nexus.seoulmate.friend.domain;
 
-import com.nexus.seoulmate.domain.member.domain.Member;
+import com.nexus.seoulmate.member.domain.Member;
 import jakarta.persistence.*;
 
 @Entity

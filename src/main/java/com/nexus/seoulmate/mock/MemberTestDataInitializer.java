@@ -1,10 +1,10 @@
 package com.nexus.seoulmate.mock;
 
-import com.nexus.seoulmate.domain.member.domain.Hobby;
-import com.nexus.seoulmate.domain.member.domain.Member;
-import com.nexus.seoulmate.domain.member.domain.enums.*;
-import com.nexus.seoulmate.domain.member.repository.HobbyRepository;
-import com.nexus.seoulmate.domain.member.repository.MemberRepository;
+import com.nexus.seoulmate.member.domain.Hobby;
+import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.domain.enums.*;
+import com.nexus.seoulmate.member.repository.HobbyRepository;
+import com.nexus.seoulmate.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;

@@ -1,12 +1,16 @@
-package com.nexus.seoulmate.domain.member.domain;
+package com.nexus.seoulmate.member.domain;
 
-import com.nexus.seoulmate.domain.member.domain.enums.HobbyCategory;
+import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 public class Hobby {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
