@@ -1,12 +1,6 @@
 spring:
   profiles:
-    active: prod
-
-  datasource:
-    url: ${spring.datasource.url}
-    username: ${spring.datasource.username}
-    password: ${spring.datasource.password}
-    driver-class-name: ${spring.datasource.driver-class-name}
+    active: dev
 
   jpa:
     hibernate:
@@ -22,3 +16,21 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: trace
+
+fluent:
+  api:
+    key: ${fluent.api.key}
+    username: ${fluent.api.username}
+    password: ${fluent.api.password}
+
+cloud:
+  aws:
+    s3:
+      bucket: seoulmate7
+    region:
+      static: ap-southeast-2
+    stack:
+      auto: false
+    credentials:
+      accessKey: ${AWS_ACCESS_KEY_ID}
+      secretKey: ${AWS_SECRET_ACCESS_KEY}
