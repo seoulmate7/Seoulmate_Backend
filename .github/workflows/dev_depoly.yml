@@ -88,6 +88,6 @@ jobs:
               ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
               pgrep java | xargs -r kill -15 
               sleep 10
-              nohup java -jar /home/$EC2_USERNAME/seoulmateServer.jar > app.log 2>&1 & 
+              nohup java -jar -Dspring.profiles.active=prod /home/$EC2_USERNAME/seoulmateServer.jar > app.log 2>&1 &
               "
               rm -f private_key.pem
