@@ -1,7 +1,7 @@
-package com.nexus.seoulmate.domain.member.controller;
+package com.nexus.seoulmate.member.controller;
 
-import com.nexus.seoulmate.domain.member.domain.enums.Languages;
-import com.nexus.seoulmate.domain.member.service.FluentProxyService;
+import com.nexus.seoulmate.member.domain.enums.Languages;
+import com.nexus.seoulmate.member.service.FluentProxyService;
 import com.nexus.seoulmate.exception.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

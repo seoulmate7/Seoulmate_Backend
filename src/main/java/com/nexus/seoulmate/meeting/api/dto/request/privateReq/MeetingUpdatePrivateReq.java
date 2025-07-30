@@ -1,6 +1,6 @@
 package com.nexus.seoulmate.meeting.api.dto.request.privateReq;
 
-import com.nexus.seoulmate.domain.member.domain.enums.Languages;
+import com.nexus.seoulmate.member.domain.enums.Languages;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "개인 모임 수정 요청 DTO")

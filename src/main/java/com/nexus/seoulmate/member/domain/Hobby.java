@@ -1,6 +1,6 @@
-package com.nexus.seoulmate.domain.member.domain;
+package com.nexus.seoulmate.member.domain;
 
-import com.nexus.seoulmate.domain.member.domain.enums.HobbyCategory;
+import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.NoArgsConstructor;

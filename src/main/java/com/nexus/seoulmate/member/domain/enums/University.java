@@ -1,4 +1,4 @@
-package com.nexus.seoulmate.domain.member.domain.enums;
+package com.nexus.seoulmate.member.domain.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 

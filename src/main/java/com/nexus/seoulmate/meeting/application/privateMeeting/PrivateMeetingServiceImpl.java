@@ -1,8 +1,8 @@
 package com.nexus.seoulmate.meeting.application.privateMeeting;
 
-import com.nexus.seoulmate.domain.member.domain.Member;
-import com.nexus.seoulmate.domain.member.domain.enums.Role;
-import com.nexus.seoulmate.domain.member.repository.MemberRepository;
+import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.domain.enums.Role;
+import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.exception.Response;
 import com.nexus.seoulmate.exception.status.ErrorStatus;

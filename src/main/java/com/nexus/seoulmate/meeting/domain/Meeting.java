@@ -1,7 +1,7 @@
 package com.nexus.seoulmate.meeting.domain;
 
-import com.nexus.seoulmate.domain.member.domain.Member;
-import com.nexus.seoulmate.domain.member.domain.enums.Languages;
+import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.domain.enums.Languages;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

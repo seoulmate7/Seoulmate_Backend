@@ -1,8 +1,8 @@
 package com.nexus.seoulmate.mock;
 
-import com.nexus.seoulmate.domain.member.domain.Hobby;
-import com.nexus.seoulmate.domain.member.domain.enums.HobbyCategory;
-import com.nexus.seoulmate.domain.member.repository.HobbyRepository;
+import com.nexus.seoulmate.member.domain.Hobby;
+import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
+import com.nexus.seoulmate.member.repository.HobbyRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
