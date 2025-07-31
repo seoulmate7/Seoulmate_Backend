@@ -1,12 +1,6 @@
 spring:
   profiles:
-    active: prod
-
-  datasource:
-    url: ${spring.datasource.url}
-    username: ${spring.datasource.username}
-    password: ${spring.datasource.password}
-    driver-class-name: ${spring.datasource.driver-class-name}
+    active: dev
 
   data:
     redis:

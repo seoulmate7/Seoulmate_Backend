@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface MeetingRepository extends JpaRepository<Meeting, Long> {
+public interface MeetingRepository extends JpaRepository<Meeting, Long>, MeetingCustomRepository {
 
     // userId 를 같이 불러오도록
     @EntityGraph(attributePaths = {"userId"})
