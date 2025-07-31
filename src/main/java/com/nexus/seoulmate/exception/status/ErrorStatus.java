@@ -16,9 +16,10 @@ public enum ErrorStatus {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON404", "사용자를 찾을 수 없습니다"),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "COMMON405", "허용되지 않는 HTTP Method입니다."),
 
-    // 도메인별로
     // Member
-    // Fluent 관련 예외
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER 404", "사용자를 찾을 수 없습니다."),
+
+    // Member > Fluent 관련 예외
     FLUENT_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "FLUENT 401", "Fluent API 로그인에 실패했습니다."),
     FLUENT_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "FLUENT 404", "Fluent API 토큰을 찾을 수 없습니다."),
     FLUENT_TOKEN_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "Fluent API 토큰 파싱에 실패했습니다."),
@@ -30,14 +31,13 @@ public enum ErrorStatus {
     FLUENT_OVERALL_POINT_NOT_FOUND(HttpStatus.NOT_FOUND, "FLUENT 404", "overall_points를 찾을 수 없습니다."),
     FLUENT_OVERALL_POINT_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "overall_points 파싱에 실패했습니다."),
 
-
-    // Member
-    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404", "사용자를 찾을 수 없습니다."),
-
     // Meeting
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING404", "모임을 찾을 수 없습니다."),
     INVALID_MEETING_TYPE(HttpStatus.BAD_REQUEST, "MEETINGTYPE400", "모임 타입이 유효하지 않습니다."),
-    INVALID_LANGUAGE(HttpStatus.BAD_REQUEST, "COMMON400", "유효하지 않은 언어입니다.");
+    INVALID_LANGUAGE(HttpStatus.BAD_REQUEST, "COMMON400", "유효하지 않은 언어입니다."),
+
+    // Search
+    SEARCH_NOT_FOUND(HttpStatus.NOT_FOUND, "SEARCH404", "검색 조건에 해당하는 값이 없습니다.");
 
     private final HttpStatus status;
     private final String code;

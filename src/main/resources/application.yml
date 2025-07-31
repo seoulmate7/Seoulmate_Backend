@@ -8,15 +8,39 @@ spring:
     password: ${spring.datasource.password}
     driver-class-name: ${spring.datasource.driver-class-name}
 
+  data:
+    redis:
+      host: localhost    # Redis 서버의 호스트 주소
+      port: 6379        # Redis 서버의 포트 번호 (기본)
+      timeout: 2000ms   # 연결 타임아웃 시간 (2초)
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         show_sql: true
     open-in-view: false
+
+  security:
+    oauth2:
+      client:
+        registration: # 외부 서비스에서 우리 서비스를 특정하기 위해 등록하는 정보 (등록 필수)
+          google:
+            client-id : ${spring.security.oauth2.client.registration.google.client-id}
+            client-secret : ${spring.security.oauth2.client.registration.google.client-secret}
+            redirect-uri : ${spring.security.oauth2.client.registration.google.redirect-uri}
+            scope :
+              - profile
+              - email
+        provider: # 서비스별로 정해진 값이 존재해, OAuth2 클라이언트 의존성이 유명한 서비스는 내부적으로 데이터를 가지고 있음
+          google:
+            authorization-uri: ${spring.security.oauth2.client.provider.google.authorization-uri}
+            token-uri: ${spring.security.oauth2.client.provider.google.token-uri}
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
 
 logging:
   level:
@@ -28,3 +52,15 @@ fluent:
     key: ${fluent.api.key}
     username: ${fluent.api.username}
     password: ${fluent.api.password}
+
+cloud:
+  aws:
+    s3:
+      bucket: seoulmate7
+    region:
+      static: ap-southeast-2
+    stack:
+      auto: false
+    credentials:
+      accessKey: ${AWS_ACCESS_KEY_ID}
+      secretKey: ${AWS_SECRET_ACCESS_KEY}
