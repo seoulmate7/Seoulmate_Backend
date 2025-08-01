@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -38,8 +38,8 @@ spring:
 
 logging:
   level:
-    org.hibernate.SQL: debug
-    org.hibernate.type.descriptor.sql: trace
+    org.hibernate.SQL: warn
+    org.hibernate.type.descriptor.sql: warn
 
 fluent:
   api:

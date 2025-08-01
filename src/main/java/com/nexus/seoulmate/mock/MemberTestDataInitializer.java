@@ -6,6 +6,7 @@ import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.repository.HobbyRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 @Order(2) // 실행 순서
 @RequiredArgsConstructor
@@ -26,6 +28,10 @@ public class MemberTestDataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        log.info("테스트 사용자 데이터 초기화 시작");
+        
+        List<Member> membersToSave = new ArrayList<>();
+        
         // 첫 번째 테스트 사용자
         String testEmail1 = "test1@example.com";
         if (memberRepository.findByEmail(testEmail1).isEmpty()) {
@@ -34,7 +40,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
             languages1.put("Korean", 90);
             languages1.put("English", 70);
 
-            // Hobby 엔티티 3개 조회 (이름과 카테고리 기준)
+            // Hobby 엔티티 3개 조회
             Hobby hobby1 = hobbyRepository.findByHobbyNameAndHobbyCategory("축구", HobbyCategory.SPORTS).orElse(null);
             Hobby hobby2 = hobbyRepository.findByHobbyNameAndHobbyCategory("노래", HobbyCategory.HOBBY).orElse(null);
             Hobby hobby3 = hobbyRepository.findByHobbyNameAndHobbyCategory("맛집투어", HobbyCategory.FOOD_DRINK).orElse(null);
@@ -59,10 +65,9 @@ public class MemberTestDataInitializer implements CommandLineRunner {
                     VerificationStatus.VERIFIED,
                     AuthProvider.GOOGLE
             );
-            memberRepository.save(member1);
-            System.out.println("첫 번째 테스트 사용자 생성 완료");
+            membersToSave.add(member1);
         } else {
-            System.out.println(testEmail1 + " 계정은 이미 존재합니다.");
+            log.info("{} 계정은 이미 존재합니다.", testEmail1);
         }
 
         // 두 번째 테스트 사용자
@@ -99,10 +104,16 @@ public class MemberTestDataInitializer implements CommandLineRunner {
                     VerificationStatus.VERIFIED,
                     AuthProvider.GOOGLE
             );
-            memberRepository.save(member2);
-            System.out.println("두 번째 테스트 사용자 생성 완료");
+            membersToSave.add(member2);
         } else {
-            System.out.println(testEmail2 + " 계정은 이미 존재합니다.");
+            log.info("{} 계정은 이미 존재합니다.", testEmail2);
+        }
+        
+        if (!membersToSave.isEmpty()) {
+            memberRepository.saveAll(membersToSave);
+            log.info("테스트 사용자 {}명 생성 완료", membersToSave.size());
+        } else {
+            log.info("모든 테스트 사용자가 이미 존재합니다.");
         }
     }
 }
