@@ -2,7 +2,6 @@ package com.nexus.seoulmate.exception.status;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -12,9 +11,16 @@ public enum SuccessStatus {
     SUCCESS(HttpStatus.OK, "COMMON200", "요청이 성공적으로 처리되었습니다."),
     CREATED(HttpStatus.CREATED, "COMMON201", "리소스가 성공적으로 생성되었습니다."),
 
-    // 도메인별로
-    // 회원가입
-    LEVEL_TEST_SUCCESS(HttpStatus.OK, "SIGNUP 200", "레벨테스트 성공했습니다."),
+    // Member
+    GOOGLE_PROFILE_SUCCESS(HttpStatus.OK, "SIGNUP 200", "구글 회원가입 성공"),
+    PROFILE_INFO_SUCCESS(HttpStatus.OK, "SIGNUP 200", "프로필 기본 정보 불러오기 성공"),
+    PROFILE_SUCCESS(HttpStatus.OK, "SIGNUP 200", "프로필 생성 성공"),
+    PROFILE_IMAGE_UPLOAD_SUCCESS(HttpStatus.OK, "SIGNUP 200", "프로필 이미지 업로드 성공"),
+    LEVEL_TEST_SUCCESS(HttpStatus.OK, "FLUENT 200", "레벨테스트 성공"),
+    SUBMIT_LEVEL_TEST_SUCCESS(HttpStatus.OK, "SIGNUP 200", "레벨테스트 제출 성공"),
+    HOBBY_SUCCESS(HttpStatus.OK, "SIGNUP 200", "취미 선택 완료"),
+    // REGISTER_SUCCESS(HttpStatus.OK, "SIGNUP 200", "학교 인증 신청 성공"),
+    MEMBER_CREATED(HttpStatus.CREATED, "SIGNUP 201", "회원가입 성공"),
 
     // Meeting
     CREATE_MEETING(HttpStatus.CREATED, "MEETING201", "모임이 성공적으로 생성되었습니다."),
