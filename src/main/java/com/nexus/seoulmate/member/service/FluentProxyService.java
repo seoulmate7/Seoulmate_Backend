@@ -42,8 +42,8 @@ public class FluentProxyService {
         // 2. 음성 파일 제출
         String postId = null;
         switch (language){
-            case KOREAN -> postId = "P_Korean";
-            case ENGLISH -> postId = "P555324012"; // 영어 버전
+            case KOREAN -> postId = "P163524106";
+            case ENGLISH -> postId = "P174024107";
         }
 
         // 3. 오디오파일 업로드
