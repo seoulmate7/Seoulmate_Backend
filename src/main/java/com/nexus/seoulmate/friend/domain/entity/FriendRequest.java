@@ -26,4 +26,8 @@ public class FriendRequest extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private FriendRequestStatus status;
+
+    public void updateStatus(FriendRequestStatus status) {
+        this.status = status;
+    }
 }

@@ -4,4 +4,5 @@ import com.nexus.seoulmate.friend.dto.FriendRequestDTO;
 
 public interface FriendService {
     void sendFriendRequest(FriendRequestDTO.FriendRequestCreateDTO request);
+    void updateFriendRequest(Long requestId, FriendRequestDTO.FriendRequestUpdateDTO request);
 }

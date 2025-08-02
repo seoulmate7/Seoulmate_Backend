@@ -42,7 +42,10 @@ public enum ErrorStatus {
     //friend
     FRIEND_REQUEST_SELF(HttpStatus.BAD_REQUEST, "FRIEND4001", "자기 자신에게 친구 요청을 보낼 수 없습니다."),
     FRIEND_REQUEST_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "FRIEND4002", "이미 친구 요청을 보낸 사용자입니다."),
-    FRIEND_ALREADY(HttpStatus.BAD_REQUEST, "FRIEND4003", "이미 친구 상태입니다.");
+    FRIEND_ALREADY(HttpStatus.BAD_REQUEST, "FRIEND4003", "이미 친구 상태입니다."),
+    FRIEND_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "FRIEND4004", "해당 친구 요청을 찾을 수 없습니다."),
+    FRIEND_REQUEST_ALREADY_HANDLED(HttpStatus.BAD_REQUEST, "FRIEND4005", "이미 처리된 친구 요청입니다.");
+
 
     private final HttpStatus status;
     private final String code;

@@ -4,7 +4,10 @@ import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.exception.status.ErrorStatus;
 import com.nexus.seoulmate.friend.converter.FriendConverter;
 import com.nexus.seoulmate.friend.domain.entity.FriendRequest;
+import com.nexus.seoulmate.friend.domain.entity.FriendRequestStatus;
+import com.nexus.seoulmate.friend.domain.entity.Friendship;
 import com.nexus.seoulmate.friend.domain.repository.FriendRequestRepository;
+import com.nexus.seoulmate.friend.domain.repository.FriendshipRepository;
 import com.nexus.seoulmate.friend.dto.FriendRequestDTO;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.repository.MemberRepository;
@@ -17,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class FriendServiceImpl implements FriendService {
 
     private final FriendRequestRepository friendRequestRepository;
+    private final FriendshipRepository friendshipRepository;
+    private final FriendConverter friendConverter;
     private final MemberRepository memberRepository;
 
     @Override
@@ -39,7 +44,25 @@ public class FriendServiceImpl implements FriendService {
             throw new CustomException(ErrorStatus.FRIEND_REQUEST_ALREADY_EXISTS);
         }
 
-        FriendRequest friendRequest = FriendConverter.toFriendRequest(sender, receiver);
+        FriendRequest friendRequest = friendConverter.toFriendRequest(sender, receiver);
         friendRequestRepository.save(friendRequest);
+    }
+
+    @Override
+    @Transactional
+    public void updateFriendRequest(Long requestId, FriendRequestDTO.FriendRequestUpdateDTO request) {
+        FriendRequest friendRequest = friendRequestRepository.findById(requestId)
+                .orElseThrow(() -> new CustomException(ErrorStatus.FRIEND_REQUEST_NOT_FOUND));
+
+        if (!friendRequest.getStatus().equals(FriendRequestStatus.PENDING)) {
+            throw new CustomException(ErrorStatus.FRIEND_REQUEST_ALREADY_HANDLED);
+        }
+
+        friendRequest.updateStatus(request.getStatus());
+
+        if (request.getStatus() == FriendRequestStatus.APPROVED) {
+            Friendship friendship = friendConverter.toFriendship(friendRequest);
+            friendshipRepository.save(friendship);
+        }
     }
 }

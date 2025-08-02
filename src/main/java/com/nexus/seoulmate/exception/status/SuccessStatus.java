@@ -32,7 +32,9 @@ public enum SuccessStatus {
     SEARCH_SUCCESS(HttpStatus.OK, "COMMON202", "조회에 성공하였습니다."),
 
     // Friend
-    FRIEND_REQUEST_SENT(HttpStatus.CREATED, "FRIEND201", "친구 요청이 성공적으로 전송되었습니다.");
+    FRIEND_REQUEST_SENT(HttpStatus.CREATED, "FRIEND201", "친구 요청이 성공적으로 전송되었습니다."),
+    FRIEND_REQUEST_UPDATED(HttpStatus.OK, "FRIEND200", "친구 요청 상태가 성공적으로 업데이트되었습니다.");
+
 
     private final HttpStatus status;
     private final String code;
