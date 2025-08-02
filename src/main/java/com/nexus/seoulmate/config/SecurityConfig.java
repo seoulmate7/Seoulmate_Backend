@@ -1,20 +1,27 @@
 package com.nexus.seoulmate.config;
 
+import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.member.service.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.Optional;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final MemberRepository memberRepository;
 
-    public SecurityConfig(CustomOAuth2UserService customOAuth2UserService){
+    public SecurityConfig(CustomOAuth2UserService customOAuth2UserService, MemberRepository memberRepository){
         this.customOAuth2UserService = customOAuth2UserService;
+        this.memberRepository = memberRepository;
     }
 
     @Bean
@@ -33,12 +40,29 @@ public class SecurityConfig {
                 .oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint((userInfoEndpointConfig) ->
                                 userInfoEndpointConfig.userService(customOAuth2UserService))
-                        .defaultSuccessUrl("/signup/profile-info", true)); // 로그인 성공 후 메인 페이지로 리다이렉트
+                        .successHandler((request, response, authentication) -> {
+                            // OAuth2User에서 이메일 추출
+                            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+                            String email = oAuth2User.getAttribute("email");
+                            
+                            // 이메일로 회원 조회
+                            Optional<Member> member = memberRepository.findByEmail(email);
+                            
+                            if (member.isPresent()) {
+                                // 회원가입된 사용자는 /seoulmate로 리디렉트
+                                response.sendRedirect("/seoulmate");
+                            } else {
+                                // 회원가입되지 않은 사용자는 기존 경로로 리디렉트
+                                response.sendRedirect("/signup/profile-info");
+                            }
+                        }));
 
         http
                 .authorizeHttpRequests((auth) -> auth
                         // 인증 없이 접근 가능
-                        .requestMatchers("/", "/oauth2/**", "/login/**", "/signup/**").permitAll()
+                        .requestMatchers("/", "/oauth2/**", "/login/**", "/signup/**", "/auth/status").permitAll()
+                        // /seoulmate는 인증 필요
+                        .requestMatchers("/seoulmate/**").authenticated()
                         // 그 외는 전부 로그인 필요
                         .anyRequest().authenticated());
 

@@ -70,6 +70,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             System.out.println("기존 회원 - 로그인 처리");
             Member member = existingUser.get();
             Role role = member.getRole();
+            System.out.println("기존 회원 로그인 성공 - 역할: " + role);
 
             return new CustomOAuth2User(oAuth2Response, role);
         }
