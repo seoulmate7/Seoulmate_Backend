@@ -77,26 +77,7 @@ public class FriendServiceImpl implements FriendService {
     @Override
     @Transactional(readOnly = true)
     public List<FriendResponseDTO.FriendRequestListDTO> getFriendRequests() {
-        Member currentUser = Member.builder() //임시 로그인 사용자
-                .userId(1L)
-                .email("dummyuser@seoulmate.com")
-                .password("dummy")
-                .firstName("Dummy")
-                .lastName("User")
-                .DOB(LocalDate.of(2000, 1, 1))
-                .country(Countries.KOREA)
-                .bio("더미 사용자입니다.")
-                .profileImage("https://cdn.seoulmate.com/profile/dummy.png")
-                .languages(Map.of("ENGLISH", 3))
-                .hobbies(new ArrayList<>())
-                .univCertificate("dummy_cert.png")
-                .univ(University.SUNGSIL)
-                .isVerified(VerificationStatus.VERIFIED)
-                .isDeleted(false)
-                .role(Role.USER)
-                .authProvider(AuthProvider.GOOGLE)
-                .userStatus(UserStatus.ACTIVE)
-                .build();
+        Member currentUser = getCurrentLoginMember();
 
         List<FriendRequest> requestList = friendRequestRepository.findByReceiverAndStatus(currentUser, FriendRequestStatus.PENDING);
 
@@ -106,27 +87,7 @@ public class FriendServiceImpl implements FriendService {
     @Override
     @Transactional(readOnly = true)
     public List<FriendResponseDTO.FriendListDTO> getFriends() {
-        Member currentUser = Member.builder() //임시 로그인 사용자
-                .userId(1L)
-                .email("dummyuser@seoulmate.com")
-                .password("dummy")
-                .firstName("Dummy")
-                .lastName("User")
-                .DOB(LocalDate.of(2000, 1, 1))
-                .country(Countries.KOREA)
-                .bio("더미 사용자입니다.")
-                .profileImage("https://cdn.seoulmate.com/profile/dummy.png")
-                .languages(Map.of("ENGLISH", 3))
-                .hobbies(new ArrayList<>())
-                .univCertificate("dummy_cert.png")
-                .univ(University.SUNGSIL)
-                .isVerified(VerificationStatus.VERIFIED)
-                .isDeleted(false)
-                .role(Role.USER)
-                .authProvider(AuthProvider.GOOGLE)
-                .userStatus(UserStatus.ACTIVE)
-                .build();
-
+        Member currentUser = getCurrentLoginMember();
         List<Friendship> friendships = friendshipRepository.findByUser(currentUser);
 
         return friendships.stream()
@@ -137,17 +98,41 @@ public class FriendServiceImpl implements FriendService {
     @Override
     @Transactional(readOnly = true)
     public FriendResponseDTO.FriendDetailDTO getFriendDetail(Long userId) {
-        Member currentUser = Member.builder() //임시 로그인 사용자
-                .userId(1L)
-                .email("dummyuser@seoulmate.com")
-                .password("dummy")
+        Member currentUser = getCurrentLoginMember();
+
+        Member targetUser = memberRepository.findWithLanguagesById(userId)
+                .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        boolean isFriend = friendshipRepository.findFriendshipByUsers(currentUser, targetUser).isPresent();
+
+        return friendConverter.toFriendDetailDTO(targetUser, isFriend);
+    }
+
+    @Override
+    public void deleteFriend(Long userId) {
+        Member currentUser = getCurrentLoginMember();
+
+        Member targetUser = memberRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        Friendship friendship = friendshipRepository
+                .findFriendshipByUsers(currentUser, targetUser)
+                .orElseThrow(() -> new CustomException(ErrorStatus.FRIEND_RELATION_NOT_FOUND));
+
+        friendshipRepository.delete(friendship);
+    }
+
+    private Member getCurrentLoginMember() {
+        return Member.builder()
+                .userId(1L) // 테스트용 ID
+                .email("dummy@seoulmate.com")
                 .firstName("Dummy")
                 .lastName("User")
                 .DOB(LocalDate.of(2000, 1, 1))
                 .country(Countries.KOREA)
                 .bio("더미 사용자입니다.")
                 .profileImage("https://cdn.seoulmate.com/profile/dummy.png")
-                .languages(Map.of("ENGLISH", 3))
+                .languages(Map.of("Korean", 5, "English", 3))
                 .hobbies(new ArrayList<>())
                 .univCertificate("dummy_cert.png")
                 .univ(University.SUNGSIL)
@@ -156,13 +141,7 @@ public class FriendServiceImpl implements FriendService {
                 .role(Role.USER)
                 .authProvider(AuthProvider.GOOGLE)
                 .userStatus(UserStatus.ACTIVE)
+                .password("oauth2")
                 .build();
-
-        Member targetUser = memberRepository.findWithLanguagesById(userId)
-                .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
-
-        boolean isFriend = friendshipRepository.findFriendshipByUsers(currentUser, targetUser).isPresent();
-
-        return friendConverter.toFriendDetailDTO(targetUser, isFriend);
     }
 }

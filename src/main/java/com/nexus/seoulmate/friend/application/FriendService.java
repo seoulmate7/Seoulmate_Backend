@@ -11,4 +11,5 @@ public interface FriendService {
     List<FriendResponseDTO.FriendRequestListDTO> getFriendRequests();
     List<FriendResponseDTO.FriendListDTO> getFriends();
     FriendResponseDTO.FriendDetailDTO getFriendDetail(Long userId);
+    void deleteFriend(Long userId);
 }

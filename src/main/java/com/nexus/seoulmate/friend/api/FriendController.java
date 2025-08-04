@@ -73,4 +73,14 @@ public class FriendController {
         return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_DETAIL_FETCHED, response));
     }
 
+    @DeleteMapping("/{userId}")
+    @Operation(
+            summary = "친구 삭제",
+            description = "특정 사용자와의 친구 관계를 삭제합니다."
+    )
+    public ResponseEntity<Response<Void>> deleteFriend(@PathVariable Long userId) {
+        friendService.deleteFriend(userId);
+        return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_DELETED, null));
+    }
+
 }

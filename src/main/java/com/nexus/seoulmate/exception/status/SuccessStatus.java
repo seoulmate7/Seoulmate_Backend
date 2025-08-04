@@ -36,7 +36,8 @@ public enum SuccessStatus {
     FRIEND_REQUEST_UPDATED(HttpStatus.OK, "FRIEND200", "친구 요청 상태가 성공적으로 업데이트되었습니다."),
     FRIEND_REQUEST_LIST_FETCHED(HttpStatus.OK, "FRIEND200", "친구 요청 목록 조회 성공"),
     FRIEND_LIST_FETCHED(HttpStatus.OK, "FRIEND200", "친구 목록 조회 성공"),
-    FRIEND_DETAIL_FETCHED(HttpStatus.OK, "FRIEND200", "사용자 상세 정보 조회 성공");
+    FRIEND_DETAIL_FETCHED(HttpStatus.OK, "FRIEND200", "사용자 상세 정보 조회 성공"),
+    FRIEND_DELETED(HttpStatus.OK,"FRIEND200", "친구 삭제가 완료되었습니다.");
 
     private final HttpStatus status;
     private final String code;
