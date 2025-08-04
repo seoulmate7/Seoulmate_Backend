@@ -5,6 +5,8 @@ import com.nexus.seoulmate.exception.status.ErrorStatus;
 import com.nexus.seoulmate.exception.status.SuccessStatus;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.repository.MemberRepository;
+import com.nexus.seoulmate.member.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -21,13 +23,15 @@ import java.util.Optional;
 public class SeoulmateController {
 
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
-    public SeoulmateController(MemberRepository memberRepository) {
+    public SeoulmateController(MemberRepository memberRepository, MemberService memberService) {
         this.memberRepository = memberRepository;
+        this.memberService = memberService;
     }
 
     @GetMapping("")
-    public Response<Map<String, Object>> getSeoulmateInfo() {
+    public Response<Map<String, Object>> getSeoulmateInfo(HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         
         // 인증되지 않은 사용자 체크
@@ -44,6 +48,9 @@ public class SeoulmateController {
         data.put("message", "서울메이트 메인 페이지에 접속했습니다!");
         data.put("email", email);
         data.put("isAuthenticated", true);
+
+        // JSESSIONID 쿠키 찾기
+        String jsessionId = memberService.getSessionId(request);
         
         if (member.isPresent()) {
             data.put("memberId", member.get().getUserId());
@@ -51,6 +58,7 @@ public class SeoulmateController {
             data.put("lastName", member.get().getLastName());
             data.put("role", member.get().getRole());
             data.put("schoolVerification", member.get().getUnivVerification());
+            data.put("jsessionId", "JSESSIONID=" + jsessionId);
         }
         
         return Response.success(SuccessStatus.SUCCESS, data);

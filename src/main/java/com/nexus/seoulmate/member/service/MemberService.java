@@ -5,6 +5,8 @@ import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.dto.signup.*;
 import com.nexus.seoulmate.member.repository.HobbyRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -96,7 +98,7 @@ public class MemberService {
         // Todo : 모든 회원의 궁합 계산하기
     }
 
-    // Todo : 현재 로그인한 사용자 정보 가져오기
+    // 현재 로그인한 사용자 정보 가져오기
     public Object getCurrentUser() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
 
@@ -110,5 +112,19 @@ public class MemberService {
         return optionalMember.isPresent() ?
                 "학교 인증 진행 상황 : " + optionalMember.get().getUnivVerification() :
                 false;
+    }
+
+    public String getSessionId(HttpServletRequest request){
+        String jsessionId = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("JSESSIONID".equals(cookie.getName())) {
+                    jsessionId = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        return jsessionId;
     }
 }

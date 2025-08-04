@@ -12,10 +12,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 @Service
@@ -55,17 +52,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         if (existingUser.isEmpty()) { // 회원가입 안 되어있는 경우
             System.out.println("회원가입 안 된 사용자 - SignupResponse 생성");
+            
             SignupResponse signupResponse = SignupResponse.builder()
-                    .sessionId("123")
                     .googleId(oAuth2Response.getProviderId())
                     .email(email)
                     .firstName(givenName)
                     .lastName(familyName)
+                    .sessionId(null)
                     .build();
 
             // 임시 저장소에 구글 회원가입 정보 저장
             tempStorage.save(signupResponse);
-            System.out.println("TempStorage에 저장 완료");
             
             // 임시로 USER 역할을 가진 CustomOAuth2User 반환
             return new CustomOAuth2User(oAuth2Response, Role.USER);

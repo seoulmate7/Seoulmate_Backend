@@ -5,8 +5,6 @@ import com.nexus.seoulmate.member.domain.enums.Languages;
 import com.nexus.seoulmate.member.domain.enums.University;
 import com.nexus.seoulmate.member.dto.CustomOAuth2User;
 import com.nexus.seoulmate.member.dto.OAuth2Response;
-import com.nexus.seoulmate.member.repository.MemberRepository;
-import com.nexus.seoulmate.member.service.CustomOAuth2UserService;
 import com.nexus.seoulmate.member.service.FluentProxyService;
 import com.nexus.seoulmate.member.service.MemberService;
 import com.nexus.seoulmate.member.service.TempStorage;
@@ -19,6 +17,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,18 +32,14 @@ public class MemberController {
     private final FluentProxyService fluentProxyService;
     private final MemberService memberService;
     private final TempStorage tempStorage;
-    private final MemberRepository memberRepository;
-    private final CustomOAuth2UserService customOAuth2UserService;
 
     // 소셜 회원가입
 
     // 1-1. 프로필 기본 정보 받아오기
     @GetMapping("/profile-info")
-    public Response<Object> getProfileInfo(@AuthenticationPrincipal OAuth2User oAuth2User){
+    public Response<Object> getProfileInfo(@AuthenticationPrincipal OAuth2User oAuth2User,
+                                         HttpServletRequest request){
         System.out.println("=== 프로필 기본 정보 요청 ===");
-
-        // loadUser 결과를 저장할 변수
-        OAuth2User loadUserResult = null;
 
         if (oAuth2User instanceof CustomOAuth2User customUser) {
             OAuth2Response oAuth2Response = customUser.getOAuth2Response();
@@ -54,17 +49,33 @@ public class MemberController {
             SignupResponse dto = tempStorage.getSignupResponse(oAuth2Response.getProviderId());
 
             if (dto != null) {
+                String jsessionId = memberService.getSessionId(request);
+
+                // 쿠키를 포함한 새로운 SignupResponse 생성
+                SignupResponse dtoWithCookies = SignupResponse.builder()
+                        .googleId(dto.getGoogleId())
+                        .email(dto.getEmail())
+                        .firstName(dto.getFirstName())
+                        .lastName(dto.getLastName())
+                        .sessionId("JSESSIONID=" + jsessionId)
+                        .build();
+
                 System.out.println("=== loadUser 결과 및 SignupResponse 정보 ===");
-                System.out.println("세션 ID: " + dto.getSessionId());
-                System.out.println("구글 ID: " + dto.getGoogleId());
-                System.out.println("이메일: " + dto.getEmail());
-                System.out.println("이름: " + dto.getFirstName());
-                System.out.println("성: " + dto.getLastName());
-                System.out.println("인증 제공자: " + dto.getAuthProvider());
+                System.out.println("구글 ID: " + dtoWithCookies.getGoogleId());
+                System.out.println("이메일: " + dtoWithCookies.getEmail());
+                System.out.println("이름: " + dtoWithCookies.getFirstName());
+                System.out.println("성: " + dtoWithCookies.getLastName());
+                System.out.println("인증 제공자: " + dtoWithCookies.getAuthProvider());
+                System.out.println("쿠키: " + dtoWithCookies.getSessionId());
 
                 // SignupResponse를 data로 반환
-                return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, dto);
+                return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, dtoWithCookies);
+            } else {
+                System.out.println("TempStorage에서 SignupResponse를 찾을 수 없습니다.");
+                System.out.println("ProviderId: " + oAuth2Response.getProviderId());
             }
+        } else {
+            System.out.println("OAuth2User가 CustomOAuth2User 인스턴스가 아닙니다.");
         }
         
         // SignupResponse가 없는 경우 빈 데이터 반환
@@ -215,14 +226,18 @@ public class MemberController {
     }
 
     @GetMapping("/in-progress")
-    private Response<Object> inProgress(){
+    private Response<Object> inProgress(HttpServletRequest request){
 
         Object result = memberService.getCurrentUser();
+        String jsessionId = memberService.getSessionId(request);
 
         if (result.equals(false)){
             return Response.fail(UNAUTHORIZED);
         } else {
-            return Response.success(SuccessStatus.SUCCESS, result);
+            Map<String, Object> data = new HashMap<>();
+            data.put("univVerification", result);
+            data.put("jsessionId", "JSESSIONID=" + jsessionId);
+            return Response.success(SuccessStatus.SUCCESS, data);
         }
     }
 }
