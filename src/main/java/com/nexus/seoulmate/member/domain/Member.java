@@ -2,10 +2,13 @@ package com.nexus.seoulmate.member.domain;
 
 import com.nexus.seoulmate.member.domain.enums.*;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +16,9 @@ import java.util.Map;
 
 @Getter
 @Entity
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -99,5 +104,9 @@ public class Member {
         user.authProvider = authProvider;
         user.userStatus = UserStatus.ACTIVE;  // 정해진 값
         return user;
+    }
+
+    public int calculateAge() {
+        return Period.between(this.DOB, LocalDate.now()).getYears();
     }
 }

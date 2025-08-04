@@ -36,7 +36,15 @@ public enum ErrorStatus {
     INVALID_LANGUAGE(HttpStatus.BAD_REQUEST, "COMMON400", "유효하지 않은 언어입니다."),
 
     // Search
-    SEARCH_NOT_FOUND(HttpStatus.NOT_FOUND, "SEARCH404", "검색 조건에 해당하는 값이 없습니다.");
+    SEARCH_NOT_FOUND(HttpStatus.NOT_FOUND, "SEARCH404", "검색 조건에 해당하는 값이 없습니다."),
+
+    //friend
+    FRIEND_REQUEST_SELF(HttpStatus.BAD_REQUEST, "FRIEND4001", "자기 자신에게 친구 요청을 보낼 수 없습니다."),
+    FRIEND_REQUEST_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "FRIEND4002", "이미 친구 요청을 보낸 사용자입니다."),
+    FRIEND_ALREADY(HttpStatus.BAD_REQUEST, "FRIEND4003", "이미 친구 상태입니다."),
+    FRIEND_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "FRIEND4004", "해당 친구 요청을 찾을 수 없습니다."),
+    FRIEND_REQUEST_ALREADY_HANDLED(HttpStatus.BAD_REQUEST, "FRIEND4005", "이미 처리된 친구 요청입니다."),
+    FRIEND_RELATION_NOT_FOUND(HttpStatus.NOT_FOUND, "FRIEND4006", "해당 사용자와의 친구 관계가 존재하지 않습니다.");
 
     private final HttpStatus status;
     private final String code;
