@@ -1,5 +1,8 @@
 package com.nexus.seoulmate.member.controller;
 
+import com.nexus.seoulmate.exception.Response;
+import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.exception.status.SuccessStatus;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import org.springframework.security.core.Authentication;
@@ -24,25 +27,31 @@ public class SeoulmateController {
     }
 
     @GetMapping("")
-    public Map<String, Object> getSeoulmateInfo() {
+    public Response<Map<String, Object>> getSeoulmateInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         
+        // 인증되지 않은 사용자 체크
+        if (authentication == null || !authentication.isAuthenticated() || 
+            !(authentication.getPrincipal() instanceof OAuth2User)) {
+            return Response.fail(ErrorStatus.UNAUTHORIZED);
+        }
+        
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
         Optional<Member> member = memberRepository.findByEmail(email);
         
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "서울메이트 메인 페이지에 접속했습니다!");
-        response.put("email", email);
-        response.put("isAuthenticated", true);
+        Map<String, Object> data = new HashMap<>();
+        data.put("message", "서울메이트 메인 페이지에 접속했습니다!");
+        data.put("email", email);
+        data.put("isAuthenticated", true);
         
         if (member.isPresent()) {
-            response.put("memberId", member.get().getUserId());
-            response.put("firstName", member.get().getFirstName());
-            response.put("lastName", member.get().getLastName());
-            response.put("role", member.get().getRole());
+            data.put("memberId", member.get().getUserId());
+            data.put("firstName", member.get().getFirstName());
+            data.put("lastName", member.get().getLastName());
+            data.put("role", member.get().getRole());
         }
         
-        return response;
+        return Response.success(SuccessStatus.SUCCESS, data);
     }
 } 

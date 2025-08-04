@@ -2,6 +2,12 @@ spring:
   profiles:
     active: dev
 
+  # 세션 설정
+  session:
+    timeout: 30m        # 세션 타임아웃 (30분)
+    create: always      # 항상 세션 생성
+    tracking-modes: cookie  # 쿠키로 세션 추적
+
   data:
     redis:
       host: localhost    # Redis 서버의 호스트 주소

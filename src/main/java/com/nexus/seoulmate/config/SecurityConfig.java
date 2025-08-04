@@ -49,7 +49,7 @@ public class SecurityConfig {
                             Optional<Member> member = memberRepository.findByEmail(email);
                             
                             if (member.isPresent()) {
-                                // 회원가입된 사용자는 /seoulmate로 리디렉트
+                                // 회원가입된 사용자는 /seoulmate로 리디렉트 (로그인 성공하면) 
                                 response.sendRedirect("/seoulmate");
                             } else {
                                 // 회원가입되지 않은 사용자는 기존 경로로 리디렉트
@@ -59,8 +59,10 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        // 인증 없이 접근 가능
-                        .requestMatchers("/", "/oauth2/**", "/login/**", "/signup/**", "/auth/status").permitAll()
+                        // 정적 리소스는 인증 없이 접근 가능
+                        .requestMatchers("/", "/index.html", "/static/**").permitAll()
+                        // 인증 관련 경로들
+                        .requestMatchers("/oauth2/**", "/login/**", "/signup/**", "/auth/status", "/auth/logout").permitAll()
                         // /seoulmate는 인증 필요
                         .requestMatchers("/seoulmate/**").authenticated()
                         // 그 외는 전부 로그인 필요
