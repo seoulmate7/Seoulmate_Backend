@@ -9,4 +9,5 @@ public interface FriendService {
     void sendFriendRequest(FriendRequestDTO.FriendRequestCreateDTO request);
     void updateFriendRequest(Long requestId, FriendRequestDTO.FriendRequestUpdateDTO request);
     List<FriendResponseDTO.FriendRequestListDTO> getFriendRequests();
+    List<FriendResponseDTO.FriendListDTO> getFriends();
 }

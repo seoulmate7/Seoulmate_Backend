@@ -77,7 +77,7 @@ public class FriendServiceImpl implements FriendService {
     @Override
     @Transactional(readOnly = true)
     public List<FriendResponseDTO.FriendRequestListDTO> getFriendRequests() {
-        Member receiver = Member.builder() //임시 로그인 사용자
+        Member currentUser = Member.builder() //임시 로그인 사용자
                 .userId(1L)
                 .email("dummyuser@seoulmate.com")
                 .password("dummy")
@@ -98,8 +98,39 @@ public class FriendServiceImpl implements FriendService {
                 .userStatus(UserStatus.ACTIVE)
                 .build();
 
-        List<FriendRequest> requestList = friendRequestRepository.findByReceiverAndStatus(receiver, FriendRequestStatus.PENDING);
+        List<FriendRequest> requestList = friendRequestRepository.findByReceiverAndStatus(currentUser, FriendRequestStatus.PENDING);
 
         return requestList.stream().map(friendConverter::toFriendRequestListDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FriendResponseDTO.FriendListDTO> getFriends() {
+        Member currentUser = Member.builder() //임시 로그인 사용자
+                .userId(1L)
+                .email("dummyuser@seoulmate.com")
+                .password("dummy")
+                .firstName("Dummy")
+                .lastName("User")
+                .DOB(LocalDate.of(2000, 1, 1))
+                .country(Countries.KOREA)
+                .bio("더미 사용자입니다.")
+                .profileImage("https://cdn.seoulmate.com/profile/dummy.png")
+                .languages(Map.of("ENGLISH", 3))
+                .hobbies(new ArrayList<>())
+                .univCertificate("dummy_cert.png")
+                .univ(University.SUNGSIL)
+                .isVerified(VerificationStatus.VERIFIED)
+                .isDeleted(false)
+                .role(Role.USER)
+                .authProvider(AuthProvider.GOOGLE)
+                .userStatus(UserStatus.ACTIVE)
+                .build();
+
+        List<Friendship> friendships = friendshipRepository.findByUser(currentUser);
+
+        return friendships.stream()
+                .map(f -> friendConverter.toFriendListDTO(currentUser, f))
+                .collect(Collectors.toList());
     }
 }

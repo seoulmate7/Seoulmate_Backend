@@ -51,4 +51,17 @@ public class FriendConverter {
                 .chemistry(0)
                 .build();
     }
+
+    public FriendResponseDTO.FriendListDTO toFriendListDTO(Member currentUser, Friendship friendship) {
+        Member friend = friendship.getUserId1().getUserId().equals(currentUser.getUserId())
+                ? friendship.getUserId2()
+                : friendship.getUserId1();
+
+        return FriendResponseDTO.FriendListDTO.builder()
+                .userId(friend.getUserId())
+                .name(friend.getFirstName() + " " + friend.getLastName())
+                .profileImage(friend.getProfileImage())
+                .chemistry(friendship.getChemistry())
+                .build();
+    }
 }

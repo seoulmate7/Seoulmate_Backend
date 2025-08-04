@@ -54,4 +54,14 @@ public class FriendController {
         List<FriendResponseDTO.FriendRequestListDTO> responses = friendRequestService.getFriendRequests();
         return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_REQUEST_LIST_FETCHED, responses));
     }
+
+    @GetMapping
+    @Operation(
+            summary = "내 친구 목록 조회",
+            description = "로그인한 사용자의 친구 목록을 조회합니다.")
+    public ResponseEntity<Response<List<FriendResponseDTO.FriendListDTO>>> getFriends() {
+        List<FriendResponseDTO.FriendListDTO> responses = friendRequestService.getFriends();
+        return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_LIST_FETCHED, responses));
+    }
+
 }
