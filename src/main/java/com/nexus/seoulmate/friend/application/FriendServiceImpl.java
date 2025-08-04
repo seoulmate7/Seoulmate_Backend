@@ -9,11 +9,19 @@ import com.nexus.seoulmate.friend.domain.entity.Friendship;
 import com.nexus.seoulmate.friend.domain.repository.FriendRequestRepository;
 import com.nexus.seoulmate.friend.domain.repository.FriendshipRepository;
 import com.nexus.seoulmate.friend.dto.FriendRequestDTO;
+import com.nexus.seoulmate.friend.dto.FriendResponseDTO;
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,5 +72,34 @@ public class FriendServiceImpl implements FriendService {
             Friendship friendship = friendConverter.toFriendship(friendRequest);
             friendshipRepository.save(friendship);
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FriendResponseDTO.FriendRequestListDTO> getFriendRequests() {
+        Member receiver = Member.builder() //임시 로그인 사용자
+                .userId(1L)
+                .email("dummyuser@seoulmate.com")
+                .password("dummy")
+                .firstName("Dummy")
+                .lastName("User")
+                .DOB(LocalDate.of(2000, 1, 1))
+                .country(Countries.KOREA)
+                .bio("더미 사용자입니다.")
+                .profileImage("https://cdn.seoulmate.com/profile/dummy.png")
+                .languages(Map.of("ENGLISH", 3))
+                .hobbies(new ArrayList<>())
+                .univCertificate("dummy_cert.png")
+                .univ(University.SUNGSIL)
+                .isVerified(VerificationStatus.VERIFIED)
+                .isDeleted(false)
+                .role(Role.USER)
+                .authProvider(AuthProvider.GOOGLE)
+                .userStatus(UserStatus.ACTIVE)
+                .build();
+
+        List<FriendRequest> requestList = friendRequestRepository.findByReceiverAndStatus(receiver, FriendRequestStatus.PENDING);
+
+        return requestList.stream().map(friendConverter::toFriendRequestListDTO).collect(Collectors.toList());
     }
 }

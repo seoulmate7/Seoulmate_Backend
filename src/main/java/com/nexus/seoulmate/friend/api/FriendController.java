@@ -4,11 +4,14 @@ import com.nexus.seoulmate.exception.Response;
 import com.nexus.seoulmate.exception.status.SuccessStatus;
 import com.nexus.seoulmate.friend.application.FriendService;
 import com.nexus.seoulmate.friend.dto.FriendRequestDTO;
+import com.nexus.seoulmate.friend.dto.FriendResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/friends")
@@ -41,5 +44,14 @@ public class FriendController {
     ){
         friendRequestService.updateFriendRequest(requestId, request);
         return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_REQUEST_UPDATED, null));
+    }
+
+    @GetMapping("/requests")
+    @Operation(
+            summary = "친구 요청 목록 조회",
+            description = "내가 받은 친구 요청 목록을 조회합니다.")
+    public ResponseEntity<Response<List<FriendResponseDTO.FriendRequestListDTO>>> getFriendRequests() {
+        List<FriendResponseDTO.FriendRequestListDTO> responses = friendRequestService.getFriendRequests();
+        return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_REQUEST_LIST_FETCHED, responses));
     }
 }
