@@ -41,7 +41,6 @@ public class FriendConverter {
         return Friendship.builder()
                 .userId1(userId1)
                 .userId2(userId2)
-                .chemistry(0)
                 .build();
     }
 
@@ -51,9 +50,8 @@ public class FriendConverter {
         return FriendResponseDTO.FriendRequestListDTO.builder()
                 .requestId(request.getId())
                 .senderId(sender.getUserId())
-                .name(sender.getFirstName() + " " + sender.getLastName())
+                .name(formatName(sender))
                 .profileImage(sender.getProfileImage())
-                .chemistry(0)
                 .build();
     }
 
@@ -64,9 +62,8 @@ public class FriendConverter {
 
         return FriendResponseDTO.FriendListDTO.builder()
                 .userId(friend.getUserId())
-                .name(friend.getFirstName() + " " + friend.getLastName())
+                .name(formatName(friend))
                 .profileImage(friend.getProfileImage())
-                .chemistry(friendship.getChemistry())
                 .build();
     }
 
@@ -114,7 +111,7 @@ public class FriendConverter {
 
         return FriendResponseDTO.FriendDetailDTO.builder()
                 .userId(member.getUserId())
-                .name(member.getFirstName() + " " + member.getLastName())
+                .name(formatName(member))
                 .profileImage(member.getProfileImage())
                 .bio(member.getBio())
                 .university(member.getUniv().toString())
@@ -122,9 +119,27 @@ public class FriendConverter {
                 .country(member.getCountry().toString())
                 .languageLevels(languageLevels)
                 .isFriend(isFriend)
-                .chemistry(0)
                 .hobbyList(hobbyNames)
                 .build();
+    }
+
+    public FriendResponseDTO.FriendSearchResultDTO toFriendSearchResultDTO(Member member) {
+        return FriendResponseDTO.FriendSearchResultDTO.builder()
+                .userId(member.getUserId())
+                .name(formatName(member))
+                .profileImage(member.getProfileImage())
+                .build();
+    }
+
+    private String formatName(Member member) {
+        switch (member.getCountry()) {
+            case KOREA:
+            case CHINA:
+            case JAPAN:
+                return member.getLastName() + member.getFirstName();
+            default:
+                return member.getFirstName() + " " + member.getLastName();
+        }
     }
 
 }

@@ -14,6 +14,9 @@ import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,6 +123,31 @@ public class FriendServiceImpl implements FriendService {
                 .orElseThrow(() -> new CustomException(ErrorStatus.FRIEND_RELATION_NOT_FOUND));
 
         friendshipRepository.delete(friendship);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FriendResponseDTO.FriendSearchResultDTO> searchFriends(String query, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Member currentUser = getCurrentLoginMember();
+
+        List<Friendship> friendships = friendshipRepository.findByUser(currentUser);
+        List<Long> friendIds = friendships.stream()
+                .map(f -> {
+                    Member user1 = f.getUserId1();
+                    Member user2 = f.getUserId2();
+                    return user1.getUserId().equals(currentUser.getUserId()) ? user2.getUserId() : user1.getUserId();
+                })
+                .toList();
+
+        Page<Member> matched = memberRepository
+                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(query, query, pageable);
+
+        return matched.stream()
+                .filter(member -> !member.getUserId().equals(currentUser.getUserId()))
+                .filter(member -> !friendIds.contains(member.getUserId()))
+                .map(friendConverter::toFriendSearchResultDTO)
+                .collect(Collectors.toList());
     }
 
     private Member getCurrentLoginMember() {
