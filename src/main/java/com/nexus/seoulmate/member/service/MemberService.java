@@ -6,11 +6,14 @@ import com.nexus.seoulmate.member.dto.signup.*;
 import com.nexus.seoulmate.member.repository.HobbyRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,14 +22,6 @@ public class MemberService {
     private final TempStorage tempStorage;
     private final MemberRepository memberRepository;
     private final HobbyRepository hobbyRepository;
-
-    // 소셜 회원가입/로그인
-    public SignupResponse saveGoogleSignup(SignupResponse signupRequest){
-        tempStorage.save(signupRequest);
-
-        SignupResponse dto = new SignupResponse(signupRequest.getFirstName(), signupRequest.getLastName());
-        return dto;
-    }
 
     // 1. 프로필 생성
     public void saveProfile(ProfileCreateRequest profileCreateRequest, MultipartFile profileImage){
@@ -102,4 +97,18 @@ public class MemberService {
     }
 
     // Todo : 현재 로그인한 사용자 정보 가져오기
+    public Object getCurrentUser() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(auth != null && auth.isAuthenticated() &&
+                auth.getPrincipal() instanceof OAuth2User oAuth2User)) {
+            return false;
+        }
+
+        String email = oAuth2User.getAttribute("email");
+        Optional<Member> optionalMember = memberRepository.findByEmail(email);
+        return optionalMember.isPresent() ?
+                "학교 인증 진행 상황 : " + optionalMember.get().getUnivVerification() :
+                false;
+    }
 }

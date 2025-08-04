@@ -29,6 +29,7 @@ public class TempStorage {
     public void save(SignupResponse dto) {
         String key = dto.getGoogleId();
         Map<String, Object> map = Map.of(
+                "sessionId", dto.getSessionId(),
                 "email", dto.getEmail(),
                 "firstName", dto.getFirstName(),
                 "lastName", dto.getLastName(),
@@ -36,21 +37,48 @@ public class TempStorage {
         );
         redisTemplate.opsForHash().putAll(key, map);
         redisTemplate.expire(key, TTL);
+        System.out.println("Redis에 저장된 세션 ID: " + dto.getSessionId());
     }
 
     // 1-1. 구글 회원가입 정보 가져오기
     public SignupResponse getSignupResponse(String googleId) {
-        Map<Object, Object> raw = redisTemplate.opsForHash().entries(googleId);
-        if (raw.isEmpty()) {
+        try {
+            if (googleId == null || googleId.isEmpty()) {
+                System.out.println("googleId가 null이거나 비어있습니다.");
+                return null;
+            }
+            
+            Map<Object, Object> raw = redisTemplate.opsForHash().entries(googleId);
+            System.out.println("Redis에서 가져온 데이터: " + raw);
+            
+            if (raw.isEmpty()) {
+                System.out.println("Redis에서 데이터를 찾을 수 없습니다. googleId: " + googleId);
+                return null;
+            }
+            
+            String sessionId = (String) raw.get("sessionId");
+            String email = (String) raw.get("email");
+            String firstName = (String) raw.get("firstName");
+            String lastName = (String) raw.get("lastName");
+            
+            System.out.println("Redis에서 추출한 데이터:");
+            System.out.println("sessionId: " + sessionId);
+            System.out.println("email: " + email);
+            System.out.println("firstName: " + firstName);
+            System.out.println("lastName: " + lastName);
+            
+            return SignupResponse.builder()
+                    .sessionId(sessionId)
+                    .googleId(googleId)
+                    .email(email)
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .build();
+        } catch (Exception e) {
+            System.out.println("getSignupResponse에서 오류 발생: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
-        
-        return new SignupResponse(
-                googleId,
-                (String) raw.get("email"),
-                (String) raw.get("firstName"),
-                (String) raw.get("lastName")
-        );
     }
 
     // 2. 프로필 생성 정보 저장
@@ -95,6 +123,10 @@ public class TempStorage {
     public MemberCreateRequest collect(String googleId){
         Map<Object, Object> raw = redisTemplate.opsForHash().entries(googleId);
         MemberCreateRequest result = new MemberCreateRequest();
+
+        // sessionId도 함께 로그 출력
+        String sessionId = (String) raw.get("sessionId");
+        System.out.println("최종 데이터 취합 시 세션 ID: " + sessionId);
 
         result.setEmail((String) raw.get("email"));
         result.setFirstName((String) raw.get("firstName"));

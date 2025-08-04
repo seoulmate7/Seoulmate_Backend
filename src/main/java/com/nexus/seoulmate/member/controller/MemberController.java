@@ -5,6 +5,8 @@ import com.nexus.seoulmate.member.domain.enums.Languages;
 import com.nexus.seoulmate.member.domain.enums.University;
 import com.nexus.seoulmate.member.dto.CustomOAuth2User;
 import com.nexus.seoulmate.member.dto.OAuth2Response;
+import com.nexus.seoulmate.member.repository.MemberRepository;
+import com.nexus.seoulmate.member.service.CustomOAuth2UserService;
 import com.nexus.seoulmate.member.service.FluentProxyService;
 import com.nexus.seoulmate.member.service.MemberService;
 import com.nexus.seoulmate.member.service.TempStorage;
@@ -17,6 +19,10 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.nexus.seoulmate.exception.status.ErrorStatus.*;
 import static com.nexus.seoulmate.exception.status.SuccessStatus.*;
 
 @RestController
@@ -27,6 +33,8 @@ public class MemberController {
     private final FluentProxyService fluentProxyService;
     private final MemberService memberService;
     private final TempStorage tempStorage;
+    private final MemberRepository memberRepository;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     // 소셜 회원가입
 
@@ -34,21 +42,34 @@ public class MemberController {
     @GetMapping("/profile-info")
     public Response<Object> getProfileInfo(@AuthenticationPrincipal OAuth2User oAuth2User){
         System.out.println("=== 프로필 기본 정보 요청 ===");
-        
+
+        // loadUser 결과를 저장할 변수
+        OAuth2User loadUserResult = null;
+
         if (oAuth2User instanceof CustomOAuth2User customUser) {
             OAuth2Response oAuth2Response = customUser.getOAuth2Response();
             System.out.println("ProviderId: " + oAuth2Response.getProviderId());
-            
+
             // TempStorage에서 저장된 SignupResponse 가져오기
             SignupResponse dto = tempStorage.getSignupResponse(oAuth2Response.getProviderId());
-            
+
             if (dto != null) {
-                System.out.println("프로필 등록 이름 : " + dto.getFirstName());
-                System.out.println("프로필 등록 성 : " + dto.getLastName());
+                System.out.println("=== loadUser 결과 및 SignupResponse 정보 ===");
+                System.out.println("세션 ID: " + dto.getSessionId());
+                System.out.println("구글 ID: " + dto.getGoogleId());
+                System.out.println("이메일: " + dto.getEmail());
+                System.out.println("이름: " + dto.getFirstName());
+                System.out.println("성: " + dto.getLastName());
+                System.out.println("인증 제공자: " + dto.getAuthProvider());
+
+                // SignupResponse를 data로 반환
                 return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, dto);
             }
         }
-        return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, null);
+        
+        // SignupResponse가 없는 경우 빈 데이터 반환
+        Map<String, Object> data = new HashMap<>();
+        return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, data);
     }
     
     // 1-2. 프로필 생성 (DTO + 파일 동시 처리)
@@ -191,5 +212,17 @@ public class MemberController {
             return customUser.getOAuth2Response().getProviderId();
         }
         return null;
+    }
+
+    @GetMapping("/in-progress")
+    private Response<Object> inProgress(){
+
+        Object result = memberService.getCurrentUser();
+
+        if (result.equals(false)){
+            return Response.fail(UNAUTHORIZED);
+        } else {
+            return Response.success(SuccessStatus.SUCCESS, result);
+        }
     }
 }

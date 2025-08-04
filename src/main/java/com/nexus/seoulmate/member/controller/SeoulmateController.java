@@ -50,6 +50,7 @@ public class SeoulmateController {
             data.put("firstName", member.get().getFirstName());
             data.put("lastName", member.get().getLastName());
             data.put("role", member.get().getRole());
+            data.put("schoolVerification", member.get().getUnivVerification());
         }
         
         return Response.success(SuccessStatus.SUCCESS, data);

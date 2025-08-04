@@ -42,17 +42,13 @@ public class AuthController {
             Optional<Member> member = memberRepository.findByEmail(email);
             
             Map<String, Object> data = new HashMap<>();
-            data.put("isAuthenticated", true);
-            data.put("email", email);
-            data.put("name", oAuth2User.getAttribute("name"));
-            data.put("givenName", oAuth2User.getAttribute("given_name"));
-            data.put("familyName", oAuth2User.getAttribute("family_name"));
-            data.put("picture", oAuth2User.getAttribute("picture"));
-            data.put("sessionId", session.getId());
-            data.put("sessionCreationTime", session.getCreationTime());
-            data.put("lastAccessedTime", session.getLastAccessedTime());
             
             if (member.isPresent()) {
+                data.put("schoolVerification", member.get().getUnivVerification());
+                data.put("email", email);
+                data.put("firstName", member.get().getFirstName());
+                data.put("lastName", member.get().getLastName());
+                data.put("sessionId", session.getId());
                 data.put("memberId", member.get().getUserId());
                 data.put("role", member.get().getRole());
                 data.put("isRegistered", true);

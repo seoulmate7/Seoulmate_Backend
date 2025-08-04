@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class SignupResponse {
+    private String sessionId;
     private String googleId;
     private String email;
     private String firstName;
@@ -16,7 +17,8 @@ public class SignupResponse {
 
     // 구글 회원가입
     @Builder
-    public SignupResponse(String googleId, String email, String firstName, String lastName){
+    public SignupResponse(String sessionId, String googleId, String email, String firstName, String lastName){
+        this.sessionId = sessionId;
         this.googleId = googleId;
         this.email = email; // 다시 수정할 일 없음
         this.firstName = firstName;
