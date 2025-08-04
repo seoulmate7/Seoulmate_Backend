@@ -1,12 +1,16 @@
 package com.nexus.seoulmate.member.service;
 
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.domain.GoogleInfo;
 import com.nexus.seoulmate.member.domain.enums.Role;
 import com.nexus.seoulmate.member.dto.CustomOAuth2User;
 import com.nexus.seoulmate.member.dto.GoogleResponse;
 import com.nexus.seoulmate.member.dto.OAuth2Response;
 import com.nexus.seoulmate.member.dto.signup.SignupResponse;
+import com.nexus.seoulmate.member.repository.GoogleInfoRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -20,10 +24,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
     private final TempStorage tempStorage;
+    private final GoogleInfoRepository googleInfoRepository;
 
-    public CustomOAuth2UserService(MemberRepository memberRepository, TempStorage tempStorage){
+    public CustomOAuth2UserService(MemberRepository memberRepository, TempStorage tempStorage, GoogleInfoRepository googleInfoRepository){
         this.memberRepository = memberRepository;
         this.tempStorage = tempStorage;
+        this.googleInfoRepository = googleInfoRepository;
     }
 
     @Override
@@ -73,6 +79,32 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             System.out.println("기존 회원 로그인 성공 - 역할: " + role);
 
             return new CustomOAuth2User(oAuth2Response, role);
+        }
+    }
+
+    public void changeJsessionId(HttpServletRequest request){
+        String jsessionId = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("JSESSIONID".equals(cookie.getName())) {
+                    jsessionId = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        
+        // 새로운 JSESSIONID 저장
+        if (jsessionId != null) {
+            // 기존에 같은 jsessionId가 있는지 확인
+            Optional<GoogleInfo> existingGoogleInfo = googleInfoRepository.findBySessionId(jsessionId);
+            
+            // Optional이 비어있지 않은 경우에만 처리
+            if (existingGoogleInfo.isPresent()) {
+                GoogleInfo existing = existingGoogleInfo.get();
+                existing.updateSessionId(jsessionId);  // setter 대신 도메인 메서드 사용
+                googleInfoRepository.save(existing);
+            }
         }
     }
 }

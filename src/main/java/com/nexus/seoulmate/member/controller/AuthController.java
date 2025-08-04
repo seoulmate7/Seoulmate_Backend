@@ -3,7 +3,10 @@ package com.nexus.seoulmate.member.controller;
 import com.nexus.seoulmate.exception.Response;
 import com.nexus.seoulmate.exception.status.ErrorStatus;
 import com.nexus.seoulmate.exception.status.SuccessStatus;
+import com.nexus.seoulmate.member.domain.GoogleInfo;
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.dto.StatusResponse;
+import com.nexus.seoulmate.member.repository.GoogleInfoRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,41 +26,40 @@ import java.util.Optional;
 public class AuthController {
 
     private final MemberRepository memberRepository;
+    private final GoogleInfoRepository googleInfoRepository;
 
-    public AuthController(MemberRepository memberRepository) {
+    public AuthController(MemberRepository memberRepository, GoogleInfoRepository googleInfoRepository) {
         this.memberRepository = memberRepository;
+        this.googleInfoRepository = googleInfoRepository;
     }
 
     @GetMapping("/status")
-    public Response<Map<String, Object>> getAuthStatus(HttpSession session) {
+    public Response<StatusResponse> getAuthStatus() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
-        if (authentication != null && authentication.isAuthenticated() && 
-            authentication.getPrincipal() instanceof OAuth2User) {
-            
-            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+
+        if (authentication != null && authentication.isAuthenticated() &&
+                authentication.getPrincipal() instanceof OAuth2User oAuth2User) {
+
             String email = oAuth2User.getAttribute("email");
-            
-            // 데이터베이스에서 회원 정보 조회
+
             Optional<Member> member = memberRepository.findByEmail(email);
-            
-            Map<String, Object> data = new HashMap<>();
-            
+
             if (member.isPresent()) {
-                data.put("schoolVerification", member.get().getUnivVerification());
-                data.put("email", email);
-                data.put("firstName", member.get().getFirstName());
-                data.put("lastName", member.get().getLastName());
-                data.put("sessionId", session.getId());
-                data.put("memberId", member.get().getUserId());
-                data.put("role", member.get().getRole());
-                data.put("isRegistered", true);
+                Member user = member.get();
+                Optional<GoogleInfo> googleIdOpt = googleInfoRepository.findByUserId(user);
+
+                String googleId = googleIdOpt.map(info -> String.valueOf(info.getGoogleId())).orElse(null);
+
+                StatusResponse statusResponse = new StatusResponse(
+                        user.getUnivVerification(),
+                        user.getUserStatus(),
+                        googleId
+                );
+
+                return Response.success(SuccessStatus.SUCCESS, statusResponse);
             } else {
-                data.put("isRegistered", false);
-                data.put("message", "회원가입이 완료되지 않았습니다.");
+                return Response.fail(ErrorStatus.MEMBER_NOT_FOUND);
             }
-            
-            return Response.success(SuccessStatus.SUCCESS, data);
         } else {
             return Response.fail(ErrorStatus.UNAUTHORIZED);
         }

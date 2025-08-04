@@ -25,6 +25,7 @@ public class TempStorage {
     public void save(SignupResponse dto) {
         String key = dto.getGoogleId();
         Map<String, Object> map = Map.of(
+                "googleId", dto.getGoogleId(),
                 "email", dto.getEmail(),
                 "firstName", dto.getFirstName(),
                 "lastName", dto.getLastName(),
@@ -113,6 +114,8 @@ public class TempStorage {
         MemberCreateRequest result = new MemberCreateRequest();
 
         try {
+            // googleId도 함께 설정
+            result.setGoogleId(googleId);
             result.setEmail((String) raw.get("email"));
             result.setFirstName((String) raw.get("firstName"));
             result.setLastName((String) raw.get("lastName"));

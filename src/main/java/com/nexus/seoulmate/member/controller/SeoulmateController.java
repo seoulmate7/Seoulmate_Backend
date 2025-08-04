@@ -5,8 +5,10 @@ import com.nexus.seoulmate.exception.status.ErrorStatus;
 import com.nexus.seoulmate.exception.status.SuccessStatus;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.repository.MemberRepository;
+import com.nexus.seoulmate.member.service.CustomOAuth2UserService;
 import com.nexus.seoulmate.member.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -20,15 +22,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/seoulmate")
+@RequiredArgsConstructor
 public class SeoulmateController {
 
     private final MemberRepository memberRepository;
     private final MemberService memberService;
-
-    public SeoulmateController(MemberRepository memberRepository, MemberService memberService) {
-        this.memberRepository = memberRepository;
-        this.memberService = memberService;
-    }
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @GetMapping("")
     public Response<Map<String, Object>> getSeoulmateInfo(HttpServletRequest request) {
@@ -50,6 +49,7 @@ public class SeoulmateController {
         data.put("isAuthenticated", true);
 
         // JSESSIONID 쿠키 찾기
+        customOAuth2UserService.changeJsessionId(request);
         String jsessionId = memberService.getSessionId(request);
         
         if (member.isPresent()) {

@@ -1,10 +1,9 @@
 package com.nexus.seoulmate.member.controller;
 
-import com.nexus.seoulmate.member.domain.enums.Countries;
-import com.nexus.seoulmate.member.domain.enums.Languages;
-import com.nexus.seoulmate.member.domain.enums.University;
+import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.dto.CustomOAuth2User;
 import com.nexus.seoulmate.member.dto.OAuth2Response;
+import com.nexus.seoulmate.member.service.CustomOAuth2UserService;
 import com.nexus.seoulmate.member.service.FluentProxyService;
 import com.nexus.seoulmate.member.service.MemberService;
 import com.nexus.seoulmate.member.service.TempStorage;
@@ -32,6 +31,7 @@ public class MemberController {
     private final FluentProxyService fluentProxyService;
     private final MemberService memberService;
     private final TempStorage tempStorage;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     // 소셜 회원가입
 
@@ -50,6 +50,7 @@ public class MemberController {
 
             if (dto != null) {
                 String jsessionId = memberService.getSessionId(request);
+                customOAuth2UserService.changeJsessionId(request);
 
                 // 쿠키를 포함한 새로운 SignupResponse 생성
                 SignupResponse dtoWithCookies = SignupResponse.builder()
@@ -186,8 +187,9 @@ public class MemberController {
     // 4. 학교 인증 + 최종 회원가입
     @PostMapping("/school")
     public Response<Object> authUniv(@RequestParam("university") University university,
-                                    @RequestPart(value = "univCertificate") MultipartFile univCertificate,
-                                    @AuthenticationPrincipal OAuth2User oAuth2User){
+                                     @RequestPart(value = "univCertificate") MultipartFile univCertificate,
+                                     @AuthenticationPrincipal OAuth2User oAuth2User,
+                                     HttpServletRequest request){
         System.out.println("=== 학교 인증 + 최종 회원가입 요청 ===");
         System.out.println("지원 학교: " + university);
         
@@ -209,7 +211,7 @@ public class MemberController {
         memberService.authUniv(requestWithGoogleId);
         System.out.println("학교 인증 완료");
         
-        memberService.completeSignup(googleId);
+        memberService.completeSignup(googleId, request);
         System.out.println("최종 회원가입 완료");
         
         return Response.success(SuccessStatus.MEMBER_CREATED, null);
@@ -228,8 +230,9 @@ public class MemberController {
     @GetMapping("/in-progress")
     private Response<Object> inProgress(HttpServletRequest request){
 
-        Object result = memberService.getCurrentUser();
+        Object result = memberService.getUserStatus();
         String jsessionId = memberService.getSessionId(request);
+        customOAuth2UserService.changeJsessionId(request);
 
         if (result.equals(false)){
             return Response.fail(UNAUTHORIZED);

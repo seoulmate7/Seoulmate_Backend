@@ -14,6 +14,7 @@ import java.util.Map;
 @Data
 public class MemberCreateRequest {
 
+    private String googleId;
     private String email;
     private String firstName;
     private String lastName;
