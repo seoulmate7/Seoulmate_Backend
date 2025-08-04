@@ -38,7 +38,8 @@ public enum SuccessStatus {
     FRIEND_LIST_FETCHED(HttpStatus.OK, "FRIEND200", "친구 목록 조회 성공"),
     FRIEND_DETAIL_FETCHED(HttpStatus.OK, "FRIEND200", "사용자 상세 정보 조회 성공"),
     FRIEND_DELETED(HttpStatus.OK,"FRIEND200", "친구 삭제 완료"),
-    FRIEND_SEARCH_RESULT_FETCHED(HttpStatus.OK,"FRIEND200" ,"친구 검색 결과 조회 성공");
+    FRIEND_SEARCH_RESULT_FETCHED(HttpStatus.OK,"FRIEND200" ,"친구 검색 결과 조회 성공"),
+    FRIEND_RECOMMENDATION_FETCHED(HttpStatus.OK, "FRIEND200", "추천 친구 목록 조회 성공");
 
 
     private final HttpStatus status;

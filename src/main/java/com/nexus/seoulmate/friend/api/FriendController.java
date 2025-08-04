@@ -100,4 +100,14 @@ public class FriendController {
         return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_SEARCH_RESULT_FETCHED, results));
     }
 
+    @GetMapping("/recommendations/language")
+    @Operation(
+            summary = "언어 실력 기반 추천 친구 조회",
+            description = "사용자와 언어 실력이 유사한 사람들을 친구로 추천합니다. (각 언어별 ±10 수준 이내)"
+    )
+    public ResponseEntity<Response<List<FriendResponseDTO.FriendRecommendationDTO>>> getLanguageBasedRecommendations() {
+        List<FriendResponseDTO.FriendRecommendationDTO> results = friendService.getLanguageBasedRecommendations();
+        return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_RECOMMENDATION_FETCHED, results));
+    }
+
 }

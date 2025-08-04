@@ -57,4 +57,27 @@ public class FriendResponseDTO {
         private String name;
         private String profileImage;
     }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FriendRecommendationDTO {
+        private Long userId;
+        private String name;
+        private String profileImage;
+        private List<MatchedLanguageDTO> matchedLanguages;
+        private int totalMatchedLanguages;
+
+        @Getter
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class MatchedLanguageDTO {
+            private String languageName;
+            private int myLevel;
+            private int theirLevel;
+        }
+    }
+
 }

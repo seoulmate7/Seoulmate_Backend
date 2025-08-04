@@ -13,4 +13,5 @@ public interface FriendService {
     FriendResponseDTO.FriendDetailDTO getFriendDetail(Long userId);
     void deleteFriend(Long userId);
     List<FriendResponseDTO.FriendSearchResultDTO> searchFriends(String query, int page, int size);
+    List<FriendResponseDTO.FriendRecommendationDTO> getLanguageBasedRecommendations();
 }

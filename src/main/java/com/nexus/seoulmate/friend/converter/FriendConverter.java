@@ -131,6 +131,20 @@ public class FriendConverter {
                 .build();
     }
 
+    public FriendResponseDTO.FriendRecommendationDTO toFriendRecommendationDTO(
+            Member candidate,
+            List<FriendResponseDTO.FriendRecommendationDTO.MatchedLanguageDTO> matchedLanguages
+    ) {
+        return FriendResponseDTO.FriendRecommendationDTO.builder()
+                .userId(candidate.getUserId())
+                .name(formatName(candidate))
+                .profileImage(candidate.getProfileImage())
+                .matchedLanguages(matchedLanguages)
+                .totalMatchedLanguages(matchedLanguages.size())
+                .build();
+    }
+
+
     private String formatName(Member member) {
         switch (member.getCountry()) {
             case KOREA:

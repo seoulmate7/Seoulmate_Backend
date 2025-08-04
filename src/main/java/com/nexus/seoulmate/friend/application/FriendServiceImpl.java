@@ -11,7 +11,6 @@ import com.nexus.seoulmate.friend.domain.repository.FriendshipRepository;
 import com.nexus.seoulmate.friend.dto.FriendRequestDTO;
 import com.nexus.seoulmate.friend.dto.FriendResponseDTO;
 import com.nexus.seoulmate.member.domain.Member;
-import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -150,26 +150,50 @@ public class FriendServiceImpl implements FriendService {
                 .collect(Collectors.toList());
     }
 
-    private Member getCurrentLoginMember() {
-        return Member.builder()
-                .userId(1L) // 테스트용 ID
-                .email("dummy@seoulmate.com")
-                .firstName("Dummy")
-                .lastName("User")
-                .DOB(LocalDate.of(2000, 1, 1))
-                .country(Countries.KOREA)
-                .bio("더미 사용자입니다.")
-                .profileImage("https://cdn.seoulmate.com/profile/dummy.png")
-                .languages(Map.of("Korean", 5, "English", 3))
-                .hobbies(new ArrayList<>())
-                .univCertificate("dummy_cert.png")
-                .univ(University.SUNGSIL)
-                .isVerified(VerificationStatus.VERIFIED)
-                .isDeleted(false)
-                .role(Role.USER)
-                .authProvider(AuthProvider.GOOGLE)
-                .userStatus(UserStatus.ACTIVE)
-                .password("oauth2")
-                .build();
+    @Override
+    @Transactional(readOnly = true)
+    public List<FriendResponseDTO.FriendRecommendationDTO> getLanguageBasedRecommendations() {
+        Member currentUser = getCurrentLoginMember();
+        Map<String, Integer> myLanguages = currentUser.getLanguages();
+
+        List<Member> candidates = memberRepository.findAllExcludingFriendsAndSelf(currentUser.getUserId());
+
+        List<FriendResponseDTO.FriendRecommendationDTO> recommendations = new ArrayList<>();
+
+        for (Member candidate : candidates) {
+            Map<String, Integer> theirLanguages = candidate.getLanguages();
+            List<FriendResponseDTO.FriendRecommendationDTO.MatchedLanguageDTO> matchedLanguages = new ArrayList<>();
+            int matchedCount = 0;
+
+            for (Map.Entry<String, Integer> myEntry : myLanguages.entrySet()) {
+                String myLang = myEntry.getKey();
+                int myLevel = myEntry.getValue();
+
+                if (theirLanguages.containsKey(myLang)) {
+                    int theirLevel = theirLanguages.get(myLang);
+                    if (Math.abs(myLevel - theirLevel) <= 10) {
+                        matchedCount++;
+                        matchedLanguages.add(FriendResponseDTO.FriendRecommendationDTO.MatchedLanguageDTO.builder()
+                                .languageName(myLang)
+                                .myLevel(myLevel)
+                                .theirLevel(theirLevel)
+                                .build());
+                    }
+                }
+            }
+
+            if (!matchedLanguages.isEmpty()) {
+                recommendations.add(
+                        friendConverter.toFriendRecommendationDTO(candidate, matchedLanguages)
+                );
+            }
+        }
+        recommendations.sort(Comparator.comparingInt(FriendResponseDTO.FriendRecommendationDTO::getTotalMatchedLanguages).reversed());
+        return recommendations;
+    }
+
+    public Member getCurrentLoginMember() {
+        return memberRepository.findWithLanguagesById(1L)
+                .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
     }
 }
