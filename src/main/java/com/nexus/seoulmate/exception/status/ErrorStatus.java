@@ -1,5 +1,6 @@
 package com.nexus.seoulmate.exception.status;
 
+import com.google.api.Http;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -40,7 +41,16 @@ public enum ErrorStatus {
     INVALID_LANGUAGE(HttpStatus.BAD_REQUEST, "COMMON400", "유효하지 않은 언어입니다."),
 
     // Search
-    SEARCH_NOT_FOUND(HttpStatus.NOT_FOUND, "SEARCH404", "검색 조건에 해당하는 값이 없습니다.");
+    SEARCH_NOT_FOUND(HttpStatus.NOT_FOUND, "SEARCH404", "검색 조건에 해당하는 값이 없습니다."),
+
+    // Order & Payment
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER404", "주문을 찾을 수 없습니다."),
+    ALREADY_PARTICIPATED(HttpStatus.CONFLICT, "Order409", "이미 해당 모임에 참여한 사용자입니다."),
+    PAYMENT_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT500", "결제 요청 실패"),
+    AMOUNT_TAMPERED(HttpStatus.BAD_REQUEST, "PAYMENT400", "결제 금액이 일치하기 않습니다."),
+    PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "PAYMENT400", "결제가 실패했습니다."),
+    IAMPORT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT500", "아임포트 API 오류 발생")
+    ;
 
     private final HttpStatus status;
     private final String code;

@@ -34,3 +34,9 @@ cloud:
     credentials:
       accessKey: ${AWS_ACCESS_KEY_ID}
       secretKey: ${AWS_SECRET_ACCESS_KEY}
+
+imp:
+  api:
+    client-code: ${IMP_API_CLIENT_CODE}
+    key: ${IMP_API_KEY}
+    secret-key: ${IMP_API_SECRET_KEY}
