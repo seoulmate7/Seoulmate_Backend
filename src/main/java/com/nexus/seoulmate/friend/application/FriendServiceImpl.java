@@ -133,4 +133,36 @@ public class FriendServiceImpl implements FriendService {
                 .map(f -> friendConverter.toFriendListDTO(currentUser, f))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public FriendResponseDTO.FriendDetailDTO getFriendDetail(Long userId) {
+        Member currentUser = Member.builder() //임시 로그인 사용자
+                .userId(1L)
+                .email("dummyuser@seoulmate.com")
+                .password("dummy")
+                .firstName("Dummy")
+                .lastName("User")
+                .DOB(LocalDate.of(2000, 1, 1))
+                .country(Countries.KOREA)
+                .bio("더미 사용자입니다.")
+                .profileImage("https://cdn.seoulmate.com/profile/dummy.png")
+                .languages(Map.of("ENGLISH", 3))
+                .hobbies(new ArrayList<>())
+                .univCertificate("dummy_cert.png")
+                .univ(University.SUNGSIL)
+                .isVerified(VerificationStatus.VERIFIED)
+                .isDeleted(false)
+                .role(Role.USER)
+                .authProvider(AuthProvider.GOOGLE)
+                .userStatus(UserStatus.ACTIVE)
+                .build();
+
+        Member targetUser = memberRepository.findWithLanguagesById(userId)
+                .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
+
+        boolean isFriend = friendshipRepository.findFriendshipByUsers(currentUser, targetUser).isPresent();
+
+        return friendConverter.toFriendDetailDTO(targetUser, isFriend);
+    }
 }

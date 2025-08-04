@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,5 +108,9 @@ public class Member {
         user.authProvider = authProvider;
         user.userStatus = UserStatus.ACTIVE;  // 정해진 값
         return user;
+    }
+
+    public int calculateAge() {
+        return Period.between(this.DOB, LocalDate.now()).getYears();
     }
 }

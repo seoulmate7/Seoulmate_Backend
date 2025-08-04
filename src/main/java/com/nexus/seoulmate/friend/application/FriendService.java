@@ -10,4 +10,5 @@ public interface FriendService {
     void updateFriendRequest(Long requestId, FriendRequestDTO.FriendRequestUpdateDTO request);
     List<FriendResponseDTO.FriendRequestListDTO> getFriendRequests();
     List<FriendResponseDTO.FriendListDTO> getFriends();
+    FriendResponseDTO.FriendDetailDTO getFriendDetail(Long userId);
 }

@@ -19,7 +19,7 @@ import java.util.List;
 @Tag(name = "Friend", description = "친구 관련 API")
 public class FriendController {
 
-    private final FriendService friendRequestService;
+    private final FriendService friendService;
 
     @PostMapping("/requests")
     @Operation(
@@ -29,7 +29,7 @@ public class FriendController {
     public ResponseEntity<Response<Void>> sendFriendRequest(
             @RequestBody FriendRequestDTO.FriendRequestCreateDTO request
     ) {
-        friendRequestService.sendFriendRequest(request);
+        friendService.sendFriendRequest(request);
         return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_REQUEST_SENT,null));
     }
 
@@ -42,7 +42,7 @@ public class FriendController {
             @PathVariable Long requestId,
             @RequestBody FriendRequestDTO.FriendRequestUpdateDTO request
     ){
-        friendRequestService.updateFriendRequest(requestId, request);
+        friendService.updateFriendRequest(requestId, request);
         return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_REQUEST_UPDATED, null));
     }
 
@@ -51,7 +51,7 @@ public class FriendController {
             summary = "친구 요청 목록 조회",
             description = "내가 받은 친구 요청 목록을 조회합니다.")
     public ResponseEntity<Response<List<FriendResponseDTO.FriendRequestListDTO>>> getFriendRequests() {
-        List<FriendResponseDTO.FriendRequestListDTO> responses = friendRequestService.getFriendRequests();
+        List<FriendResponseDTO.FriendRequestListDTO> responses = friendService.getFriendRequests();
         return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_REQUEST_LIST_FETCHED, responses));
     }
 
@@ -60,8 +60,17 @@ public class FriendController {
             summary = "내 친구 목록 조회",
             description = "로그인한 사용자의 친구 목록을 조회합니다.")
     public ResponseEntity<Response<List<FriendResponseDTO.FriendListDTO>>> getFriends() {
-        List<FriendResponseDTO.FriendListDTO> responses = friendRequestService.getFriends();
+        List<FriendResponseDTO.FriendListDTO> responses = friendService.getFriends();
         return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_LIST_FETCHED, responses));
+    }
+
+    @GetMapping("/{userId}")
+    @Operation(summary = "사용자 상세 정보 조회", description = "특정 사용자의 프로필 정보를 조회합니다.")
+    public ResponseEntity<Response<FriendResponseDTO.FriendDetailDTO>> getFriendDetail(
+            @PathVariable Long userId
+    ) {
+        FriendResponseDTO.FriendDetailDTO response = friendService.getFriendDetail(userId);
+        return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_DETAIL_FETCHED, response));
     }
 
 }
