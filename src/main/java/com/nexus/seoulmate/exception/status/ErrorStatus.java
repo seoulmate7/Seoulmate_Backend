@@ -46,6 +46,10 @@ public enum ErrorStatus {
     FRIEND_REQUEST_ALREADY_HANDLED(HttpStatus.BAD_REQUEST, "FRIEND4005", "이미 처리된 친구 요청입니다."),
     FRIEND_RELATION_NOT_FOUND(HttpStatus.NOT_FOUND, "FRIEND4006", "해당 사용자와의 친구 관계가 존재하지 않습니다.");
 
+    // MyPage
+
+
+
     private final HttpStatus status;
     private final String code;
     private final String message;
