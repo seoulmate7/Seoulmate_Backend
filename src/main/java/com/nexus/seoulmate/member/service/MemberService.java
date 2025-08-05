@@ -1,16 +1,23 @@
 package com.nexus.seoulmate.member.service;
 
+import com.nexus.seoulmate.member.domain.GoogleInfo;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.dto.signup.*;
 import com.nexus.seoulmate.member.repository.HobbyRepository;
+import com.nexus.seoulmate.member.repository.GoogleInfoRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,14 +26,7 @@ public class MemberService {
     private final TempStorage tempStorage;
     private final MemberRepository memberRepository;
     private final HobbyRepository hobbyRepository;
-
-    // 소셜 회원가입/로그인
-    public SignupResponse saveGoogleSignup(SignupResponse signupRequest){
-        tempStorage.save(signupRequest);
-
-        SignupResponse dto = new SignupResponse(signupRequest.getFirstName(), signupRequest.getLastName());
-        return dto;
-    }
+    private final GoogleInfoRepository googleInfoRepository;
 
     // 1. 프로필 생성
     public void saveProfile(ProfileCreateRequest profileCreateRequest, MultipartFile profileImage){
@@ -67,13 +67,13 @@ public class MemberService {
     }
 
         // 정보 다 합쳐서 회원가입 완료 + 모든 회원간의 궁합 생성하기
-    public void completeSignup(String googleId) {
-        MemberCreateRequest request = tempStorage.collect(googleId);
+    public void completeSignup(String googleId, HttpServletRequest request) {
+        MemberCreateRequest memberCreateRequest = tempStorage.collect(googleId);
 
         // 기존 Hobby 엔티티들을 조회
         List<Hobby> existingHobbies = new ArrayList<>();
-        if (request.getHobbies() != null) {
-            for (Hobby hobby : request.getHobbies()) {
+        if (memberCreateRequest.getHobbies() != null) {
+            for (Hobby hobby : memberCreateRequest.getHobbies()) {
                 // hobbyName으로 기존 Hobby 엔티티 조회
                 hobbyRepository.findByHobbyNameAndHobbyCategory(hobby.getHobbyName(), hobby.getHobbyCategory())
                         .ifPresent(existingHobbies::add);
@@ -81,25 +81,70 @@ public class MemberService {
         }
 
         Member member = Member.createGoogleUser(
-                request.getEmail(),
-                request.getFirstName(),
-                request.getLastName(),
-                request.getDOB(),
-                request.getCountry(),
-                request.getBio(),
-                request.getProfileImage(),
+                memberCreateRequest.getEmail(),
+                memberCreateRequest.getFirstName(),
+                memberCreateRequest.getLastName(),
+                memberCreateRequest.getDOB(),
+                memberCreateRequest.getCountry(),
+                memberCreateRequest.getBio(),
+                memberCreateRequest.getProfileImage(),
                 existingHobbies, // 기존 Hobby 엔티티들 사용
-                request.getUnivCertificate(),
-                request.getUniv(),
-                request.getLanguages(),
-                request.getVerificationStatus(),
-                request.getAuthProvider()
+                memberCreateRequest.getUnivCertificate(),
+                memberCreateRequest.getUniv(),
+                memberCreateRequest.getLanguages(),
+                memberCreateRequest.getVerificationStatus(),
+                memberCreateRequest.getAuthProvider()
         );
 
-        memberRepository.save(member);
+        // JSESSIONID 추출
+        String jsessionId = extractJsessionId(request);
 
-        // Todo : 모든 회원의 궁합 계산하기
+        // Member 저장
+        Member savedMember = memberRepository.save(member);
+
+        // GoogleInfo 저장 (회원가입 시에만 생성)
+        if (jsessionId != null) {
+            saveGoogleInfo(savedMember, jsessionId, memberCreateRequest.getGoogleId());
+        }
     }
 
-    // Todo : 현재 로그인한 사용자 정보 가져오기
+    private void saveGoogleInfo(Member member, String jsessionId, String googleId) {
+            // 새로운 GoogleInfo 생성 및 저장
+            GoogleInfo googleInfo = new GoogleInfo(member, jsessionId, googleId);
+            googleInfoRepository.save(googleInfo);
+            System.out.println("GoogleInfo 저장 완료");
+    }
+
+    // 현재 로그인한 사용자 정보 가져오기
+    public Object getUserStatus() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(auth != null && auth.isAuthenticated() &&
+                auth.getPrincipal() instanceof OAuth2User oAuth2User)) {
+            return false;
+        }
+
+        String email = oAuth2User.getAttribute("email");
+        Optional<Member> optionalMember = memberRepository.findByEmail(email);
+        return optionalMember.isPresent() ?
+                "학교 인증 진행 상황 : " + optionalMember.get().getUnivVerification() :
+                false;
+    }
+
+    private String extractJsessionId(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("JSESSIONID".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    public String getSessionId(HttpServletRequest request){
+        return extractJsessionId(request);
+    }
 }
+

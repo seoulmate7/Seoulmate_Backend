@@ -2,11 +2,17 @@ spring:
   profiles:
     active: dev
 
+  # 세션 설정
+  session:
+    timeout: 24h            # 세션 타임아웃 (24시간)
+    create: always          # 항상 세션 생성
+    tracking-modes: cookie  # 쿠키로 세션 추적
+
   data:
     redis:
-      host: localhost
-      port: 6379
-      timeout: 2000ms
+      host: localhost      # Redis 서버의 호스트 주소
+      port: 6379           # Redis 서버의 포트 번호 (기본)
+      timeout: 2000ms      # 연결 타임아웃 시간 (2초)
 
   jpa:
     hibernate:

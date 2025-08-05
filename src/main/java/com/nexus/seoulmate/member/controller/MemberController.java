@@ -1,10 +1,9 @@
 package com.nexus.seoulmate.member.controller;
 
-import com.nexus.seoulmate.member.domain.enums.Countries;
-import com.nexus.seoulmate.member.domain.enums.Languages;
-import com.nexus.seoulmate.member.domain.enums.University;
+import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.dto.CustomOAuth2User;
 import com.nexus.seoulmate.member.dto.OAuth2Response;
+import com.nexus.seoulmate.member.service.CustomOAuth2UserService;
 import com.nexus.seoulmate.member.service.FluentProxyService;
 import com.nexus.seoulmate.member.service.MemberService;
 import com.nexus.seoulmate.member.service.TempStorage;
@@ -16,42 +15,81 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.nexus.seoulmate.exception.status.ErrorStatus.*;
 import static com.nexus.seoulmate.exception.status.SuccessStatus.*;
 
 @RestController
 @RequestMapping("/signup")
 @RequiredArgsConstructor
+@Tag(name = "회원가입", description = "회원가입 관련 API")
 public class MemberController {
 
     private final FluentProxyService fluentProxyService;
     private final MemberService memberService;
     private final TempStorage tempStorage;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     // 소셜 회원가입
 
     // 1-1. 프로필 기본 정보 받아오기
+    @Operation(summary = "구글에서 받아온 정보 반환", description = "회원가입하지 않은 사용자의 리디렉션 경로")
     @GetMapping("/profile-info")
-    public Response<Object> getProfileInfo(@AuthenticationPrincipal OAuth2User oAuth2User){
+    public Response<Object> getProfileInfo(@AuthenticationPrincipal OAuth2User oAuth2User,
+                                         HttpServletRequest request){
         System.out.println("=== 프로필 기본 정보 요청 ===");
-        
+
         if (oAuth2User instanceof CustomOAuth2User customUser) {
             OAuth2Response oAuth2Response = customUser.getOAuth2Response();
             System.out.println("ProviderId: " + oAuth2Response.getProviderId());
-            
+
             // TempStorage에서 저장된 SignupResponse 가져오기
             SignupResponse dto = tempStorage.getSignupResponse(oAuth2Response.getProviderId());
-            
+
             if (dto != null) {
-                System.out.println("프로필 등록 이름 : " + dto.getFirstName());
-                System.out.println("프로필 등록 성 : " + dto.getLastName());
-                return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, dto);
+                String jsessionId = memberService.getSessionId(request);
+                customOAuth2UserService.changeJsessionId(request);
+
+                // 쿠키를 포함한 새로운 SignupResponse 생성
+                SignupResponse dtoWithCookies = SignupResponse.builder()
+                        .googleId(dto.getGoogleId())
+                        .email(dto.getEmail())
+                        .firstName(dto.getFirstName())
+                        .lastName(dto.getLastName())
+                        .sessionId("JSESSIONID=" + jsessionId)
+                        .build();
+
+                System.out.println("=== loadUser 결과 및 SignupResponse 정보 ===");
+                System.out.println("구글 ID: " + dtoWithCookies.getGoogleId());
+                System.out.println("이메일: " + dtoWithCookies.getEmail());
+                System.out.println("이름: " + dtoWithCookies.getFirstName());
+                System.out.println("성: " + dtoWithCookies.getLastName());
+                System.out.println("인증 제공자: " + dtoWithCookies.getAuthProvider());
+                System.out.println("쿠키: " + dtoWithCookies.getSessionId());
+
+                // SignupResponse를 data로 반환
+                return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, dtoWithCookies);
+            } else {
+                System.out.println("TempStorage에서 SignupResponse를 찾을 수 없습니다.");
+                System.out.println("ProviderId: " + oAuth2Response.getProviderId());
             }
+        } else {
+            System.out.println("OAuth2User가 CustomOAuth2User 인스턴스가 아닙니다.");
         }
-        return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, null);
+        
+        // SignupResponse가 없는 경우 빈 데이터 반환
+        Map<String, Object> data = new HashMap<>();
+        return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, data);
     }
     
     // 1-2. 프로필 생성 (DTO + 파일 동시 처리)
+    @Operation(summary = "1. 프로필 생성 API")
     @PostMapping("/create-profile")
     public Response<Object> createProfile(@RequestParam("firstName") String firstName,
                                         @RequestParam("lastName") String lastName,
@@ -93,6 +131,7 @@ public class MemberController {
     }
 
     // 2. 언어 레벨 테스트 - 점수 받기 (FluentProxyService)
+    @Operation(summary = "2-1. 언어 레벨 평가 API")
     @GetMapping("/language/level-test")
     public Response<String> levelTest(@RequestPart("audioFile") MultipartFile audioFile,
                                       @RequestParam("language") Languages language) {
@@ -108,6 +147,7 @@ public class MemberController {
     }
 
     // 2. 언어 레벨 테스트 - 점수 저장하기
+    @Operation(summary = "2-2. 언어 레벨 평가 결과 전송 API")
     @PostMapping("/language/level-test")
     public Response<Object> submitLevelTest(@RequestBody LevelTestRequest levelTestRequest,
                                           @AuthenticationPrincipal OAuth2User oAuth2User){
@@ -132,6 +172,7 @@ public class MemberController {
     }
 
     // 3. 취미 선택
+    @Operation(summary = "3. 취미 선택 API")
     @PostMapping("/select-hobby")
     public Response<Object> selectHobby(@RequestBody HobbyRequest hobbyRequest,
                                        @AuthenticationPrincipal OAuth2User oAuth2User){
@@ -152,10 +193,12 @@ public class MemberController {
     }
 
     // 4. 학교 인증 + 최종 회원가입
+    @Operation(summary = "4. 학교 인증 및 회원가입 API")
     @PostMapping("/school")
     public Response<Object> authUniv(@RequestParam("university") University university,
-                                    @RequestPart(value = "univCertificate") MultipartFile univCertificate,
-                                    @AuthenticationPrincipal OAuth2User oAuth2User){
+                                     @RequestPart(value = "univCertificate") MultipartFile univCertificate,
+                                     @AuthenticationPrincipal OAuth2User oAuth2User,
+                                     HttpServletRequest request){
         System.out.println("=== 학교 인증 + 최종 회원가입 요청 ===");
         System.out.println("지원 학교: " + university);
         
@@ -177,7 +220,7 @@ public class MemberController {
         memberService.authUniv(requestWithGoogleId);
         System.out.println("학교 인증 완료");
         
-        memberService.completeSignup(googleId);
+        memberService.completeSignup(googleId, request);
         System.out.println("최종 회원가입 완료");
         
         return Response.success(SuccessStatus.MEMBER_CREATED, null);
@@ -191,5 +234,23 @@ public class MemberController {
             return customUser.getOAuth2Response().getProviderId();
         }
         return null;
+    }
+
+    @Operation(summary = "학교 인증 진행중 API", description = "아직 학교 인증이 진행중인 경우 리디렉션 경로")
+    @GetMapping("/in-progress")
+    private Response<Object> inProgress(HttpServletRequest request){
+
+        Object result = memberService.getUserStatus();
+        String jsessionId = memberService.getSessionId(request);
+        customOAuth2UserService.changeJsessionId(request);
+
+        if (result.equals(false)){
+            return Response.fail(UNAUTHORIZED);
+        } else {
+            Map<String, Object> data = new HashMap<>();
+            data.put("univVerification", result);
+            data.put("jsessionId", "JSESSIONID=" + jsessionId);
+            return Response.success(SuccessStatus.SUCCESS, data);
+        }
     }
 }

@@ -41,4 +41,9 @@ public class GoogleResponse implements OAuth2Response{
         Object familyName = attribute.get("family_name");
         return familyName != null ? familyName.toString() : "";
     }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attribute;
+    }
 }

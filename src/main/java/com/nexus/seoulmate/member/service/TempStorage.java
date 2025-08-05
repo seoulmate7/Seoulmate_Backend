@@ -2,10 +2,6 @@ package com.nexus.seoulmate.member.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexus.seoulmate.member.domain.Hobby;
-import com.nexus.seoulmate.member.domain.enums.AuthProvider;
-import com.nexus.seoulmate.member.domain.enums.Countries;
-import com.nexus.seoulmate.member.domain.enums.University;
-import com.nexus.seoulmate.member.domain.enums.VerificationStatus;
 import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.dto.signup.*;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +25,7 @@ public class TempStorage {
     public void save(SignupResponse dto) {
         String key = dto.getGoogleId();
         Map<String, Object> map = Map.of(
+                "googleId", dto.getGoogleId(),
                 "email", dto.getEmail(),
                 "firstName", dto.getFirstName(),
                 "lastName", dto.getLastName(),
@@ -40,21 +37,41 @@ public class TempStorage {
 
     // 1-1. 구글 회원가입 정보 가져오기
     public SignupResponse getSignupResponse(String googleId) {
-        Map<Object, Object> raw = redisTemplate.opsForHash().entries(googleId);
-        if (raw.isEmpty()) {
+        try {
+            if (googleId == null || googleId.isEmpty()) {
+                System.out.println("googleId가 null이거나 비어있습니다.");
+                return null;
+            }
+
+            Map<Object, Object> raw = redisTemplate.opsForHash().entries(googleId);
+            System.out.println("Redis에서 가져온 데이터: " + raw);
+
+            if (raw.isEmpty()) {
+                System.out.println("Redis에서 데이터를 찾을 수 없습니다. googleId: " + googleId);
+                return null;
+            }
+
+            String email = (String) raw.get("email");
+            String firstName = (String) raw.get("firstName");
+            String lastName = (String) raw.get("lastName");
+            String sessionId = (String) raw.get("sessionId");
+
+            return SignupResponse.builder()
+                    .googleId(googleId)
+                    .email(email)
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .sessionId(sessionId)
+                    .build();
+        } catch (Exception e) {
+            System.out.println("getSignupResponse에서 오류 발생: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
-        
-        return new SignupResponse(
-                googleId,
-                (String) raw.get("email"),
-                (String) raw.get("firstName"),
-                (String) raw.get("lastName")
-        );
     }
 
     // 2. 프로필 생성 정보 저장
-    public void save(ProfileCreateRequest dto, String profileImageUrl){
+    public void save(ProfileCreateRequest dto, String profileImageUrl) {
         String key = dto.getGoogleId();
         Map<String, Object> map = Map.of(
                 "firstName", dto.getFirstName(),
@@ -68,20 +85,19 @@ public class TempStorage {
     }
 
     // 3. 언어 테스트 정보 저장
-    public void save(LevelTestRequest dto){
+    public void save(LevelTestRequest dto) {
         String key = dto.getGoogleId();
         redisTemplate.opsForHash().put(key, "languages", dto.getLanguages());
     }
 
     // 4. 취미 저장
-    public void save(HobbyRequest dto){
+    public void save(HobbyRequest dto) {
         String key = dto.getGoogleId();
-        // List<String>을 그대로 저장
         redisTemplate.opsForHash().put(key, "hobbies", dto.getHobbies());
     }
 
     // 5. 학교 인증 신청
-    public void save(UnivAuthRequest dto){
+    public void save(UnivAuthRequest dto) {
         String key = dto.getGoogleId();
         Map<String, Object> map = Map.of(
                 "univ", dto.getUniversity(),
@@ -92,71 +108,96 @@ public class TempStorage {
     }
 
     // 최종 데이터 취합
-    public MemberCreateRequest collect(String googleId){
+    @SuppressWarnings("unchecked")
+    public MemberCreateRequest collect(String googleId) {
         Map<Object, Object> raw = redisTemplate.opsForHash().entries(googleId);
         MemberCreateRequest result = new MemberCreateRequest();
 
-        result.setEmail((String) raw.get("email"));
-        result.setFirstName((String) raw.get("firstName"));
-        result.setLastName((String) raw.get("lastName"));
-        
-        // DOB null 체크
-        Object dobObj = raw.get("DOB");
-        if (dobObj != null) {
-            result.setDOB(LocalDate.parse((String) dobObj));
-        }
-        
-        // Countries enum 처리
-        Object countryObj = raw.get("country");
-        if (countryObj instanceof Countries) {
-            result.setCountry((Countries) countryObj);
-        } else {
-            result.setCountry(Countries.valueOf((String) countryObj));
-        }
-        
-        result.setBio((String) raw.get("bio"));
-        result.setProfileImage((String) raw.get("profileImage"));
-        // Hobby 객체 변환
-        Object hobbiesObj = raw.get("hobbies");
-        if (hobbiesObj instanceof List) {
-            List<String> hobbyNames = (List<String>) hobbiesObj;
-            List<Hobby> hobbies = hobbyNames.stream()
-                    .map(name -> Hobby.builder()
-                            .hobbyName(name)
-                            .hobbyCategory(HobbyCategory.HOBBY) // 기본값으로 HOBBY 설정
-                            .build())
-                    .toList();
-            result.setHobbies(hobbies);
-        }
-        result.setUnivCertificate((String) raw.get("univCertificate"));
-        
-        // University enum 처리
-        Object univObj = raw.get("univ");
-        if (univObj instanceof University) {
-            result.setUniv((University) univObj);
-        } else {
-            result.setUniv(University.valueOf((String) univObj));
-        }
-        
-        result.setLanguages((Map<String, Integer>) raw.get("languages"));
-        
-        // VerificationStatus enum 처리
-        Object verificationStatusObj = raw.get("verificationStatus");
-        if (verificationStatusObj instanceof VerificationStatus) {
-            result.setVerificationStatus((VerificationStatus) verificationStatusObj);
-        } else {
-            result.setVerificationStatus(VerificationStatus.valueOf((String) verificationStatusObj));
-        }
-        
-        // AuthProvider enum 처리
-        Object authProviderObj = raw.get("authProvider");
-        if (authProviderObj instanceof AuthProvider) {
-            result.setAuthProvider((AuthProvider) authProviderObj);
-        } else {
-            result.setAuthProvider(AuthProvider.valueOf((String) authProviderObj));
-        }
+        try {
+            // googleId도 함께 설정
+            result.setGoogleId(googleId);
+            result.setEmail((String) raw.get("email"));
+            result.setFirstName((String) raw.get("firstName"));
+            result.setLastName((String) raw.get("lastName"));
 
-        redisTemplate.delete(googleId); // 임시 데이터 삭제
-        return result;
+            Object dobObj = raw.get("DOB");
+            if (dobObj != null) {
+                result.setDOB(LocalDate.parse((String) dobObj));
+            }
+
+            Object countryObj = raw.get("country");
+            if (countryObj instanceof Countries) {
+                result.setCountry((Countries) countryObj);
+            } else if (countryObj instanceof String countryStr) {
+                try {
+                    result.setCountry(Countries.valueOf(countryStr));
+                } catch (IllegalArgumentException e) {
+                    System.out.println("잘못된 country 값: " + countryStr);
+                }
+            }
+
+            result.setBio((String) raw.get("bio"));
+            result.setProfileImage((String) raw.get("profileImage"));
+
+            Object hobbiesObj = raw.get("hobbies");
+            if (hobbiesObj instanceof List<?> list) {
+                List<Hobby> hobbies = list.stream()
+                        .filter(item -> item instanceof String)
+                        .map(item -> Hobby.builder()
+                                .hobbyName((String) item)
+                                .hobbyCategory(HobbyCategory.HOBBY)
+                                .build())
+                        .toList();
+                result.setHobbies(hobbies);
+            }
+
+            result.setUnivCertificate((String) raw.get("univCertificate"));
+
+            Object univObj = raw.get("univ");
+            if (univObj instanceof University) {
+                result.setUniv((University) univObj);
+            } else if (univObj instanceof String univStr) {
+                try {
+                    result.setUniv(University.valueOf(univStr));
+                } catch (IllegalArgumentException e) {
+                    System.out.println("잘못된 university 값: " + univStr);
+                }
+            }
+
+            Object langObj = raw.get("languages");
+            if (langObj instanceof Map<?, ?> langMap) {
+                try {
+                    result.setLanguages((Map<String, Integer>) langMap);
+                } catch (ClassCastException e) {
+                    System.out.println("languages 형변환 실패: " + langMap);
+                }
+            }
+
+            Object verificationStatusObj = raw.get("verificationStatus");
+            if (verificationStatusObj instanceof VerificationStatus) {
+                result.setVerificationStatus((VerificationStatus) verificationStatusObj);
+            } else if (verificationStatusObj instanceof String vsStr) {
+                try {
+                    result.setVerificationStatus(VerificationStatus.valueOf(vsStr));
+                } catch (IllegalArgumentException e) {
+                    System.out.println("잘못된 verificationStatus 값: " + vsStr);
+                }
+            }
+
+            Object authProviderObj = raw.get("authProvider");
+            if (authProviderObj instanceof AuthProvider) {
+                result.setAuthProvider((AuthProvider) authProviderObj);
+            } else if (authProviderObj instanceof String apStr) {
+                try {
+                    result.setAuthProvider(AuthProvider.valueOf(apStr));
+                } catch (IllegalArgumentException e) {
+                    System.out.println("잘못된 authProvider 값: " + apStr);
+                }
+            }
+
+            return result;
+        } finally {
+            redisTemplate.delete(googleId); // 성공/실패 관계없이 삭제
+        }
     }
 }
