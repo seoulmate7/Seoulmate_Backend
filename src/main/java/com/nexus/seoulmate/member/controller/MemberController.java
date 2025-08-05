@@ -15,6 +15,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -26,6 +28,7 @@ import static com.nexus.seoulmate.exception.status.SuccessStatus.*;
 @RestController
 @RequestMapping("/signup")
 @RequiredArgsConstructor
+@Tag(name = "회원가입", description = "회원가입 관련 API")
 public class MemberController {
 
     private final FluentProxyService fluentProxyService;
@@ -36,6 +39,7 @@ public class MemberController {
     // 소셜 회원가입
 
     // 1-1. 프로필 기본 정보 받아오기
+    @Operation(summary = "구글에서 받아온 정보 반환", description = "회원가입하지 않은 사용자의 리디렉션 경로")
     @GetMapping("/profile-info")
     public Response<Object> getProfileInfo(@AuthenticationPrincipal OAuth2User oAuth2User,
                                          HttpServletRequest request){
@@ -85,6 +89,7 @@ public class MemberController {
     }
     
     // 1-2. 프로필 생성 (DTO + 파일 동시 처리)
+    @Operation(summary = "1. 프로필 생성 API")
     @PostMapping("/create-profile")
     public Response<Object> createProfile(@RequestParam("firstName") String firstName,
                                         @RequestParam("lastName") String lastName,
@@ -126,6 +131,7 @@ public class MemberController {
     }
 
     // 2. 언어 레벨 테스트 - 점수 받기 (FluentProxyService)
+    @Operation(summary = "2-1. 언어 레벨 평가 API")
     @GetMapping("/language/level-test")
     public Response<String> levelTest(@RequestPart("audioFile") MultipartFile audioFile,
                                       @RequestParam("language") Languages language) {
@@ -141,6 +147,7 @@ public class MemberController {
     }
 
     // 2. 언어 레벨 테스트 - 점수 저장하기
+    @Operation(summary = "2-2. 언어 레벨 평가 결과 전송 API")
     @PostMapping("/language/level-test")
     public Response<Object> submitLevelTest(@RequestBody LevelTestRequest levelTestRequest,
                                           @AuthenticationPrincipal OAuth2User oAuth2User){
@@ -165,6 +172,7 @@ public class MemberController {
     }
 
     // 3. 취미 선택
+    @Operation(summary = "3. 취미 선택 API")
     @PostMapping("/select-hobby")
     public Response<Object> selectHobby(@RequestBody HobbyRequest hobbyRequest,
                                        @AuthenticationPrincipal OAuth2User oAuth2User){
@@ -185,6 +193,7 @@ public class MemberController {
     }
 
     // 4. 학교 인증 + 최종 회원가입
+    @Operation(summary = "4. 학교 인증 및 회원가입 API")
     @PostMapping("/school")
     public Response<Object> authUniv(@RequestParam("university") University university,
                                      @RequestPart(value = "univCertificate") MultipartFile univCertificate,
@@ -227,6 +236,7 @@ public class MemberController {
         return null;
     }
 
+    @Operation(summary = "학교 인증 진행중 API", description = "아직 학교 인증이 진행중인 경우 리디렉션 경로")
     @GetMapping("/in-progress")
     private Response<Object> inProgress(HttpServletRequest request){
 

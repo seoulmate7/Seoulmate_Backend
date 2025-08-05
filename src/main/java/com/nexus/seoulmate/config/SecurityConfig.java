@@ -65,6 +65,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         // 정적 리소스는 인증 없이 접근 가능
                         .requestMatchers("/", "/index.html", "/static/**").permitAll()
+                        // Swagger UI 관련 경로들
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                         // 인증 관련 경로들
                         .requestMatchers("/oauth2/**", "/login/**", "/signup/**", "/auth/status", "/auth/logout").permitAll()
                         // /seoulmate는 인증 필요

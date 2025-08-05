@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "인증", description = "인증 관련 API")
 public class AuthController {
 
     private final MemberRepository memberRepository;
@@ -33,6 +36,7 @@ public class AuthController {
         this.googleInfoRepository = googleInfoRepository;
     }
 
+    @Operation(summary = "회원 상태 반환 API", description = "JSESSIONID로 회원 조회")
     @GetMapping("/status")
     public Response<StatusResponse> getAuthStatus() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -65,6 +69,7 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "로그아웃 API")
     @PostMapping("/logout")
     public Response<Map<String, Object>> logout(HttpSession session) {
         Map<String, Object> data = new HashMap<>();
