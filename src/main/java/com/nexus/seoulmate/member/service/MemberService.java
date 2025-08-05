@@ -1,5 +1,6 @@
 package com.nexus.seoulmate.member.service;
 
+import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.member.domain.GoogleInfo;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
@@ -17,7 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
+import static com.nexus.seoulmate.exception.status.ErrorStatus.UNAUTHORIZED;
+import static com.nexus.seoulmate.exception.status.ErrorStatus.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -88,7 +91,7 @@ public class MemberService {
                 memberCreateRequest.getCountry(),
                 memberCreateRequest.getBio(),
                 memberCreateRequest.getProfileImage(),
-                existingHobbies, // 기존 Hobby 엔티티들 사용
+                existingHobbies,
                 memberCreateRequest.getUnivCertificate(),
                 memberCreateRequest.getUniv(),
                 memberCreateRequest.getLanguages(),
@@ -116,19 +119,19 @@ public class MemberService {
     }
 
     // 현재 로그인한 사용자 정보 가져오기
-    public Object getUserStatus() {
+    public String getUserStatus() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (!(auth != null && auth.isAuthenticated() &&
-                auth.getPrincipal() instanceof OAuth2User oAuth2User)) {
-            return false;
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof OAuth2User oAuth2User)) {
+            throw new CustomException(UNAUTHORIZED);
         }
 
         String email = oAuth2User.getAttribute("email");
-        Optional<Member> optionalMember = memberRepository.findByEmail(email);
-        return optionalMember.isPresent() ?
-                "학교 인증 진행 상황 : " + optionalMember.get().getUnivVerification() :
-                false;
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        return "학교 인증 진행 상황 : " + member.getUnivVerification();
     }
 
     private String extractJsessionId(HttpServletRequest request) {
