@@ -65,14 +65,6 @@ public class MemberController {
                         .sessionId("JSESSIONID=" + jsessionId)
                         .build();
 
-                System.out.println("=== loadUser 결과 및 SignupResponse 정보 ===");
-                System.out.println("구글 ID: " + dtoWithCookies.getGoogleId());
-                System.out.println("이메일: " + dtoWithCookies.getEmail());
-                System.out.println("이름: " + dtoWithCookies.getFirstName());
-                System.out.println("성: " + dtoWithCookies.getLastName());
-                System.out.println("인증 제공자: " + dtoWithCookies.getAuthProvider());
-                System.out.println("쿠키: " + dtoWithCookies.getSessionId());
-
                 // SignupResponse를 data로 반환
                 return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, dtoWithCookies);
             } else {
@@ -98,13 +90,6 @@ public class MemberController {
                                         @RequestParam("bio") String bio,
                                         @RequestPart(value = "profileImage") MultipartFile profileImage,
                                         @AuthenticationPrincipal OAuth2User oAuth2User){
-        System.out.println("=== 프로필 생성 요청 ===");
-        System.out.println("받은 firstName: " + firstName);
-        System.out.println("받은 lastName: " + lastName);
-        System.out.println("받은 DOB: " + DOB);
-        System.out.println("받은 country: " + country);
-        System.out.println("받은 bio: " + bio);
-        
         // 현재 로그인한 사용자의 googleId 가져오기
         String googleId = getGoogleIdFromOAuth2User(oAuth2User);
         System.out.println("추출된 googleId: " + googleId);
@@ -121,9 +106,6 @@ public class MemberController {
                 .bio(bio)
                 .profileImageUrl(profileImageUrl)
                 .build();
-        
-        System.out.println("생성된 ProfileCreateRequest: " + requestWithGoogleId);
-        System.out.println("업로드된 이미지: " + profileImageUrl);
         
         memberService.saveProfile(requestWithGoogleId, profileImage);
         System.out.println("프로필 저장 완료");
@@ -156,15 +138,12 @@ public class MemberController {
         
         // 현재 로그인한 사용자의 googleId 가져오기
         String googleId = getGoogleIdFromOAuth2User(oAuth2User);
-        System.out.println("추출된 googleId: " + googleId);
         
         // 새로운 객체 생성하여 googleId 설정
         LevelTestRequest requestWithGoogleId = LevelTestRequest.builder()
                 .googleId(googleId)
                 .languages(levelTestRequest.getLanguages())
                 .build();
-        
-        System.out.println("생성된 LevelTestRequest: " + requestWithGoogleId);
         
         memberService.submitLevelTest(requestWithGoogleId);
         System.out.println("언어 레벨 테스트 점수 저장 완료");
@@ -176,16 +155,12 @@ public class MemberController {
     @PostMapping("/select-hobby")
     public Response<Object> selectHobby(@RequestBody HobbyRequest hobbyRequest,
                                        @AuthenticationPrincipal OAuth2User oAuth2User){
-        System.out.println("=== 취미 선택 요청 ===");
-        System.out.println("받은 HobbyRequest: " + hobbyRequest);
         
         // 현재 로그인한 사용자의 googleId 가져오기
         String googleId = getGoogleIdFromOAuth2User(oAuth2User);
-        System.out.println("추출된 googleId: " + googleId);
         
         // 새로운 객체 생성하여 googleId 설정
         HobbyRequest requestWithGoogleId = new HobbyRequest(googleId, hobbyRequest.getHobbies());
-        System.out.println("생성된 HobbyRequest: " + requestWithGoogleId);
         
         memberService.selectHobby(requestWithGoogleId);
         System.out.println("취미 선택 저장 완료");
@@ -199,12 +174,9 @@ public class MemberController {
                                      @RequestPart(value = "univCertificate") MultipartFile univCertificate,
                                      @AuthenticationPrincipal OAuth2User oAuth2User,
                                      HttpServletRequest request){
-        System.out.println("=== 학교 인증 + 최종 회원가입 요청 ===");
-        System.out.println("지원 학교: " + university);
         
         // 현재 로그인한 사용자의 googleId 가져오기
         String googleId = getGoogleIdFromOAuth2User(oAuth2User);
-        System.out.println("추출된 googleId: " + googleId);
 
         String univCertificateUrl = memberService.uploadUnivCertificate(googleId, univCertificate);
         
@@ -244,13 +216,10 @@ public class MemberController {
         String jsessionId = memberService.getSessionId(request);
         customOAuth2UserService.changeJsessionId(request);
 
-        if (result.equals(false)){
-            return Response.fail(UNAUTHORIZED);
-        } else {
-            Map<String, Object> data = new HashMap<>();
-            data.put("univVerification", result);
-            data.put("jsessionId", "JSESSIONID=" + jsessionId);
-            return Response.success(SuccessStatus.SUCCESS, data);
-        }
+        Map<String, Object> data = new HashMap<>();
+        data.put("univVerification", result);
+        data.put("jsessionId", "JSESSIONID=" + jsessionId);
+        return Response.success(SuccessStatus.SUCCESS, data);
+
     }
 }
