@@ -99,7 +99,7 @@ public class MemberController {
 
     // 2. 언어 레벨 테스트 - 점수 받기 (FluentProxyService)
     @Operation(summary = "2-1. 언어 레벨 평가 API")
-    @GetMapping(value = "/language/level-test", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/language/take-level-test", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<String> levelTest(@RequestPart("audioFile") MultipartFile audioFile,
                                       @RequestParam("language") Languages language) {
         System.out.println("=== 언어 레벨 테스트 요청 ===");
@@ -115,7 +115,7 @@ public class MemberController {
 
     // 2. 언어 레벨 테스트 - 점수 저장하기
     @Operation(summary = "2-2. 언어 레벨 평가 결과 전송 API")
-    @PostMapping("/language/level-test")
+    @PostMapping("/language/submit-level-test")
     public Response<Object> submitLevelTest(@RequestBody LevelTestRequest levelTestRequest,
                                           @AuthenticationPrincipal OAuth2User oAuth2User){
         System.out.println("=== 언어 레벨 테스트 점수 저장 요청 ===");
