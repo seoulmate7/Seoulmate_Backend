@@ -8,7 +8,7 @@ import com.nexus.seoulmate.exception.status.ErrorStatus;
 import java.util.stream.Stream;
 
 public enum Languages {
-    ENGLISH("ENGLISH"),
+    ENGLISH("영어"),
     KOREAN("한국어"),
     JAPANESE("일본어"),
     CHINESE("중국어"),

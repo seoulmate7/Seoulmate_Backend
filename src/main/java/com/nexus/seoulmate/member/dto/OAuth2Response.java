@@ -1,5 +1,7 @@
 package com.nexus.seoulmate.member.dto;
 
+import java.util.Map;
+
 public interface OAuth2Response {
 
     // 제공자
@@ -19,6 +21,9 @@ public interface OAuth2Response {
 
     // 사용자 성
     String getFamilyName();
+
+    // OAuth2 속성 정보
+    Map<String, Object> getAttributes();
 }
 
 

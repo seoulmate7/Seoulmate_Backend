@@ -2,10 +2,6 @@ package com.nexus.seoulmate.member.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexus.seoulmate.member.domain.Hobby;
-import com.nexus.seoulmate.member.domain.enums.AuthProvider;
-import com.nexus.seoulmate.member.domain.enums.Countries;
-import com.nexus.seoulmate.member.domain.enums.University;
-import com.nexus.seoulmate.member.domain.enums.VerificationStatus;
 import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.dto.signup.*;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +25,7 @@ public class TempStorage {
     public void save(SignupResponse dto) {
         String key = dto.getGoogleId();
         Map<String, Object> map = Map.of(
+                "googleId", dto.getGoogleId(),
                 "email", dto.getEmail(),
                 "firstName", dto.getFirstName(),
                 "lastName", dto.getLastName(),
@@ -40,123 +37,172 @@ public class TempStorage {
 
     // 1-1. 구글 회원가입 정보 가져오기
     public SignupResponse getSignupResponse(String googleId) {
-        Map<Object, Object> raw = redisTemplate.opsForHash().entries(googleId);
-        if (raw.isEmpty()) {
+        try {
+            if (googleId == null || googleId.isEmpty()) {
+                System.out.println("googleId가 null이거나 비어있습니다.");
+                return null;
+            }
+
+            Map<Object, Object> raw = redisTemplate.opsForHash().entries(googleId);
+            System.out.println("Redis에서 가져온 데이터: " + raw);
+
+            if (raw.isEmpty()) {
+                System.out.println("Redis에서 데이터를 찾을 수 없습니다. googleId: " + googleId);
+                return null;
+            }
+
+            String email = (String) raw.get("email");
+            String firstName = (String) raw.get("firstName");
+            String lastName = (String) raw.get("lastName");
+            String sessionId = (String) raw.get("sessionId");
+
+            return SignupResponse.builder()
+                    .googleId(googleId)
+                    .email(email)
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .sessionId(sessionId)
+                    .build();
+        } catch (Exception e) {
+            System.out.println("getSignupResponse에서 오류 발생: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
-        
-        return new SignupResponse(
-                googleId,
-                (String) raw.get("email"),
-                (String) raw.get("firstName"),
-                (String) raw.get("lastName")
-        );
     }
 
     // 2. 프로필 생성 정보 저장
-    public void save(ProfileCreateRequest dto, String profileImageUrl){
-        String key = dto.getGoogleId();
+    public void save(ProfileCreateRequest dto, String profileImageUrl, String googleId) {
+        String key = googleId;
         Map<String, Object> map = Map.of(
                 "firstName", dto.getFirstName(),
                 "lastName", dto.getLastName(),
                 "DOB", dto.getDOB().toString(),
                 "bio", dto.getBio(),
                 "country", dto.getCountry(),
-                "profileImage", profileImageUrl
+                "profileImageUrl", profileImageUrl
         );
         redisTemplate.opsForHash().putAll(key, map);
     }
 
     // 3. 언어 테스트 정보 저장
-    public void save(LevelTestRequest dto){
-        String key = dto.getGoogleId();
+    public void save(LevelTestRequest dto, String googleId) {
+        String key = googleId;
         redisTemplate.opsForHash().put(key, "languages", dto.getLanguages());
     }
 
     // 4. 취미 저장
-    public void save(HobbyRequest dto){
-        String key = dto.getGoogleId();
-        // List<String>을 그대로 저장
+    public void save(HobbyRequest dto, String googleId) {
+        String key = googleId;
         redisTemplate.opsForHash().put(key, "hobbies", dto.getHobbies());
     }
 
     // 5. 학교 인증 신청
-    public void save(UnivAuthRequest dto){
-        String key = dto.getGoogleId();
+    public void save(UnivAuthDto dto, String googleId) {
+        String key = googleId;
         Map<String, Object> map = Map.of(
                 "univ", dto.getUniversity(),
-                "univCertificate", dto.getUnivCertificate(),
-                "verificationStatus", dto.getVerificationStatus()
+                "univCertificate", dto.getUnivCertificateUrl(),
+                "verificationStatus", VerificationStatus.SUBMITTED
         );
         redisTemplate.opsForHash().putAll(key, map);
     }
 
     // 최종 데이터 취합
-    public MemberCreateRequest collect(String googleId){
+    public MemberCreateRequest collect(String googleId) {
         Map<Object, Object> raw = redisTemplate.opsForHash().entries(googleId);
-        MemberCreateRequest result = new MemberCreateRequest();
 
-        result.setEmail((String) raw.get("email"));
-        result.setFirstName((String) raw.get("firstName"));
-        result.setLastName((String) raw.get("lastName"));
-        
-        // DOB null 체크
-        Object dobObj = raw.get("DOB");
-        if (dobObj != null) {
-            result.setDOB(LocalDate.parse((String) dobObj));
-        }
-        
-        // Countries enum 처리
-        Object countryObj = raw.get("country");
-        if (countryObj instanceof Countries) {
-            result.setCountry((Countries) countryObj);
-        } else {
-            result.setCountry(Countries.valueOf((String) countryObj));
-        }
-        
-        result.setBio((String) raw.get("bio"));
-        result.setProfileImage((String) raw.get("profileImage"));
-        // Hobby 객체 변환
-        Object hobbiesObj = raw.get("hobbies");
-        if (hobbiesObj instanceof List) {
-            List<String> hobbyNames = (List<String>) hobbiesObj;
-            List<Hobby> hobbies = hobbyNames.stream()
-                    .map(name -> Hobby.builder()
-                            .hobbyName(name)
-                            .hobbyCategory(HobbyCategory.HOBBY) // 기본값으로 HOBBY 설정
-                            .build())
-                    .toList();
-            result.setHobbies(hobbies);
-        }
-        result.setUnivCertificate((String) raw.get("univCertificate"));
-        
-        // University enum 처리
-        Object univObj = raw.get("univ");
-        if (univObj instanceof University) {
-            result.setUniv((University) univObj);
-        } else {
-            result.setUniv(University.valueOf((String) univObj));
-        }
-        
-        result.setLanguages((Map<String, Integer>) raw.get("languages"));
-        
-        // VerificationStatus enum 처리
-        Object verificationStatusObj = raw.get("verificationStatus");
-        if (verificationStatusObj instanceof VerificationStatus) {
-            result.setVerificationStatus((VerificationStatus) verificationStatusObj);
-        } else {
-            result.setVerificationStatus(VerificationStatus.valueOf((String) verificationStatusObj));
-        }
-        
-        // AuthProvider enum 처리
-        Object authProviderObj = raw.get("authProvider");
-        if (authProviderObj instanceof AuthProvider) {
-            result.setAuthProvider((AuthProvider) authProviderObj);
-        } else {
-            result.setAuthProvider(AuthProvider.valueOf((String) authProviderObj));
-        }
+        try {
+            String email = (String) raw.get("email");
+            String firstName = (String) raw.get("firstName");
+            String lastName = (String) raw.get("lastName");
+            
+            LocalDate dob = null;
+            Object dobObj = raw.get("DOB");
+            if (dobObj != null) {
+                dob = LocalDate.parse((String) dobObj);
+            }
 
-        redisTemplate.delete(googleId); // 임시 데이터 삭제
-        return result;
+            Countries country = null;
+            Object countryObj = raw.get("country");
+            if (countryObj instanceof Countries) {
+                country = (Countries) countryObj;
+            } else if (countryObj instanceof String countryStr) {
+                try {
+                    country = Countries.valueOf(countryStr);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("잘못된 country 값: " + countryStr);
+                }
+            }
+
+            String bio = (String) raw.get("bio");
+            String profileImage = (String) raw.get("profileImage");
+
+            List<Hobby> hobbies = null;
+            Object hobbiesObj = raw.get("hobbies");
+            if (hobbiesObj instanceof List<?> list) {
+                hobbies = list.stream()
+                        .filter(item -> item instanceof String)
+                        .map(item -> Hobby.builder()
+                                .hobbyName((String) item)
+                                .hobbyCategory(HobbyCategory.HOBBY)
+                                .build())
+                        .toList();
+            }
+
+            String univCertificate = (String) raw.get("univCertificate");
+
+            University univ = null;
+            Object univObj = raw.get("univ");
+            if (univObj instanceof University) {
+                univ = (University) univObj;
+            } else if (univObj instanceof String univStr) {
+                try {
+                    univ = University.valueOf(univStr);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("잘못된 university 값: " + univStr);
+                }
+            }
+
+            Map<String, Integer> languages = null;
+            Object langObj = raw.get("languages");
+            if (langObj instanceof Map<?, ?> langMap) {
+                try {
+                    languages = (Map<String, Integer>) langMap;
+                } catch (ClassCastException e) {
+                    System.out.println("languages 형변환 실패: " + langMap);
+                }
+            }
+
+            VerificationStatus verificationStatus = null;
+            Object verificationStatusObj = raw.get("verificationStatus");
+            if (verificationStatusObj instanceof VerificationStatus) {
+                verificationStatus = (VerificationStatus) verificationStatusObj;
+            } else if (verificationStatusObj instanceof String vsStr) {
+                try {
+                    verificationStatus = VerificationStatus.valueOf(vsStr);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("잘못된 verificationStatus 값: " + vsStr);
+                }
+            }
+
+            AuthProvider authProvider = null;
+            Object authProviderObj = raw.get("authProvider");
+            if (authProviderObj instanceof AuthProvider) {
+                authProvider = (AuthProvider) authProviderObj;
+            } else if (authProviderObj instanceof String apStr) {
+                try {
+                    authProvider = AuthProvider.valueOf(apStr);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("잘못된 authProvider 값: " + apStr);
+                }
+            }
+
+            // 생성자를 사용하여 MemberCreateRequest 객체 생성
+            return new MemberCreateRequest(googleId, email, firstName, lastName, dob, country, 
+                                        bio, profileImage, hobbies, univCertificate, univ, 
+                                        languages, verificationStatus, authProvider);
+        } finally {
+            redisTemplate.delete(googleId); // 성공/실패 관계없이 삭제
+        }
     }
 }
