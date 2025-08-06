@@ -71,7 +71,7 @@ public class TempStorage {
     }
 
     // 2. 프로필 생성 정보 저장
-    public void save(ProfileCreateRequest dto, String profileImageUrl, String googleId) {
+    public void save(ProfileCreateRequest dto, String googleId) {
         String key = googleId;
         Map<String, Object> map = Map.of(
                 "firstName", dto.getFirstName(),
@@ -79,7 +79,7 @@ public class TempStorage {
                 "DOB", dto.getDOB().toString(),
                 "bio", dto.getBio(),
                 "country", dto.getCountry(),
-                "profileImageUrl", profileImageUrl
+                "profileImageUrl", dto.getProfileImageUrl()
         );
         redisTemplate.opsForHash().putAll(key, map);
     }
@@ -135,7 +135,7 @@ public class TempStorage {
             }
 
             String bio = (String) raw.get("bio");
-            String profileImage = (String) raw.get("profileImage");
+            String profileImage = (String) raw.get("profileImageUrl");  // profileImage -> profileImageUrl로 변경
 
             List<Hobby> hobbies = null;
             Object hobbiesObj = raw.get("hobbies");
