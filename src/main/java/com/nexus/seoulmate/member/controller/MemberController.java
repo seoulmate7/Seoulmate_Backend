@@ -22,7 +22,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.nexus.seoulmate.exception.status.ErrorStatus.*;
 import static com.nexus.seoulmate.exception.status.SuccessStatus.*;
 
 @RestController
@@ -212,7 +211,7 @@ public class MemberController {
     @GetMapping("/in-progress")
     private Response<Object> inProgress(HttpServletRequest request){
 
-        Object result = memberService.getUserStatus();
+        Object result = memberService.inProgress();
         String jsessionId = memberService.getSessionId(request);
         customOAuth2UserService.changeJsessionId(request);
 

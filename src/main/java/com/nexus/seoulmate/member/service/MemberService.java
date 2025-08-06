@@ -118,8 +118,8 @@ public class MemberService {
             System.out.println("GoogleInfo 저장 완료");
     }
 
-    // 현재 로그인한 사용자 정보 가져오기
-    public String getUserStatus() {
+    // 현재 로그인한 사용자의 학교 인증서 처리 상태 받기
+    public String inProgress() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof OAuth2User oAuth2User)) {
@@ -146,8 +146,45 @@ public class MemberService {
         return null;
     }
 
+    // 서버에서 JSESSIONID 추출하기
     public String getSessionId(HttpServletRequest request){
         return extractJsessionId(request);
+    }
+
+    // 현재 로그인한 사용자 정보 가져오기
+    public Member getCurrentUser() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof OAuth2User oAuth2User)) {
+            throw new CustomException(UNAUTHORIZED);
+        }
+
+        String email = oAuth2User.getAttribute("email");
+
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+    }
+
+    // 현재 로그인한 사용자의 이메일 가져오기
+    public String getCurrentUserEmail() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof OAuth2User oAuth2User)) {
+            throw new CustomException(UNAUTHORIZED);
+        }
+
+        return oAuth2User.getAttribute("email");
+    }
+
+    // 현재 로그인한 사용자의 Google ID 가져오기
+    public String getCurrentUserGoogleId() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof OAuth2User oAuth2User)) {
+            throw new CustomException(UNAUTHORIZED);
+        }
+
+        return oAuth2User.getAttribute("sub");
     }
 }
 
