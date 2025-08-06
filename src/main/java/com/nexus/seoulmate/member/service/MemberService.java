@@ -32,10 +32,9 @@ public class MemberService {
     private final GoogleInfoRepository googleInfoRepository;
 
     // 1. 프로필 생성
-    public void saveProfile(ProfileCreateRequest profileCreateRequest, MultipartFile profileImage){
-        String profileImageUrl = uploadProfileImage(profileCreateRequest.getGoogleId(), profileImage);
+    public void saveProfile(ProfileCreateRequest profileCreateRequest, String profileImageUrl, String googleId){
 
-        tempStorage.save(profileCreateRequest, profileImageUrl);
+        tempStorage.save(profileCreateRequest, profileImageUrl, googleId);
     }
 
     // 1-1. 프로필 이미지 업로드
@@ -47,29 +46,30 @@ public class MemberService {
 
     // 2. 언어 레벨 테스트
     // FluentProxyService 에서 진행
-    public void submitLevelTest(LevelTestRequest levelTestRequest){
+    public void submitLevelTest(LevelTestRequest levelTestRequest, String googleId){
 
-        tempStorage.save(levelTestRequest);
+        tempStorage.save(levelTestRequest, googleId);
     }
 
     // 3. 취미 선택
-    public void selectHobby(HobbyRequest hobbyRequest){
-        tempStorage.save(hobbyRequest);
+    public void selectHobby(HobbyRequest hobbyRequest, String googleId){
+        tempStorage.save(hobbyRequest, googleId);
     }
 
     // 4. 학교 인증
-    public void authUniv(UnivAuthRequest univAuthRequest){
-        tempStorage.save(univAuthRequest);
+    public void authUniv(UnivAuthDto univAuthRequest, String googleId){
+
+        tempStorage.save(univAuthRequest, googleId);
     }
 
-    // 1-1. 프로필 이미지 업로드
+    // 4-1. 학교 인증서 업로드
     public String uploadUnivCertificate(String googleId, MultipartFile profileImage) {
         // TODO: S3 업로드 로직 구현
         // 임시로 파일명 반환
         return "https://seoulmate-s3-bucket.s3.amazonaws.com/certificate/" + googleId + "/" + profileImage.getOriginalFilename();
     }
 
-        // 정보 다 합쳐서 회원가입 완료 + 모든 회원간의 궁합 생성하기
+    // 정보 다 합쳐서 회원가입 완료 + 모든 회원간의 궁합 생성하기
     public void completeSignup(String googleId, HttpServletRequest request) {
         MemberCreateRequest memberCreateRequest = tempStorage.collect(googleId);
 
