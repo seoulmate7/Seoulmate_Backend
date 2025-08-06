@@ -71,131 +71,136 @@ public class TempStorage {
     }
 
     // 2. 프로필 생성 정보 저장
-    public void save(ProfileCreateRequest dto, String profileImageUrl) {
-        String key = dto.getGoogleId();
+    public void save(ProfileCreateRequest dto, String profileImageUrl, String googleId) {
+        String key = googleId;
         Map<String, Object> map = Map.of(
                 "firstName", dto.getFirstName(),
                 "lastName", dto.getLastName(),
                 "DOB", dto.getDOB().toString(),
                 "bio", dto.getBio(),
                 "country", dto.getCountry(),
-                "profileImage", profileImageUrl
+                "profileImageUrl", profileImageUrl
         );
         redisTemplate.opsForHash().putAll(key, map);
     }
 
     // 3. 언어 테스트 정보 저장
-    public void save(LevelTestRequest dto) {
-        String key = dto.getGoogleId();
+    public void save(LevelTestRequest dto, String googleId) {
+        String key = googleId;
         redisTemplate.opsForHash().put(key, "languages", dto.getLanguages());
     }
 
     // 4. 취미 저장
-    public void save(HobbyRequest dto) {
-        String key = dto.getGoogleId();
+    public void save(HobbyRequest dto, String googleId) {
+        String key = googleId;
         redisTemplate.opsForHash().put(key, "hobbies", dto.getHobbies());
     }
 
     // 5. 학교 인증 신청
-    public void save(UnivAuthRequest dto) {
-        String key = dto.getGoogleId();
+    public void save(UnivAuthDto dto, String googleId) {
+        String key = googleId;
         Map<String, Object> map = Map.of(
                 "univ", dto.getUniversity(),
-                "univCertificate", dto.getUnivCertificate(),
-                "verificationStatus", dto.getVerificationStatus()
+                "univCertificate", dto.getUnivCertificateUrl(),
+                "verificationStatus", VerificationStatus.SUBMITTED
         );
         redisTemplate.opsForHash().putAll(key, map);
     }
 
     // 최종 데이터 취합
-    @SuppressWarnings("unchecked")
     public MemberCreateRequest collect(String googleId) {
         Map<Object, Object> raw = redisTemplate.opsForHash().entries(googleId);
-        MemberCreateRequest result = new MemberCreateRequest();
 
         try {
-            // googleId도 함께 설정
-            result.setGoogleId(googleId);
-            result.setEmail((String) raw.get("email"));
-            result.setFirstName((String) raw.get("firstName"));
-            result.setLastName((String) raw.get("lastName"));
-
+            String email = (String) raw.get("email");
+            String firstName = (String) raw.get("firstName");
+            String lastName = (String) raw.get("lastName");
+            
+            LocalDate dob = null;
             Object dobObj = raw.get("DOB");
             if (dobObj != null) {
-                result.setDOB(LocalDate.parse((String) dobObj));
+                dob = LocalDate.parse((String) dobObj);
             }
 
+            Countries country = null;
             Object countryObj = raw.get("country");
             if (countryObj instanceof Countries) {
-                result.setCountry((Countries) countryObj);
+                country = (Countries) countryObj;
             } else if (countryObj instanceof String countryStr) {
                 try {
-                    result.setCountry(Countries.valueOf(countryStr));
+                    country = Countries.valueOf(countryStr);
                 } catch (IllegalArgumentException e) {
                     System.out.println("잘못된 country 값: " + countryStr);
                 }
             }
 
-            result.setBio((String) raw.get("bio"));
-            result.setProfileImage((String) raw.get("profileImage"));
+            String bio = (String) raw.get("bio");
+            String profileImage = (String) raw.get("profileImage");
 
+            List<Hobby> hobbies = null;
             Object hobbiesObj = raw.get("hobbies");
             if (hobbiesObj instanceof List<?> list) {
-                List<Hobby> hobbies = list.stream()
+                hobbies = list.stream()
                         .filter(item -> item instanceof String)
                         .map(item -> Hobby.builder()
                                 .hobbyName((String) item)
                                 .hobbyCategory(HobbyCategory.HOBBY)
                                 .build())
                         .toList();
-                result.setHobbies(hobbies);
             }
 
-            result.setUnivCertificate((String) raw.get("univCertificate"));
+            String univCertificate = (String) raw.get("univCertificate");
 
+            University univ = null;
             Object univObj = raw.get("univ");
             if (univObj instanceof University) {
-                result.setUniv((University) univObj);
+                univ = (University) univObj;
             } else if (univObj instanceof String univStr) {
                 try {
-                    result.setUniv(University.valueOf(univStr));
+                    univ = University.valueOf(univStr);
                 } catch (IllegalArgumentException e) {
                     System.out.println("잘못된 university 값: " + univStr);
                 }
             }
 
+            Map<String, Integer> languages = null;
             Object langObj = raw.get("languages");
             if (langObj instanceof Map<?, ?> langMap) {
                 try {
-                    result.setLanguages((Map<String, Integer>) langMap);
+                    languages = (Map<String, Integer>) langMap;
                 } catch (ClassCastException e) {
                     System.out.println("languages 형변환 실패: " + langMap);
                 }
             }
 
+            VerificationStatus verificationStatus = null;
             Object verificationStatusObj = raw.get("verificationStatus");
             if (verificationStatusObj instanceof VerificationStatus) {
-                result.setVerificationStatus((VerificationStatus) verificationStatusObj);
+                verificationStatus = (VerificationStatus) verificationStatusObj;
             } else if (verificationStatusObj instanceof String vsStr) {
                 try {
-                    result.setVerificationStatus(VerificationStatus.valueOf(vsStr));
+                    verificationStatus = VerificationStatus.valueOf(vsStr);
                 } catch (IllegalArgumentException e) {
                     System.out.println("잘못된 verificationStatus 값: " + vsStr);
                 }
             }
 
+            AuthProvider authProvider = null;
             Object authProviderObj = raw.get("authProvider");
             if (authProviderObj instanceof AuthProvider) {
-                result.setAuthProvider((AuthProvider) authProviderObj);
+                authProvider = (AuthProvider) authProviderObj;
             } else if (authProviderObj instanceof String apStr) {
                 try {
-                    result.setAuthProvider(AuthProvider.valueOf(apStr));
+                    authProvider = AuthProvider.valueOf(apStr);
                 } catch (IllegalArgumentException e) {
                     System.out.println("잘못된 authProvider 값: " + apStr);
                 }
             }
 
-            return result;
+            // 생성자를 사용하여 MemberCreateRequest 객체 생성
+            return new MemberCreateRequest(googleId, email, firstName, lastName, dob, country, 
+                                        bio, profileImage, hobbies, univCertificate, univ, 
+                                        languages, verificationStatus, authProvider);
         } finally {
             redisTemplate.delete(googleId); // 성공/실패 관계없이 삭제
         }

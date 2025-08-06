@@ -29,40 +29,30 @@ import java.util.Optional;
 @Tag(name = "서울메이트", description = "서울메이트 메인 API")
 public class SeoulmateController {
 
-    private final MemberRepository memberRepository;
     private final MemberService memberService;
     private final CustomOAuth2UserService customOAuth2UserService;
 
-    @GetMapping("")
+    @GetMapping
     @Operation(summary = "서울메이트 메인페이지지 조회", description = "인증된 사용자의 서울메이트 메인 정보를 조회합니다.")
     @SecurityRequirement(name = "sessionId")
     public Response<Map<String, Object>> getSeoulmateInfo(HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
-        // 인증되지 않은 사용자 체크
-        if (authentication == null || !authentication.isAuthenticated() || 
-            !(authentication.getPrincipal() instanceof OAuth2User)) {
+        try {
+            Member currentUser = memberService.getCurrentUser();
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("email", currentUser.getEmail());
+            data.put("memberId", currentUser.getUserId());
+            data.put("role", currentUser.getRole());
+            data.put("schoolVerification", currentUser.getUnivVerification());
+
+            // JSESSIONID 쿠키 찾기
+            customOAuth2UserService.changeJsessionId(request);
+            String jsessionId = memberService.getSessionId(request);
+            data.put("jsessionId", "JSESSIONID=" + jsessionId);
+
+            return Response.success(SuccessStatus.SUCCESS, data);
+        } catch (Exception e) {
             return Response.fail(ErrorStatus.UNAUTHORIZED);
         }
-        
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        String email = oAuth2User.getAttribute("email");
-        Optional<Member> member = memberRepository.findByEmail(email);
-        
-        Map<String, Object> data = new HashMap<>();
-        data.put("email", email);
-
-        // JSESSIONID 쿠키 찾기
-        customOAuth2UserService.changeJsessionId(request);
-        String jsessionId = memberService.getSessionId(request);
-        
-        if (member.isPresent()) {
-            data.put("memberId", member.get().getUserId());
-            data.put("role", member.get().getRole());
-            data.put("schoolVerification", member.get().getUnivVerification());
-            data.put("jsessionId", "JSESSIONID=" + jsessionId);
-        }
-        
-        return Response.success(SuccessStatus.SUCCESS, data);
     }
-} 
+}

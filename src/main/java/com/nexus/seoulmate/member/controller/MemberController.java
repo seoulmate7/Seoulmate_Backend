@@ -11,6 +11,7 @@ import com.nexus.seoulmate.exception.Response;
 import com.nexus.seoulmate.exception.status.SuccessStatus;
 import com.nexus.seoulmate.member.dto.signup.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +20,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.nexus.seoulmate.exception.status.ErrorStatus.*;
 import static com.nexus.seoulmate.exception.status.SuccessStatus.*;
 
 @RestController
@@ -65,7 +66,6 @@ public class MemberController {
                         .sessionId("JSESSIONID=" + jsessionId)
                         .build();
 
-                // SignupResponse를 data로 반환
                 return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, dtoWithCookies);
             } else {
                 System.out.println("TempStorage에서 SignupResponse를 찾을 수 없습니다.");
@@ -82,12 +82,8 @@ public class MemberController {
     
     // 1-2. 프로필 생성 (DTO + 파일 동시 처리)
     @Operation(summary = "1. 프로필 생성 API")
-    @PostMapping("/create-profile")
-    public Response<Object> createProfile(@RequestParam("firstName") String firstName,
-                                        @RequestParam("lastName") String lastName,
-                                        @RequestParam("DOB") String DOB,
-                                        @RequestParam("country") String country,
-                                        @RequestParam("bio") String bio,
+    @PostMapping(value = "/create-profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Response<Object> createProfile(@RequestBody ProfileCreateRequest profileCreateRequest,
                                         @RequestPart(value = "profileImage") MultipartFile profileImage,
                                         @AuthenticationPrincipal OAuth2User oAuth2User){
         // 현재 로그인한 사용자의 googleId 가져오기
@@ -96,25 +92,14 @@ public class MemberController {
 
         String profileImageUrl = memberService.uploadProfileImage(googleId, profileImage);
         
-        // ProfileCreateRequest 객체 생성
-        ProfileCreateRequest requestWithGoogleId = ProfileCreateRequest.builder()
-                .googleId(googleId)
-                .firstName(firstName)
-                .lastName(lastName)
-                .DOB(java.time.LocalDate.parse(DOB))
-                .country(Countries.valueOf(country))
-                .bio(bio)
-                .profileImageUrl(profileImageUrl)
-                .build();
-        
-        memberService.saveProfile(requestWithGoogleId, profileImage);
+        memberService.saveProfile(profileCreateRequest, profileImageUrl, googleId);
         System.out.println("프로필 저장 완료");
         return Response.success(SuccessStatus.PROFILE_SUCCESS, null);
     }
 
     // 2. 언어 레벨 테스트 - 점수 받기 (FluentProxyService)
     @Operation(summary = "2-1. 언어 레벨 평가 API")
-    @GetMapping("/language/level-test")
+    @GetMapping(value = "/language/level-test", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<String> levelTest(@RequestPart("audioFile") MultipartFile audioFile,
                                       @RequestParam("language") Languages language) {
         System.out.println("=== 언어 레벨 테스트 요청 ===");
@@ -139,13 +124,7 @@ public class MemberController {
         // 현재 로그인한 사용자의 googleId 가져오기
         String googleId = getGoogleIdFromOAuth2User(oAuth2User);
         
-        // 새로운 객체 생성하여 googleId 설정
-        LevelTestRequest requestWithGoogleId = LevelTestRequest.builder()
-                .googleId(googleId)
-                .languages(levelTestRequest.getLanguages())
-                .build();
-        
-        memberService.submitLevelTest(requestWithGoogleId);
+        memberService.submitLevelTest(levelTestRequest, googleId);
         System.out.println("언어 레벨 테스트 점수 저장 완료");
         return Response.success(SUBMIT_LEVEL_TEST_SUCCESS, null);
     }
@@ -159,17 +138,14 @@ public class MemberController {
         // 현재 로그인한 사용자의 googleId 가져오기
         String googleId = getGoogleIdFromOAuth2User(oAuth2User);
         
-        // 새로운 객체 생성하여 googleId 설정
-        HobbyRequest requestWithGoogleId = new HobbyRequest(googleId, hobbyRequest.getHobbies());
-        
-        memberService.selectHobby(requestWithGoogleId);
+        memberService.selectHobby(hobbyRequest, googleId);
         System.out.println("취미 선택 저장 완료");
         return Response.success(SuccessStatus.HOBBY_SUCCESS, null);
     }
 
     // 4. 학교 인증 + 최종 회원가입
     @Operation(summary = "4. 학교 인증 및 회원가입 API")
-    @PostMapping("/school")
+    @PostMapping(value = "/school", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<Object> authUniv(@RequestParam("university") University university,
                                      @RequestPart(value = "univCertificate") MultipartFile univCertificate,
                                      @AuthenticationPrincipal OAuth2User oAuth2User,
@@ -179,17 +155,13 @@ public class MemberController {
         String googleId = getGoogleIdFromOAuth2User(oAuth2User);
 
         String univCertificateUrl = memberService.uploadUnivCertificate(googleId, univCertificate);
-        
-        // 새로운 객체 생성하여 googleId 설정
-        UnivAuthRequest requestWithGoogleId = UnivAuthRequest.builder()
-                .googleId(googleId)
+
+        UnivAuthDto univAuthDto = UnivAuthDto.builder()
                 .university(university)
-                .univCertificate(univCertificateUrl)
+                .univCertificateUrl(univCertificateUrl)
                 .build();
         
-        System.out.println("생성된 UnivAuthRequest: " + requestWithGoogleId);
-        
-        memberService.authUniv(requestWithGoogleId);
+        memberService.authUniv(univAuthDto, googleId);
         System.out.println("학교 인증 완료");
         
         memberService.completeSignup(googleId, request);
@@ -212,7 +184,7 @@ public class MemberController {
     @GetMapping("/in-progress")
     private Response<Object> inProgress(HttpServletRequest request){
 
-        Object result = memberService.getUserStatus();
+        Object result = memberService.inProgress();
         String jsessionId = memberService.getSessionId(request);
         customOAuth2UserService.changeJsessionId(request);
 

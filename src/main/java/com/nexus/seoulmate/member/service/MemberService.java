@@ -32,10 +32,9 @@ public class MemberService {
     private final GoogleInfoRepository googleInfoRepository;
 
     // 1. 프로필 생성
-    public void saveProfile(ProfileCreateRequest profileCreateRequest, MultipartFile profileImage){
-        String profileImageUrl = uploadProfileImage(profileCreateRequest.getGoogleId(), profileImage);
+    public void saveProfile(ProfileCreateRequest profileCreateRequest, String profileImageUrl, String googleId){
 
-        tempStorage.save(profileCreateRequest, profileImageUrl);
+        tempStorage.save(profileCreateRequest, profileImageUrl, googleId);
     }
 
     // 1-1. 프로필 이미지 업로드
@@ -47,29 +46,30 @@ public class MemberService {
 
     // 2. 언어 레벨 테스트
     // FluentProxyService 에서 진행
-    public void submitLevelTest(LevelTestRequest levelTestRequest){
+    public void submitLevelTest(LevelTestRequest levelTestRequest, String googleId){
 
-        tempStorage.save(levelTestRequest);
+        tempStorage.save(levelTestRequest, googleId);
     }
 
     // 3. 취미 선택
-    public void selectHobby(HobbyRequest hobbyRequest){
-        tempStorage.save(hobbyRequest);
+    public void selectHobby(HobbyRequest hobbyRequest, String googleId){
+        tempStorage.save(hobbyRequest, googleId);
     }
 
     // 4. 학교 인증
-    public void authUniv(UnivAuthRequest univAuthRequest){
-        tempStorage.save(univAuthRequest);
+    public void authUniv(UnivAuthDto univAuthRequest, String googleId){
+
+        tempStorage.save(univAuthRequest, googleId);
     }
 
-    // 1-1. 프로필 이미지 업로드
+    // 4-1. 학교 인증서 업로드
     public String uploadUnivCertificate(String googleId, MultipartFile profileImage) {
         // TODO: S3 업로드 로직 구현
         // 임시로 파일명 반환
         return "https://seoulmate-s3-bucket.s3.amazonaws.com/certificate/" + googleId + "/" + profileImage.getOriginalFilename();
     }
 
-        // 정보 다 합쳐서 회원가입 완료 + 모든 회원간의 궁합 생성하기
+    // 정보 다 합쳐서 회원가입 완료 + 모든 회원간의 궁합 생성하기
     public void completeSignup(String googleId, HttpServletRequest request) {
         MemberCreateRequest memberCreateRequest = tempStorage.collect(googleId);
 
@@ -118,8 +118,8 @@ public class MemberService {
             System.out.println("GoogleInfo 저장 완료");
     }
 
-    // 현재 로그인한 사용자 정보 가져오기
-    public String getUserStatus() {
+    // 현재 로그인한 사용자의 학교 인증서 처리 상태 받기
+    public String inProgress() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof OAuth2User oAuth2User)) {
@@ -146,8 +146,45 @@ public class MemberService {
         return null;
     }
 
+    // 서버에서 JSESSIONID 추출하기
     public String getSessionId(HttpServletRequest request){
         return extractJsessionId(request);
+    }
+
+    // 현재 로그인한 사용자 정보 가져오기
+    public Member getCurrentUser() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof OAuth2User oAuth2User)) {
+            throw new CustomException(UNAUTHORIZED);
+        }
+
+        String email = oAuth2User.getAttribute("email");
+
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+    }
+
+    // 현재 로그인한 사용자의 이메일 가져오기
+    public String getCurrentUserEmail() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof OAuth2User oAuth2User)) {
+            throw new CustomException(UNAUTHORIZED);
+        }
+
+        return oAuth2User.getAttribute("email");
+    }
+
+    // 현재 로그인한 사용자의 Google ID 가져오기
+    public String getCurrentUserGoogleId() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof OAuth2User oAuth2User)) {
+            throw new CustomException(UNAUTHORIZED);
+        }
+
+        return oAuth2User.getAttribute("sub");
     }
 }
 
