@@ -41,7 +41,6 @@ public class FriendConverter {
         return Friendship.builder()
                 .userId1(userId1)
                 .userId2(userId2)
-                .chemistry(0)
                 .build();
     }
 
@@ -66,7 +65,6 @@ public class FriendConverter {
                 .userId(friend.getUserId())
                 .name(friend.getFirstName() + " " + friend.getLastName())
                 .profileImage(friend.getProfileImage())
-                .chemistry(friendship.getChemistry())
                 .build();
     }
 
