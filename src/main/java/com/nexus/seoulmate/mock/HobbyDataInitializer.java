@@ -5,12 +5,17 @@ import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import com.nexus.seoulmate.member.repository.HobbyRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @Order(1)
 @RequiredArgsConstructor
@@ -31,22 +36,37 @@ public class HobbyDataInitializer {
 
     @PostConstruct
     public void init() {
+        log.info("취미 데이터 초기화 시작");
+        
+        // 모든 기존 조회
+        List<Hobby> existingHobbies = hobbyRepository.findAll();
+        Set<String> existingHobbyKeys = existingHobbies.stream()
+                .map(hobby -> hobby.getHobbyName() + ":" + hobby.getHobbyCategory())
+                .collect(Collectors.toSet());
+        
+        List<Hobby> hobbiesToSave = new ArrayList<>();
+        
+        // 모든 취미를 한 번에 처리
         for (Map.Entry<HobbyCategory, List<String>> entry : HOBBY_DATA.entrySet()) {
             HobbyCategory category = entry.getKey();
-            List<String> hobbies = entry.getValue();
+            List<String> hobbyNames = entry.getValue();
 
-            for (String hobbyName : hobbies) {
-                if (hobbyRepository.findByHobbyNameAndHobbyCategory(hobbyName, category).isEmpty()) {
-                    hobbyRepository.save(Hobby.builder()
+            for (String hobbyName : hobbyNames) {
+                String hobbyKey = hobbyName + ":" + category;
+                if (!existingHobbyKeys.contains(hobbyKey)) {
+                    hobbiesToSave.add(Hobby.builder()
                             .hobbyName(hobbyName)
                             .hobbyCategory(category)
                             .build());
-                    System.out.println("취미 리스트 생성 완료");
-                } else {
-                    System.out.println("취미 리스트가 이미 존재합니다.");
                 }
             }
         }
+        
+        if (!hobbiesToSave.isEmpty()) {
+            hobbyRepository.saveAll(hobbiesToSave);
+            log.info("취미 데이터 {}개 생성 완료", hobbiesToSave.size());
+        } else {
+            log.info("모든 취미 데이터가 이미 존재합니다.");
+        }
     }
-
 }
