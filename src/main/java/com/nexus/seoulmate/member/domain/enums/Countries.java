@@ -43,4 +43,14 @@ public enum Countries {
     public String getDisplayName() {
         return displayName;
     }
+
+    // 한글 표시명으로부터 enum을 찾는 메서드
+    public static Countries fromDisplayName(String displayName) {
+        for (Countries country : values()) {
+            if (country.getDisplayName().equals(displayName)) {
+                return country;
+            }
+        }
+        throw new IllegalArgumentException("지원하지 않는 국가입니다: " + displayName);
+    }
 }

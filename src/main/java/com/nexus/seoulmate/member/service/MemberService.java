@@ -32,9 +32,9 @@ public class MemberService {
     private final GoogleInfoRepository googleInfoRepository;
 
     // 1. 프로필 생성
-    public void saveProfile(ProfileCreateRequest profileCreateRequest, String profileImageUrl, String googleId){
+    public void saveProfile(ProfileCreateRequest profileCreateRequest, String googleId){
 
-        tempStorage.save(profileCreateRequest, profileImageUrl, googleId);
+        tempStorage.save(profileCreateRequest, googleId);
     }
 
     // 1-1. 프로필 이미지 업로드
