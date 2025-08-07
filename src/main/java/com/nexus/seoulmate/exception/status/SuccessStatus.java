@@ -1,5 +1,6 @@
 package com.nexus.seoulmate.exception.status;
 
+import com.google.api.Http;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpCookie;
@@ -23,8 +24,14 @@ public enum SuccessStatus {
     READ_MEETING_DETAIL(HttpStatus.OK, "MEETING200","모임 상세 조회에 성공했습니다."),
 
     // Search
-    SEARCH_SUCCESS(HttpStatus.OK, "COMMON202", "조회에 성공하였습니다.");
+    SEARCH_SUCCESS(HttpStatus.OK, "COMMON202", "조회에 성공하였습니다."),
 
+    // Payment
+    CREATE_ORDER(HttpStatus.CREATED, "ORDER201", "주문이 성공적으로 생성되었습니다."),
+    VERIFY_PAYMENT(HttpStatus.OK, "PAYMENT200", "결제 검증 성공."),
+    PAYMENT_WEBHOOK_RECEIVED(HttpStatus.OK, "PAYMENT_WEBHOOK200", "웹훅 수신 완료."),
+    GET_ORDER(HttpStatus.OK, "ORDER200", "주문 정보 조회에 성공했습니다."),
+    PAYMENT_SUCCESS(HttpStatus.OK, "PAYMENT200", "결제에 성공했습니다.");
 
     private final HttpStatus status;
     private final String code;

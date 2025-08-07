@@ -9,10 +9,13 @@ import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.Payment;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
@@ -21,12 +24,13 @@ public class PaymentService {
     private final OrderRepository orderRepository;
 
     // 결제 검증 (클라이언트에서 호출)
+    @Transactional
     public void verifyPayment(String impUid, String merchantUid){
         processPaymentValidation(impUid, merchantUid);
     }
 
     // 웹훅 처리
-    public void handelWebhook(WebhookPayload payload){
+    public void handleWebhook(WebhookPayload payload){
         processPaymentValidation(payload.getImp_uid(), payload.getMerchant_uid());
     }
 
@@ -52,6 +56,7 @@ public class PaymentService {
             }
 
         } catch (IamportResponseException | IOException e){
+            log.error("아임포트 API 호출 오류", e);
             throw new CustomException(ErrorStatus.IAMPORT_ERROR);
         }
     }

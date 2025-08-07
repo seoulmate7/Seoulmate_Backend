@@ -5,6 +5,7 @@ import com.nexus.seoulmate.exception.status.ErrorStatus;
 import com.nexus.seoulmate.meeting.domain.Meeting;
 import com.nexus.seoulmate.meeting.domain.repository.MeetingRepository;
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.order.domain.Order;
 import com.nexus.seoulmate.order.domain.OrderStatus;
 import com.nexus.seoulmate.order.domain.repository.OrderRepository;
@@ -17,9 +18,12 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final MeetingRepository meetingRepository;
+    private final MemberRepository memberRepository;
 
-    public Order createOrder(Long meetingId, Member member) {
-        // 모임 조회
+    public Order createOrder(Long meetingId, Long userId) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
+
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
