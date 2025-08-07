@@ -26,7 +26,10 @@ public class OrderController {
             @RequestHeader("userId") Long userId // 로그인 구현 후 수정 예정
     ){
         Order order = orderService.createOrder(meetingId, userId);
-        CreateOrderResDto resDto = new CreateOrderResDto(order.getOrderUid());
+        CreateOrderResDto resDto = new CreateOrderResDto(
+                order.getOrderUid(),
+                order.getMerchantUid(),
+                order.getAmount());
 
         return ResponseEntity
                 .status(SuccessStatus.CREATE_ORDER.getStatus())
@@ -34,10 +37,13 @@ public class OrderController {
     }
 
     @Operation(summary = "주문 단건 조회 API")
-    @PostMapping("/{orderUid}")
-    public ResponseEntity<Response<CreateOrderResDto>> getOrder(@PathVariable Long orderUid) {
-        Order order = orderService.getOrderByUid(orderUid.toString());
-        CreateOrderResDto resDto = new CreateOrderResDto(order.getOrderUid());
+    @GetMapping("/{orderUid}")
+    public ResponseEntity<Response<CreateOrderResDto>> getOrder(@PathVariable String orderUid) {
+        Order order = orderService.getOrderByUid(orderUid);
+        CreateOrderResDto resDto = new CreateOrderResDto(
+                order.getOrderUid(),
+                order.getMerchantUid(),
+                order.getAmount());
 
         return ResponseEntity
                 .ok(Response.success(SuccessStatus.GET_ORDER, resDto));

@@ -46,6 +46,8 @@ public class PaymentController {
     @Operation(summary = "웹훅 수신 API (아임포트에서 서버로)")
     @PostMapping("/webhook")
     public ResponseEntity<Response<Void>> handleWebhook(@RequestBody WebhookPayload payload) {
+        System.out.println("웹훅 수신: imp_uid = " + payload.getImp_uid());
+
         paymentService.handleWebhook(payload);
 
         return ResponseEntity

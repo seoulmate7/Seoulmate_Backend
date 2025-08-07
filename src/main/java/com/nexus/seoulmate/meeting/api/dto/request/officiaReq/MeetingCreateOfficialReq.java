@@ -29,6 +29,6 @@ public record MeetingCreateOfficialReq(
         @Schema(description = "호스트 메시지", example = "서울시와 함께하는 문화 소통의 시간!")
         String host_message,
 
-        @Schema(description = "참가비", example = "0")
+        @Schema(description = "참가비", example = "100")
         int price
 ) {}
