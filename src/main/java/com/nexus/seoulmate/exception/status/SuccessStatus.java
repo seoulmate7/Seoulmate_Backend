@@ -3,19 +3,28 @@ package com.nexus.seoulmate.exception.status;
 import com.google.api.Http;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
 public enum SuccessStatus {
     // SUCCESS 2XX
-    SUCCESS(HttpStatus.OK, "COMMON200", "요청이 성공적으로 처리되었습니다."),
-    CREATED(HttpStatus.CREATED, "COMMON201", "리소스가 성공적으로 생성되었습니다."),
+    SUCCESS(HttpStatus.OK, "COMMON 200", "요청이 성공적으로 처리되었습니다."),
+    CREATED(HttpStatus.CREATED, "COMMON 201", "리소스가 성공적으로 생성되었습니다."),
 
-    // 도메인별로
-    // 회원가입
-    LEVEL_TEST_SUCCESS(HttpStatus.OK, "SIGNUP 200", "레벨테스트 성공했습니다."),
+    // Member
+    GOOGLE_PROFILE_SUCCESS(HttpStatus.OK, "SIGNUP 200", "구글 회원가입 성공"),
+    PROFILE_INFO_SUCCESS(HttpStatus.OK, "SIGNUP 200", "프로필 기본 정보 불러오기 성공"),
+    PROFILE_SUCCESS(HttpStatus.OK, "SIGNUP 200", "프로필 생성 성공"),
+    PROFILE_IMAGE_UPLOAD_SUCCESS(HttpStatus.OK, "SIGNUP 200", "프로필 이미지 업로드 성공"),
+    LEVEL_TEST_SUCCESS(HttpStatus.OK, "FLUENT 200", "레벨테스트 성공"),
+    SUBMIT_LEVEL_TEST_SUCCESS(HttpStatus.OK, "SIGNUP 200", "레벨테스트 제출 성공"),
+    HOBBY_SUCCESS(HttpStatus.OK, "SIGNUP 200", "취미 선택 완료"),
+    // REGISTER_SUCCESS(HttpStatus.OK, "SIGNUP 200", "학교 인증 신청 성공"),
+    MEMBER_CREATED(HttpStatus.CREATED, "SIGNUP 201", "회원가입 성공"),
+    LOGIN_SUCCESS(HttpStatus.OK, "LOGIN 200", "로그인 성공"),
+    LOGOUT_SUCCESS(HttpStatus.OK, "LOGOUT 200", "로그아웃 성공"),
+
 
     // Meeting
     CREATE_MEETING(HttpStatus.CREATED, "MEETING201", "모임이 성공적으로 생성되었습니다."),
@@ -31,7 +40,15 @@ public enum SuccessStatus {
     VERIFY_PAYMENT(HttpStatus.OK, "PAYMENT200", "결제 검증 성공."),
     PAYMENT_WEBHOOK_RECEIVED(HttpStatus.OK, "PAYMENT_WEBHOOK200", "웹훅 수신 완료."),
     GET_ORDER(HttpStatus.OK, "ORDER200", "주문 정보 조회에 성공했습니다."),
-    PAYMENT_SUCCESS(HttpStatus.OK, "PAYMENT200", "결제에 성공했습니다.");
+    PAYMENT_SUCCESS(HttpStatus.OK, "PAYMENT200", "결제에 성공했습니다."),
+
+    // Friend
+    FRIEND_REQUEST_SENT(HttpStatus.CREATED, "FRIEND201", "친구 요청이 성공적으로 전송되었습니다."),
+    FRIEND_REQUEST_UPDATED(HttpStatus.OK, "FRIEND200", "친구 요청 상태가 성공적으로 업데이트되었습니다."),
+    FRIEND_REQUEST_LIST_FETCHED(HttpStatus.OK, "FRIEND200", "친구 요청 목록 조회 성공"),
+    FRIEND_LIST_FETCHED(HttpStatus.OK, "FRIEND200", "친구 목록 조회 성공"),
+    FRIEND_DETAIL_FETCHED(HttpStatus.OK, "FRIEND200", "사용자 상세 정보 조회 성공"),
+    FRIEND_DELETED(HttpStatus.OK,"FRIEND200", "친구 삭제가 완료되었습니다.");
 
     private final HttpStatus status;
     private final String code;

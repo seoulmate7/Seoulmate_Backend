@@ -1,4 +1,4 @@
-📌 프로젝트명: SeoulMate 
+📌 프로젝트명: SeoulMate
 
 > 언어 교류 기반 소셜 플랫폼의 백엔드 API
 

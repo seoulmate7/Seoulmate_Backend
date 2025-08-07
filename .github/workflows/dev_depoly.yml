@@ -7,6 +7,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     env:
       fluent.api.key: ${{ secrets.FLUENT_API_KEY }}
       fluent.api.username: ${{ secrets.FLUENT_API_USERNAME }}
@@ -29,13 +43,19 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" > ./application.yml
         shell: bash
 
+      - name: Make application-prod.yml
+        run: |
+          cd ./src/main/resources
+          echo "${{ secrets.APPLICATION_PROD_YML }}" > ./application-prod.yml
+        shell: bash
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: build
+          arguments: clean bootJar -Dspring.profiles.active=prod
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -49,7 +69,7 @@ jobs:
 
       steps:
           - name: Download build artifact
-            uses: actions/download-artifact@v3
+            uses: actions/download-artifact@v4
             with:
               name: seoulmateServer
               path: build/libs/
@@ -68,6 +88,6 @@ jobs:
               ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
               pgrep java | xargs -r kill -15 
               sleep 10
-              nohup java -jar /home/$EC2_USERNAME/seoulmateServer.jar > app.log 2>&1 & 
+              nohup java -jar -Dspring.profiles.active=prod /home/$EC2_USERNAME/seoulmateServer.jar > app.log 2>&1 &
               "
               rm -f private_key.pem
