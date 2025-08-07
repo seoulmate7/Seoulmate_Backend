@@ -66,4 +66,14 @@ public enum University {
     public String getDisplayName() {
         return displayName;
     }
+
+    // 한글 표시명으로부터 enum을 찾는 메서드
+    public static University fromDisplayName(String displayName) {
+        for (University university : values()) {
+            if (university.getDisplayName().equals(displayName)) {
+                return university;
+            }
+        }
+        throw new IllegalArgumentException("지원하지 않는 대학교입니다: " + displayName);
+    }
 }

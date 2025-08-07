@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,16 +75,20 @@ public class MemberController {
         } else {
             System.out.println("OAuth2User가 CustomOAuth2User 인스턴스가 아닙니다.");
         }
-        
+
         // SignupResponse가 없는 경우 빈 데이터 반환
         Map<String, Object> data = new HashMap<>();
         return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, data);
     }
-    
+
     // 1-2. 프로필 생성 (DTO + 파일 동시 처리)
     @Operation(summary = "1. 프로필 생성 API")
     @PostMapping(value = "/create-profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Response<Object> createProfile(@RequestBody ProfileCreateRequest profileCreateRequest,
+    public Response<Object> createProfile(@RequestParam("firstName") String firstName,
+                                        @RequestParam("lastName") String lastName,
+                                        @RequestParam("DOB") String DOB,
+                                        @RequestParam("country") String countryStr,
+                                        @RequestParam("bio") String bio,
                                         @RequestPart(value = "profileImage") MultipartFile profileImage,
                                         @AuthenticationPrincipal OAuth2User oAuth2User){
         // 현재 로그인한 사용자의 googleId 가져오기
@@ -91,21 +96,46 @@ public class MemberController {
         System.out.println("추출된 googleId: " + googleId);
 
         String profileImageUrl = memberService.uploadProfileImage(googleId, profileImage);
+
+        // String을 Countries enum으로 변환 (한글 표시명 또는 enum 상수명 모두 지원)
+        Countries country;
+        try {
+            // 먼저 enum 상수명으로 시도
+            country = Countries.valueOf(countryStr);
+        } catch (IllegalArgumentException e) {
+            // enum 상수명이 아니면 한글 표시명으로 시도
+            country = Countries.fromDisplayName(countryStr);
+        }
+
+        // ProfileCreateRequest 객체 생성
+        ProfileCreateRequest profileCreateRequest = new ProfileCreateRequest(
+                firstName, lastName, LocalDate.parse(DOB), country, bio, profileImageUrl
+        );
         
-        memberService.saveProfile(profileCreateRequest, profileImageUrl, googleId);
+        memberService.saveProfile(profileCreateRequest, googleId);
         System.out.println("프로필 저장 완료");
         return Response.success(SuccessStatus.PROFILE_SUCCESS, null);
     }
 
     // 2. 언어 레벨 테스트 - 점수 받기 (FluentProxyService)
     @Operation(summary = "2-1. 언어 레벨 평가 API")
-    @GetMapping(value = "/language/level-test", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/language/take-level-test", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<String> levelTest(@RequestPart("audioFile") MultipartFile audioFile,
-                                      @RequestParam("language") Languages language) {
+                                      @RequestParam("language") String languageStr) {
         System.out.println("=== 언어 레벨 테스트 요청 ===");
         System.out.println("업로드된 오디오 파일명: " + audioFile.getOriginalFilename());
         System.out.println("파일 크기: " + audioFile.getSize() + " bytes");
-        System.out.println("테스트 언어: " + language);
+        System.out.println("테스트 언어: " + languageStr);
+        
+        // String을 Languages enum으로 변환 (한글 표시명 또는 enum 상수명 모두 지원)
+        Languages language;
+        try {
+            // 먼저 enum 상수명으로 시도
+            language = Languages.valueOf(languageStr);
+        } catch (IllegalArgumentException e) {
+            // enum 상수명이 아니면 한글 표시명으로 시도
+            language = Languages.fromDisplayName(languageStr);
+        }
         
         String result = fluentProxyService.fluentFlow(audioFile, language);
         System.out.println("Fluent API 결과: " + result);
@@ -115,7 +145,7 @@ public class MemberController {
 
     // 2. 언어 레벨 테스트 - 점수 저장하기
     @Operation(summary = "2-2. 언어 레벨 평가 결과 전송 API")
-    @PostMapping("/language/level-test")
+    @PostMapping("/language/submit-level-test")
     public Response<Object> submitLevelTest(@RequestBody LevelTestRequest levelTestRequest,
                                           @AuthenticationPrincipal OAuth2User oAuth2User){
         System.out.println("=== 언어 레벨 테스트 점수 저장 요청 ===");
@@ -146,15 +176,25 @@ public class MemberController {
     // 4. 학교 인증 + 최종 회원가입
     @Operation(summary = "4. 학교 인증 및 회원가입 API")
     @PostMapping(value = "/school", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Response<Object> authUniv(@RequestParam("university") University university,
-                                     @RequestPart(value = "univCertificate") MultipartFile univCertificate,
-                                     @AuthenticationPrincipal OAuth2User oAuth2User,
-                                     HttpServletRequest request){
+    public Response<Object> authUniv(@RequestParam("university") String universityStr,
+                                    @RequestPart(value = "univCertificate") MultipartFile univCertificate,
+                                    @AuthenticationPrincipal OAuth2User oAuth2User,
+                                    HttpServletRequest request){
         
         // 현재 로그인한 사용자의 googleId 가져오기
         String googleId = getGoogleIdFromOAuth2User(oAuth2User);
 
         String univCertificateUrl = memberService.uploadUnivCertificate(googleId, univCertificate);
+
+        // String을 University enum으로 변환 (한글 표시명 또는 enum 상수명 모두 지원)
+        University university;
+        try {
+            // 먼저 enum 상수명으로 시도
+            university = University.valueOf(universityStr);
+        } catch (IllegalArgumentException e) {
+            // enum 상수명이 아니면 한글 표시명으로 시도
+            university = University.fromDisplayName(universityStr);
+        }
 
         UnivAuthDto univAuthDto = UnivAuthDto.builder()
                 .university(university)
