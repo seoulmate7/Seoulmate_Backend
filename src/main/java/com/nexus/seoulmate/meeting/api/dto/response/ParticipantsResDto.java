@@ -1,5 +1,7 @@
 package com.nexus.seoulmate.meeting.api.dto.response;
 
+import com.nexus.seoulmate.meeting.domain.Meeting;
+import com.nexus.seoulmate.member.domain.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -17,4 +19,20 @@ public record ParticipantsResDto(
 
         @Schema(description = "참여자 목록")
         List<ParticipantDto> participants
-){}
+){
+        public static ParticipantsResDto from(Meeting meeting, List<Member> members){
+                List<ParticipantDto> participantDto = members.stream()
+                        .map(member -> new ParticipantDto(
+                                member.getUserId(),
+                                member.getLastName() + member.getFirstName(),
+                                member.getProfileImage()
+                        ))
+                        .toList();
+                return new ParticipantsResDto(
+                        meeting.getId(),
+                        meeting.getTitle(),
+                        participantDto.size(),
+                        participantDto
+                );
+        }
+}

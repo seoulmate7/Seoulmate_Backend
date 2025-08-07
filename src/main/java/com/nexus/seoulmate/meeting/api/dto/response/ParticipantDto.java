@@ -8,6 +8,9 @@ public record ParticipantDto(
         Long userId,
 
         @Schema(description = "이름", example = "정다운")
-        String name
+        String name,
+
+        @Schema(description = "프로필 이미지", example = "https://cdn.seoulmate.com/profile/default.png")
+        String profileImageUrl
 ){
 }

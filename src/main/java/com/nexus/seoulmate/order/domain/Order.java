@@ -2,6 +2,7 @@ package com.nexus.seoulmate.order.domain;
 
 import com.nexus.seoulmate.meeting.domain.Meeting;
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.payment.domain.Payment;
 import jakarta.persistence.*;
 import lombok.*;
 import com.nexus.seoulmate.order.domain.OrderStatus;
@@ -47,6 +48,10 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
 
     // 생성
     public static Order create(Member member, Meeting meeting, int amount) {
