@@ -24,8 +24,7 @@ public class PaymentController {
         paymentService.verifyPayment(request.getImpUid(), request.getMerchantUid());
 
         return ResponseEntity
-                .status(SuccessStatus.VERIFY_PAYMENT.getStatus())
-                .body(Response.success(SuccessStatus.VERIFY_PAYMENT, null));
+                .ok(Response.success(SuccessStatus.VERIFY_PAYMENT, null));
     }
 
     @Operation(summary = "결제 결과 페이지")
@@ -51,8 +50,7 @@ public class PaymentController {
         paymentService.handleWebhook(payload);
 
         return ResponseEntity
-                .status(SuccessStatus.PAYMENT_WEBHOOK_RECEIVED.getStatus())
-                .body(Response.success(SuccessStatus.PAYMENT_WEBHOOK_RECEIVED, null));
+                .ok(Response.success(SuccessStatus.PAYMENT_WEBHOOK_RECEIVED, null));
     }
 
 }
