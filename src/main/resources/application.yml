@@ -32,6 +32,18 @@ spring:
         show_sql: true
     open-in-view: false
 
+  cloud:
+    aws:
+      s3:
+        bucket: seoulmate7
+      region:
+        static: ap-southeast-2
+      stack:
+        auto: false
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
+
   security:
     oauth2:
       client:
@@ -61,17 +73,7 @@ fluent:
     username: ${fluent.api.username}
     password: ${fluent.api.password}
 
-cloud:
-  aws:
-    s3:
-      bucket: seoulmate7
-    region:
-      static: ap-southeast-2
-    stack:
-      auto: false
-    credentials:
-      access-key: ${AWS_ACCESS_KEY_ID}
-      secret-key: ${AWS_SECRET_ACCESS_KEY}
+
 
 imp:
   api:
