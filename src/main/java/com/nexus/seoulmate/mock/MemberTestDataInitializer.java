@@ -63,7 +63,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
                     University.SOOKMYUNG,
                     languages1,
                     VerificationStatus.VERIFIED,
-                    AuthProvider.GOOGLE
+                    AuthProvider.LOCAL
             );
             membersToSave.add(member1);
         } else {
@@ -102,7 +102,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
                     University.YONSEI,
                     languages2,
                     VerificationStatus.VERIFIED,
-                    AuthProvider.GOOGLE
+                    AuthProvider.LOCAL
             );
             membersToSave.add(member2);
         } else {

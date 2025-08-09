@@ -23,6 +23,4 @@ public class Friendship extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id_2")
     private Member userId2;
-
-    private int chemistry;
 }

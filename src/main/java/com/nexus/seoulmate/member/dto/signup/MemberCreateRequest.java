@@ -5,15 +5,21 @@ import com.nexus.seoulmate.member.domain.enums.AuthProvider;
 import com.nexus.seoulmate.member.domain.enums.Countries;
 import com.nexus.seoulmate.member.domain.enums.University;
 import com.nexus.seoulmate.member.domain.enums.VerificationStatus;
-import lombok.Data;
+
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Getter;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-@Data
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class MemberCreateRequest {
 
+    private String googleId;
     private String email;
     private String firstName;
     private String lastName;
@@ -28,7 +34,7 @@ public class MemberCreateRequest {
     private String univCertificate;
     private University univ;
 
-    private Map<String, Integer> languages; // 언어 이름: 레벨
+    private Map<String, Integer> languages;
 
     private VerificationStatus verificationStatus; // 인증 여부
     private AuthProvider authProvider; // GOOGLE, KAKAO 등
