@@ -46,15 +46,15 @@ public class SecurityConfig {
                             // OAuth2User에서 이메일 추출
                             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
                             String email = oAuth2User.getAttribute("email");
-                            
+
                             // 이메일로 회원 조회
                             Optional<Member> member = memberRepository.findByEmail(email);
-                            
+
                             if (member.isPresent()) { // 회원가입된 사용자 (로그인 성공하면)
                                 if (member.get().getUnivVerification().equals(SUBMITTED)){
                                     response.sendRedirect("/signup/in-progress");
                                 } else {
-                                response.sendRedirect("/seoulmate");
+                                    response.sendRedirect("/seoulmate");
                                 }
                             } else { // 회원가입되지 않은 사용자는 기존 경로로 리디렉트
                                 response.sendRedirect("/signup/profile-info");

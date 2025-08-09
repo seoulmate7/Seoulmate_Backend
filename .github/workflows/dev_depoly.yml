@@ -85,20 +85,15 @@ jobs:
           echo "$EC2_SSH_KEY" > private_key.pem     
           chmod 600 private_key.pem
 
-          # jar 파일 찾고 이름 변경
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
-
-          echo "Ensure app directory exists"
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "mkdir -p /home/$EC2_USERNAME/app"
-
-          echo "Copying JAR as app.jar to EC2"
           scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/app/app.jar
 
-          echo "Restarting application on EC2"
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
-            pgrep java | xargs -r kill -15
-            sleep 10
-            nohup java -jar -Dspring.profiles.active=prod /home/$EC2_USERNAME/app/app.jar > /home/$EC2_USERNAME/app/app.log 2>&1 &
+          set -e
+          cd /home/$EC2_USERNAME/app
+          docker compose down
+          docker compose up -d --build
           "
 
           rm -f private_key.pem
