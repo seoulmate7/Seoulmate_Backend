@@ -21,6 +21,7 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
+
     env:
       fluent.api.key: ${{ secrets.FLUENT_API_KEY }}
       fluent.api.username: ${{ secrets.FLUENT_API_USERNAME }}
@@ -64,30 +65,40 @@ jobs:
           path: build/libs/*.jar
 
   deploy:
-      needs: build
-      runs-on: ubuntu-latest
+    needs: build
+    runs-on: ubuntu-latest
 
-      steps:
-          - name: Download build artifact
-            uses: actions/download-artifact@v4
-            with:
-              name: seoulmateServer
-              path: build/libs/
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: seoulmateServer
+          path: build/libs/
 
-          - name: Deploy to EC2
-            env:
-              EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-              EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
-              EC2_HOST: ${{ secrets.EC2_HOST }}
+      - name: Deploy to EC2 as app.jar
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
 
-            run:
-              echo "$EC2_SSH_KEY" > private_key.pem     
-              chmod 600 private_key.pem
-              jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
-              scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/seoulmateServer.jar
-              ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
-              pgrep java | xargs -r kill -15 
-              sleep 10
-              nohup java -jar -Dspring.profiles.active=prod /home/$EC2_USERNAME/seoulmateServer.jar > app.log 2>&1 &
-              "
-              rm -f private_key.pem
+        run: |
+          echo "$EC2_SSH_KEY" > private_key.pem     
+          chmod 600 private_key.pem
+
+          # jar 파일 찾고 이름 변경
+          jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
+
+          echo "Ensure app directory exists"
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "mkdir -p /home/$EC2_USERNAME/app"
+
+          echo "Copying JAR as app.jar to EC2"
+          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/app/app.jar
+
+          echo "Restarting application on EC2"
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
+            pgrep java | xargs -r kill -15
+            sleep 10
+            nohup java -jar -Dspring.profiles.active=prod /home/$EC2_USERNAME/app/app.jar > /home/$EC2_USERNAME/app/app.log 2>&1 &
+          "
+
+          rm -f private_key.pem
