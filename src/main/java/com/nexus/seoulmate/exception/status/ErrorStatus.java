@@ -1,5 +1,6 @@
 package com.nexus.seoulmate.exception.status;
 
+import com.google.api.Http;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,15 @@ public enum ErrorStatus {
     FRIEND_ALREADY(HttpStatus.BAD_REQUEST, "FRIEND4003", "이미 친구 상태입니다."),
     FRIEND_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "FRIEND4004", "해당 친구 요청을 찾을 수 없습니다."),
     FRIEND_REQUEST_ALREADY_HANDLED(HttpStatus.BAD_REQUEST, "FRIEND4005", "이미 처리된 친구 요청입니다."),
-    FRIEND_RELATION_NOT_FOUND(HttpStatus.NOT_FOUND, "FRIEND4006", "해당 사용자와의 친구 관계가 존재하지 않습니다.");
+    FRIEND_RELATION_NOT_FOUND(HttpStatus.NOT_FOUND, "FRIEND4006", "해당 사용자와의 친구 관계가 존재하지 않습니다."),
+
+    // Order & Payment
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER404", "주문을 찾을 수 없습니다."),
+    ALREADY_PARTICIPATED(HttpStatus.CONFLICT, "Order409", "이미 해당 모임에 참여한 사용자입니다."),
+    PAYMENT_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT500", "결제 요청 실패"),
+    AMOUNT_TAMPERED(HttpStatus.BAD_REQUEST, "PAYMENT400", "결제 금액이 일치하기 않습니다."),
+    PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "PAYMENT400", "결제가 실패했습니다."),
+    IAMPORT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT500", "아임포트 API 오류 발생");
 
     // MyPage
 

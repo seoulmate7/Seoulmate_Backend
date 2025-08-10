@@ -36,6 +36,6 @@ public record MeetingCreatePrivateReq(
         @Schema(description = "호스트 메시지", example = "자유롭게 대화 나눠요!")
         String host_message,
 
-        @Schema(description = "참가비", example = "5000")
+        @Schema(description = "참가비", example = "100")
         int price
 ) {}

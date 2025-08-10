@@ -24,13 +24,25 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         show_sql: true
     open-in-view: false
+
+  cloud:
+    aws:
+      s3:
+        bucket: seoulmate7
+      region:
+        static: ap-southeast-2
+      stack:
+        auto: false
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
 
   security:
     oauth2:
@@ -61,14 +73,10 @@ fluent:
     username: ${fluent.api.username}
     password: ${fluent.api.password}
 
-cloud:
-  aws:
-    s3:
-      bucket: seoulmate7
-    region:
-      static: ap-southeast-2
-    stack:
-      auto: false
-    credentials:
-      accessKey: ${AWS_ACCESS_KEY_ID}
-      secretKey: ${AWS_SECRET_ACCESS_KEY}
+
+
+imp:
+  api:
+    client-code: ${IMP_API_CLIENT_CODE}
+    key: ${IMP_API_KEY}
+    secret-key: ${IMP_API_SECRET_KEY}

@@ -5,7 +5,7 @@ WORKDIR /app
 COPY wait-for-it.sh /app/wait-for-it.sh
 RUN chmod +x /app/wait-for-it.sh
 
-COPY build/libs/*.jar app.jar
+COPY app.jar /app/app.jar
 
 EXPOSE 8080
 
