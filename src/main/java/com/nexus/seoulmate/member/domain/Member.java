@@ -53,7 +53,7 @@ public class Member {
     @CollectionTable(name = "MEMBER_LANGUAGE", joinColumns = @JoinColumn(name = "USER_ID"))
     @MapKeyColumn(name = "LANGUAGE")
     @Column(name = "LEVEL")
-    private Map<String, Integer> languages = new HashMap<>();
+    private Map<Languages, Integer> languages = new HashMap<>();
     // 언어 + 언어 레벨
 
     @ManyToMany
@@ -84,7 +84,7 @@ public class Member {
 
     public static Member createGoogleUser(String email, String firstName, String lastName,
                                         LocalDate DOB, Countries country, String bio, String profileImage, List<Hobby> hobbies,
-                                        String univCertificate, University univ, Map<String, Integer> languages,
+                                        String univCertificate, University univ, Map<Languages, Integer> languages,
                                         VerificationStatus verificationStatus, AuthProvider authProvider){
         Member user = new Member();
         user.email = email;

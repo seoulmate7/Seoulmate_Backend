@@ -78,18 +78,16 @@ public class FriendConverter {
             case NETHERLANDS -> "Dutch";
             case NEPAL -> "Nepali";
             case NORWAY -> "Norwegian";
-            case GERMANY -> "German";
+            case GERMANY, AUSTRIA -> "German";
             case RUSSIA -> "Russian";
             case MONGOLIA -> "Mongolian";
-            case USA -> "English";
+            case USA, AUSTRALIA, UK -> "English";
             case BANGLADESH -> "Bengali";
             case VIETNAM -> "Vietnamese";
             case BELGIUM -> "Dutch,French,German";
             case SWEDEN -> "Swedish";
             case SWITZERLAND -> "German,French,Italian";
             case SPAIN -> "Spanish";
-            case UK -> "English";
-            case AUSTRIA -> "German";
             case UZBEKISTAN -> "Uzbek";
             case ITALY -> "Italian";
             case INDIA -> "Hindi";
@@ -102,7 +100,6 @@ public class FriendConverter {
             case PAKISTAN -> "Urdu";
             case FRANCE -> "French";
             case PHILIPPINES -> "Filipino";
-            case AUSTRALIA -> "English";
             default -> "";
         };
 
