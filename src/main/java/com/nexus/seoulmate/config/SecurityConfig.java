@@ -5,6 +5,7 @@ import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.member.service.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -54,7 +55,7 @@ public class SecurityConfig {
                                 if (member.get().getUnivVerification().equals(SUBMITTED)){
                                     response.sendRedirect("/signup/in-progress");
                                 } else {
-                                    response.sendRedirect("/seoulmate");
+                                    response.sendRedirect("/home");
                                 }
                             } else { // 회원가입되지 않은 사용자는 기존 경로로 리디렉트
                                 response.sendRedirect("/signup/profile-info");
@@ -70,8 +71,7 @@ public class SecurityConfig {
                         // 인증 관련 경로들
                         .requestMatchers("/oauth2/**", "/login/**", "/signup/**", "/auth/status", "/auth/logout").permitAll()
                         // /seoulmate는 인증 필요
-                        .requestMatchers("/seoulmate/**").authenticated()
-                        // 그 외는 전부 로그인 필요
+                         .requestMatchers("/home/**").authenticated()
                         .anyRequest().authenticated());
 
         return http.build();

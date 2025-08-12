@@ -7,6 +7,7 @@ import com.nexus.seoulmate.meeting.api.dto.request.privateReq.MeetingUpdatePriva
 import com.nexus.seoulmate.meeting.api.dto.response.MeetingDetailPrivateRes;
 import com.nexus.seoulmate.meeting.application.privateMeeting.PrivateMeetingService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/meetings/private")
 @RequiredArgsConstructor
+@Tag(name = "private 모임(사설)")
 public class MeetingPrivateController {
 
     private final PrivateMeetingService privateMeetingService;

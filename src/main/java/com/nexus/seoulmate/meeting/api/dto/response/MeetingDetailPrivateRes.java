@@ -1,5 +1,7 @@
 package com.nexus.seoulmate.meeting.api.dto.response;
 
+import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
+
 public record MeetingDetailPrivateRes(
         Long id,
         String type,
@@ -7,6 +9,8 @@ public record MeetingDetailPrivateRes(
         String title,
         HostInfo host,
         String location,
+        HobbyCategory hobbyCategory,
+        String primaryHobbyName,
         String meeting_day,
         String start_time,
         int min_participants,
@@ -14,8 +18,7 @@ public record MeetingDetailPrivateRes(
         int current_participants,
         String language,
         String host_message,
-        int price,
-        int compatibility_score // 궁합 추가
+        int price
 ) {
     public record HostInfo(
             Long id,
