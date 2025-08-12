@@ -53,10 +53,12 @@ public class Member {
     @CollectionTable(name = "MEMBER_LANGUAGE", joinColumns = @JoinColumn(name = "USER_ID"))
     @MapKeyColumn(name = "LANGUAGE")
     @Column(name = "LEVEL")
+    @Builder.Default
     private Map<String, Integer> languages = new HashMap<>();
     // 언어 + 언어 레벨
 
     @ManyToMany
+    @Builder.Default
     private List<Hobby> hobbies = new ArrayList<>();
 
     @Column(nullable = false)
