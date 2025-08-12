@@ -2,6 +2,7 @@ package com.nexus.seoulmate.member.controller;
 
 import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.dto.CustomOAuth2User;
+import com.nexus.seoulmate.member.dto.InProgressResponse;
 import com.nexus.seoulmate.member.dto.OAuth2Response;
 import com.nexus.seoulmate.member.service.CustomOAuth2UserService;
 import com.nexus.seoulmate.member.service.FluentProxyService;
@@ -222,16 +223,11 @@ public class MemberController {
 
     @Operation(summary = "학교 인증 진행중 API", description = "아직 학교 인증이 진행중인 경우 리디렉션 경로")
     @GetMapping("/in-progress")
-    private Response<Object> inProgress(HttpServletRequest request){
+    private Response<InProgressResponse> inProgress(HttpServletRequest request){
 
-        Object result = memberService.inProgress();
-        String jsessionId = memberService.getSessionId(request);
-        customOAuth2UserService.changeJsessionId(request);
+        InProgressResponse inProgressResponse = memberService.inProgress(request);
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("univVerification", result);
-        data.put("jsessionId", "JSESSIONID=" + jsessionId);
-        return Response.success(SuccessStatus.SUCCESS, data);
+        return Response.success(SuccessStatus.SUCCESS, inProgressResponse);
 
     }
 }

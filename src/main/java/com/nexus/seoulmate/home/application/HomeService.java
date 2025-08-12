@@ -1,7 +1,5 @@
 package com.nexus.seoulmate.home.application;
 
-import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
 import com.nexus.seoulmate.home.api.dto.response.CategoryMeetingCountRes;
 import com.nexus.seoulmate.home.api.dto.response.HomeFeedRes;
 import com.nexus.seoulmate.home.api.dto.response.MeetingBasicInfoRes;
@@ -10,7 +8,9 @@ import com.nexus.seoulmate.meeting.domain.Meeting;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import com.nexus.seoulmate.member.domain.enums.University;
-import com.nexus.seoulmate.member.repository.MemberRepository;
+import com.nexus.seoulmate.member.service.CustomOAuth2UserService;
+import com.nexus.seoulmate.member.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,21 +20,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HomeService {
 
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
     private final MeetingHomeRepository meetingHomeRepository;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
-    public HomeFeedRes buildHome(Long userId) {
-        Member m = memberRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
+    public HomeFeedRes buildHome(HttpServletRequest request) {
+        Member member = memberService.getCurrentUser();
 
         // 학교
-        University univ = m.getUniv();
+        University univ = member.getUniv();
 
         // 본인 학교 이름이 제목에 포함된 official 모임 1개
         Meeting regular = meetingHomeRepository.findOfficialByTitleContainsUniversity(univ);
 
         // 사용자 취미 카테고리와 같은 모임 5개
-        List<Meeting> recommended = meetingHomeRepository.findRecommendedForUser(userId, 5);
+        List<Meeting> recommended = meetingHomeRepository.findRecommendedForUser(member.getUserId(), 5);
 
         // 카테고리 집계
         var categoryCounts = meetingHomeRepository.countAllGroupByCategory().stream()
@@ -45,11 +45,20 @@ public class HomeService {
         // 한국어 클래스
         List<Meeting> koreanClasses = meetingHomeRepository.findKoreanClasses(10);
 
+            // JSESSIONID 쿠키 찾기
+            customOAuth2UserService.changeJsessionId(request);
+            String jsessionId = memberService.getSessionId(request);
+
         return new HomeFeedRes(
                 toBasic(regular),
                 recommended.stream().map(this::toBasic).toList(),
                 categoryCounts,
-                koreanClasses.stream().map(this::toBasic).toList()
+                koreanClasses.stream().map(this::toBasic).toList(),
+                member.getEmail(),
+                member.getUserId(),
+                member.getRole(),
+                member.getUnivVerification(),
+                "JSESSIONID=" + jsessionId
         );
     }
 
