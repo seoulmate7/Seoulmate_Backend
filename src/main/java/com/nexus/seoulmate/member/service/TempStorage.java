@@ -163,11 +163,11 @@ public class TempStorage {
                 }
             }
 
-            Map<String, Integer> languages = null;
+            Map<Languages, Integer> languages = null;
             Object langObj = raw.get("languages");
             if (langObj instanceof Map<?, ?> langMap) {
                 try {
-                    languages = (Map<String, Integer>) langMap;
+                    languages = (Map<Languages, Integer>) langMap;
                 } catch (ClassCastException e) {
                     System.out.println("languages 형변환 실패: " + langMap);
                 }

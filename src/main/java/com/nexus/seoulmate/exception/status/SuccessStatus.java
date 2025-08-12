@@ -24,7 +24,6 @@ public enum SuccessStatus {
     LOGIN_SUCCESS(HttpStatus.OK, "LOGIN 200", "로그인 성공"),
     LOGOUT_SUCCESS(HttpStatus.OK, "LOGOUT 200", "로그아웃 성공"),
 
-
     // Meeting
     CREATE_MEETING(HttpStatus.CREATED, "MEETING201", "모임이 성공적으로 생성되었습니다."),
     UPDATE_MEETING(HttpStatus.OK, "MEETING200","모임이 성공적으로 수정되었습니다."),
@@ -48,7 +47,15 @@ public enum SuccessStatus {
     FRIEND_REQUEST_LIST_FETCHED(HttpStatus.OK, "FRIEND200", "친구 요청 목록 조회 성공"),
     FRIEND_LIST_FETCHED(HttpStatus.OK, "FRIEND200", "친구 목록 조회 성공"),
     FRIEND_DETAIL_FETCHED(HttpStatus.OK, "FRIEND200", "사용자 상세 정보 조회 성공"),
-    FRIEND_DELETED(HttpStatus.OK,"FRIEND200", "친구 삭제가 완료되었습니다.");
+    FRIEND_DELETED(HttpStatus.OK,"FRIEND200", "친구 삭제가 완료되었습니다."),
+
+    // MyPage
+    MY_PAGE_FETCH_SUCCESS(HttpStatus.OK, "MYPAGE 200", "마이페이지 조회 성공"),
+    PROFILE_IMAGE_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "프로필 이미지 수정 성공"),
+    PROFILE_BIO_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "프로필 한 줄 소개 수정 성공"),
+    HOBBY_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "취미 수정 성공"),
+    LANGUAGE_LEVEL_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "언어 레벨 수정 성공");
+
 
     private final HttpStatus status;
     private final String code;

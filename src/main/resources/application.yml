@@ -73,8 +73,6 @@ fluent:
     username: ${fluent.api.username}
     password: ${fluent.api.password}
 
-
-
 imp:
   api:
     client-code: ${IMP_API_CLIENT_CODE}

@@ -1,10 +1,7 @@
 package com.nexus.seoulmate.member.dto.signup;
 
 import com.nexus.seoulmate.member.domain.Hobby;
-import com.nexus.seoulmate.member.domain.enums.AuthProvider;
-import com.nexus.seoulmate.member.domain.enums.Countries;
-import com.nexus.seoulmate.member.domain.enums.University;
-import com.nexus.seoulmate.member.domain.enums.VerificationStatus;
+import com.nexus.seoulmate.member.domain.enums.*;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -34,7 +31,7 @@ public class MemberCreateRequest {
     private String univCertificate;
     private University univ;
 
-    private Map<String, Integer> languages;
+    private Map<Languages, Integer> languages;
 
     private VerificationStatus verificationStatus; // 인증 여부
     private AuthProvider authProvider; // GOOGLE, KAKAO 등

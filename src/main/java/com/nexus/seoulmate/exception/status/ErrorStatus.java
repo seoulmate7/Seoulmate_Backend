@@ -59,6 +59,10 @@ public enum ErrorStatus {
     PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "PAYMENT400", "결제가 실패했습니다."),
     IAMPORT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT500", "아임포트 API 오류 발생");
 
+    // MyPage
+
+
+
     private final HttpStatus status;
     private final String code;
     private final String message;

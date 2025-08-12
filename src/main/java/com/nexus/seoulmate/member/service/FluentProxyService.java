@@ -55,7 +55,6 @@ public class FluentProxyService {
 
         // 4. 채점 요청 및 결과 받기
         String result = getScore(xAccessToken, postId, audioUrl);
-        // Todo : 이걸 회원가입 dto 에 저장하기
 
         return result;
     }
