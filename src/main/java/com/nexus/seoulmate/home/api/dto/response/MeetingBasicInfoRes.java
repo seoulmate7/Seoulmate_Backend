@@ -1,6 +1,6 @@
-package com.nexus.seoulmate.meeting.api.dto.response;
+package com.nexus.seoulmate.home.api.dto.response;
 
-public record MeetingListRes(
+public record MeetingBasicInfoRes(
         Long id,
         String type,
         String image,

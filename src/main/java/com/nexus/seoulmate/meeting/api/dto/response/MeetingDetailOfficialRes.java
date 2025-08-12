@@ -11,7 +11,6 @@ public record MeetingDetailOfficialRes(
         int max_participants,
         int current_participants,
         String host_message,
-        int price,
-        int compatibility_score // 궁합 추가
+        int price
 ) {
 }

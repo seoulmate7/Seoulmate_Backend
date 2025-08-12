@@ -21,10 +21,6 @@ public class MeetingSearchServiceImpl implements MeetingSearchService{
     public List<MeetingListRes> searchMeetings(MeetingSearchReq req){
         List<Meeting> meetings = meetingRepository.findBySearchCondition(req);
 
-        if(meetings.isEmpty()){
-            throw new CustomException(ErrorStatus.MEETING_NOT_FOUND);
-        }
-
         return meetings.stream()
                 .map(m -> new MeetingListRes(
                         m.getId(),
@@ -32,8 +28,7 @@ public class MeetingSearchServiceImpl implements MeetingSearchService{
                         m.getImage(),
                         m.getTitle(),
                         m.getMeetingDay().toString(),
-                        m.getStartTime().toString(),
-                        0 // 추후 궁합 계산 로직 삽입
+                        m.getStartTime().toString()
                 ))
                 .toList();
 
