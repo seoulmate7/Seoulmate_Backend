@@ -24,21 +24,23 @@ public enum Languages {
 
     private final String displayName;
 
-    Languages(String displayName){
+    Languages(String displayName) {
         this.displayName = displayName;
     }
 
     @JsonValue
-    public String getDisplayName(){
+    public String getDisplayName() {
         return displayName;
     }
 
     // 역직렬화
     @JsonCreator
-    public static Languages fromDisplayName(String input){
-        return Stream.of(Languages.values())
-                .filter(lang -> lang.displayName.equalsIgnoreCase(input) || lang.name().equalsIgnoreCase(input))
-                .findFirst()
-                .orElseThrow(() -> new CustomException(ErrorStatus.INVALID_LANGUAGE));
+    public static Languages fromDisplayName(String input) {
+        for (Languages l : values()) {
+            if (l.getDisplayName().equalsIgnoreCase(input) || l.name().equalsIgnoreCase(input)) {
+                return l;
+            }
+        }
+        throw new CustomException(ErrorStatus.INVALID_LANGUAGE, input);
     }
 }

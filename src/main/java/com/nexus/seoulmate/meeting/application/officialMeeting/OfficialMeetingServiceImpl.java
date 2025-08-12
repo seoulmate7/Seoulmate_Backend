@@ -1,6 +1,7 @@
 package com.nexus.seoulmate.meeting.application.officialMeeting;
 
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.domain.enums.Languages;
 import com.nexus.seoulmate.member.domain.enums.Role;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.exception.CustomException;
@@ -44,6 +45,10 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
         LocalDate meetingDay = LocalDate.parse(req.meeting_day(), dateTimeFormatter);
         LocalTime startTime = LocalTime.parse(req.start_time());
 
+        // official은 언어 제한 없음
+        Languages meetingLang = null;
+        Integer hostLangLevel = null;
+
         Meeting meeting = Meeting.builder()
                 .meetingType(MeetingType.OFFICIAL)
                 .meetingDay(meetingDay)
@@ -52,12 +57,11 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
                 .maxParticipants(req.max_participants())
                 .currentParticipants(0) // 기본값 0
                 .price(req.price())
-                .category(req.category())
                 .image(req.image())
                 .title(req.title())
                 .hostMessage(req.host_message())
-                .language(null) // official은 언어 제한 없음
-                .languageLevel(null) // 추후 연결
+                .language(meetingLang) // official은 언어 제한 없음
+                .languageLevel(hostLangLevel) //
                 .userId(member)
                 .build();
 
@@ -65,6 +69,7 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
         return Response.success(SuccessStatus.CREATE_MEETING, meeting.getId());
     }
 
+    @Transactional(readOnly = true)
     public Response<MeetingDetailOfficialRes> getOfficialMeetingDetail(Long meetingId) {
         Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
@@ -72,8 +77,6 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
         if(meeting.getMeetingType() != MeetingType.OFFICIAL){
             throw new CustomException(ErrorStatus.INVALID_MEETING_TYPE);
         }
-
-        int compatibilityScore = 85; // 추후 알고리즘 개발 후 수정
 
         MeetingDetailOfficialRes dto = new MeetingDetailOfficialRes(
                 meeting.getId(),
@@ -86,8 +89,7 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
                 meeting.getMaxParticipants(),
                 meeting.getCurrentParticipants(),
                 meeting.getHostMessage(),
-                meeting.getPrice(),
-                compatibilityScore
+                meeting.getPrice()
         );
         return Response.success(SuccessStatus.READ_MEETING_DETAIL, dto);
     }
@@ -115,7 +117,6 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
                     req.title(),
                     req.image(),
                     req.location(),
-                    req.category(),
                     meetingDay,
                     startTime,
                     req.max_participants(),

@@ -7,6 +7,7 @@ import com.nexus.seoulmate.payment.api.dto.WebhookPayload;
 import com.nexus.seoulmate.payment.api.dto.request.PaymentVerifyRequest;
 import com.nexus.seoulmate.payment.application.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/payment")
+@Tag(name = "결제")
 public class PaymentController {
 
     private final PaymentService paymentService;

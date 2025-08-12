@@ -7,6 +7,7 @@ import com.nexus.seoulmate.order.api.dto.response.CreateOrderResDto;
 import com.nexus.seoulmate.order.application.OrderService;
 import com.nexus.seoulmate.order.domain.Order;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/orders")
+@Tag(name = "주문")
 public class OrderController {
 
     private final OrderService orderService;
