@@ -31,7 +31,7 @@ public record MeetingCreatePrivateReq(
         @Schema(description = "최대 인원", example = "6")
         int max_participants,
 
-        @Schema(description = "사용 언어", example = "FRENCH")
+        @Schema(description = "사용 언어", example = "한국어")
         Languages language,
 
         @Schema(description = "호스트 메시지", example = "자유롭게 대화 나눠요!")

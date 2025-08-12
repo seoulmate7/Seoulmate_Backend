@@ -6,6 +6,7 @@ import com.nexus.seoulmate.meeting.api.dto.request.MeetingSearchReq;
 import com.nexus.seoulmate.meeting.api.dto.response.MeetingListRes;
 import com.nexus.seoulmate.meeting.application.search.MeetingSearchService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/meetings")
 @RequiredArgsConstructor
+@Tag(name = "모임 검색")
 public class MeetingSearchController {
 
     private final MeetingSearchService meetingSearchService;

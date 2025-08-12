@@ -7,6 +7,7 @@ import com.nexus.seoulmate.meeting.api.dto.request.officiaReq.MeetingUpdateOffic
 import com.nexus.seoulmate.meeting.api.dto.response.MeetingDetailOfficialRes;
 import com.nexus.seoulmate.meeting.application.officialMeeting.OfficialMeetingService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/meetings/official")
 @RequiredArgsConstructor
+@Tag(name = "official 모임(정기)")
 public class MeetingOfficialController {
 
     private final OfficialMeetingService officialMeetingService;

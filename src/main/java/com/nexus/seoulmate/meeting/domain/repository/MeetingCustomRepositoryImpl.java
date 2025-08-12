@@ -28,7 +28,12 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository{
 
         // 카테고리
         if(req.hobbyCategory() != null){
-            queryBuilder.append(" AND m.hobbyCategory = :category");
+            queryBuilder.append("""
+                    AND (
+                           m.hobbyCategory = :category
+                        OR (m.primaryHobby IS NOT NULL AND m.primaryHobby.hobbyCategory = :category)
+                    )
+                """);
             params.put("category", req.hobbyCategory());
         }
 
@@ -52,7 +57,12 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository{
         if(req.minLevel() != null || req.maxLevel() != null){
             int min = Math.min(minLv, maxLv);
             int max = Math.max(minLv, maxLv);
-            queryBuilder.append(" AND (m.meetingType = :privateType2 AND (m.languageLevel BETWEEN :minLevel AND :maxLevel))");
+            queryBuilder.append("""
+                    AND (
+                          m.meetingType <> :privateType2
+                       OR (m.languageLevel IS NULL OR m.languageLevel BETWEEN :minLevel AND :maxLevel)
+                    )
+                """);
             params.put("privateType2", MeetingType.PRIVATE);
             params.put("minLevel", min);
             params.put("maxLevel", max);
