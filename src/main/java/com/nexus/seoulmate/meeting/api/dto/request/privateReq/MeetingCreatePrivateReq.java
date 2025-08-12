@@ -16,8 +16,8 @@ public record MeetingCreatePrivateReq(
         @Schema(description = "장소", example = "여의도 한강공원")
         String location,
 
-        @Schema(description = "카테고리", example = "스포츠")
-        HobbyCategory hobbyCategory,
+        @Schema(description = "상세 카테고리(관심사)", example = "축구")
+        String primaryHobbyName,
 
         @Schema(description = "모임 날짜 (dd/MM/yyyy)", example = "28/07/2025")
         String meeting_day,

@@ -1,5 +1,6 @@
 package com.nexus.seoulmate.meeting.domain;
 
+import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import com.nexus.seoulmate.member.domain.enums.Languages;
@@ -34,8 +35,12 @@ public class Meeting {
     private Member userId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "hobby_category", nullable = false)
+    @Column(name = "hobby_category", nullable = true) // official은 카테고리 없어도 가능
     private HobbyCategory hobbyCategory;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "primary_hobby_id", nullable = true)
+    private Hobby primaryHobby;
 
     @Column(name = "meeting_day")
     private LocalDate meetingDay;
@@ -94,13 +99,12 @@ public class Meeting {
     }
 
     // official 모임 update 메서드
-    public void updateOfficialMeeting(String title, String image, String location, HobbyCategory hobbyCategory ,
+    public void updateOfficialMeeting(String title, String image, String location,
                                       LocalDate meetingDay, LocalTime startTime,
                                       int maxParticipants, String hostMessage, int price){
         this.title = title;
         this.image = image;
         this.location = location;
-        this.hobbyCategory = hobbyCategory;
         this.meetingDay = meetingDay;
         this.startTime = startTime;
         this.maxParticipants = maxParticipants;
@@ -111,5 +115,9 @@ public class Meeting {
     // 언어레벨 업데이트
     public void updateLanguageLevel(Integer languageLevel){
         this.languageLevel = languageLevel;
+    }
+
+    public void updatePrimaryHobby(Hobby hobby){
+        this.primaryHobby = hobby;
     }
 }

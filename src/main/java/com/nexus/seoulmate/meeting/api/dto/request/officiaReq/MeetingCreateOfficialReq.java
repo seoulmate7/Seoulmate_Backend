@@ -15,9 +15,6 @@ public record MeetingCreateOfficialReq(
         @Schema(description = "장소", example = "서울시청 앞 광장")
         String location,
 
-        @Schema(description = "카테고리", example = "파티")
-        HobbyCategory hobbyCategory,
-
         @Schema(description = "모임 날짜 (dd/MM/yyyy)", example = "30/07/2025")
         String meeting_day,
 

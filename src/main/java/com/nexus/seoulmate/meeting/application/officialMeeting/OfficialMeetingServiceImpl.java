@@ -1,7 +1,6 @@
 package com.nexus.seoulmate.meeting.application.officialMeeting;
 
 import com.nexus.seoulmate.member.domain.Member;
-import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import com.nexus.seoulmate.member.domain.enums.Languages;
 import com.nexus.seoulmate.member.domain.enums.Role;
 import com.nexus.seoulmate.member.repository.MemberRepository;
@@ -46,9 +45,6 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
         LocalDate meetingDay = LocalDate.parse(req.meeting_day(), dateTimeFormatter);
         LocalTime startTime = LocalTime.parse(req.start_time());
 
-        // 카테고리 enum
-        HobbyCategory hobbyCategory = req.hobbyCategory();
-
         // official은 언어 제한 없음
         Languages meetingLang = null;
         Integer hostLangLevel = null;
@@ -61,7 +57,6 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
                 .maxParticipants(req.max_participants())
                 .currentParticipants(0) // 기본값 0
                 .price(req.price())
-                .hobbyCategory(hobbyCategory)
                 .image(req.image())
                 .title(req.title())
                 .hostMessage(req.host_message())
@@ -118,13 +113,10 @@ public class OfficialMeetingServiceImpl implements OfficialMeetingService {
         LocalDate meetingDay = LocalDate.parse(req.meeting_day(), dateTimeFormatter);
         LocalTime startTime = LocalTime.parse(req.start_time());
 
-        HobbyCategory hobbyCategory = req.hobbyCategory();
-
             meeting.updateOfficialMeeting(
                     req.title(),
                     req.image(),
                     req.location(),
-                    hobbyCategory,
                     meetingDay,
                     startTime,
                     req.max_participants(),

@@ -1,9 +1,11 @@
 package com.nexus.seoulmate.meeting.application.privateMeeting;
 
+import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import com.nexus.seoulmate.member.domain.enums.Languages;
 import com.nexus.seoulmate.member.domain.enums.Role;
+import com.nexus.seoulmate.member.repository.HobbyRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.exception.Response;
@@ -30,6 +32,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
 
     private final MeetingRepository meetingRepository;
     private final MemberRepository memberRepository;
+    private final HobbyRepository hobbyRepository;
 
     @Override
     @Transactional
@@ -45,8 +48,18 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
         LocalDate meetingDay = LocalDate.parse(req.meeting_day(), formatter);
         LocalTime startTime = LocalTime.parse(req.start_time());
 
-        // 카테고리 enum
-        HobbyCategory hobbyCategory = req.hobbyCategory();
+
+        // 세부 취미 조회
+        String raw = req.primaryHobbyName();
+        if(raw == null || raw.isBlank()) {
+            throw new CustomException(ErrorStatus.HOBBY_NOT_FOUND);
+        }
+        String name = raw.trim();
+
+        Hobby primaryHobby = hobbyRepository.findByHobbyNameIgnoreCase(name)
+                .orElseThrow(() -> new CustomException(ErrorStatus.HOBBY_NOT_FOUND));
+
+        HobbyCategory hobbyCategory = primaryHobby.getHobbyCategory();
 
         // 언어와 호스트 언어 레벨 연동
         Languages meetingLang = req.language(); // null값 허용하지 않음
@@ -64,7 +77,8 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
                 .maxParticipants(req.max_participants())
                 .currentParticipants(0)
                 .price(req.price())
-                .hobbyCategory(hobbyCategory)
+                .hobbyCategory(hobbyCategory) // 자동 세팅
+                .primaryHobby(primaryHobby) // 세부 취미 연결
                 .image(req.image())
                 .title(req.title())
                 .hostMessage(req.host_message())
@@ -100,6 +114,8 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
                         host.getProfileImage()
                 ),
                 meeting.getLocation(),
+                meeting.getHobbyCategory(),
+                meeting.getPrimaryHobby().getHobbyName(),
                 meeting.getMeetingDay().toString(),
                 meeting.getStartTime().toString(),
                 meeting.getMinParticipants(),
@@ -129,7 +145,16 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
         LocalDate meetingDay = LocalDate.parse(req.meeting_day(), formatter);
         LocalTime startTime = LocalTime.parse(req.start_time());
 
-        HobbyCategory hobbyCategory = req.hobbyCategory();
+        // 세부 취미 재조회
+        String raw = req.primaryHobbyName();
+        if (raw == null || raw.isBlank()) {
+            throw new CustomException(ErrorStatus.HOBBY_NOT_FOUND);
+        }
+        String name = raw.trim();
+
+        Hobby primaryHobby = hobbyRepository.findByHobbyNameIgnoreCase(name)
+                .orElseThrow(() -> new CustomException(ErrorStatus.HOBBY_NOT_FOUND));
+        HobbyCategory hobbyCategory = primaryHobby.getHobbyCategory();
 
         // 언어와 언어 레벨 갱신
         Languages meetingLang = req.language();
@@ -152,6 +177,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
                 req.price()
         );
 
+        meeting.updatePrimaryHobby(primaryHobby);
         // 언어 레벨도 갱신
         meeting.updateLanguageLevel(hostLangLevel);
 
