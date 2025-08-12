@@ -34,39 +34,39 @@ public class HobbyDataInitializer {
             HobbyCategory.MUSIC, List.of("10년대", "팝송", "EDM", "하우스", "J-pop", "K-pop", "R&B", "레게", "락", "재즈", "인디", "힙합", "오페라", "클래식")
     );
 
-    @PostConstruct
-    public void init() {
-        log.info("취미 데이터 초기화 시작");
-
-        // 모든 기존 조회
-        List<Hobby> existingHobbies = hobbyRepository.findAll();
-        Set<String> existingHobbyKeys = existingHobbies.stream()
-                .map(hobby -> hobby.getHobbyName() + ":" + hobby.getHobbyCategory())
-                .collect(Collectors.toSet());
-
-        List<Hobby> hobbiesToSave = new ArrayList<>();
-
-        // 모든 취미를 한 번에 처리
-        for (Map.Entry<HobbyCategory, List<String>> entry : HOBBY_DATA.entrySet()) {
-            HobbyCategory category = entry.getKey();
-            List<String> hobbyNames = entry.getValue();
-
-            for (String hobbyName : hobbyNames) {
-                String hobbyKey = hobbyName + ":" + category;
-                if (!existingHobbyKeys.contains(hobbyKey)) {
-                    hobbiesToSave.add(Hobby.builder()
-                            .hobbyName(hobbyName)
-                            .hobbyCategory(category)
-                            .build());
-                }
-            }
-        }
-
-        if (!hobbiesToSave.isEmpty()) {
-            hobbyRepository.saveAll(hobbiesToSave);
-            log.info("취미 데이터 {}개 생성 완료", hobbiesToSave.size());
-        } else {
-            log.info("모든 취미 데이터가 이미 존재합니다.");
-        }
-    }
+//    @PostConstruct
+//    public void init() {
+//        log.info("취미 데이터 초기화 시작");
+//
+//        // 모든 기존 조회
+//        List<Hobby> existingHobbies = hobbyRepository.findAll();
+//        Set<String> existingHobbyKeys = existingHobbies.stream()
+//                .map(hobby -> hobby.getHobbyName() + ":" + hobby.getHobbyCategory())
+//                .collect(Collectors.toSet());
+//
+//        List<Hobby> hobbiesToSave = new ArrayList<>();
+//
+//        // 모든 취미를 한 번에 처리
+//        for (Map.Entry<HobbyCategory, List<String>> entry : HOBBY_DATA.entrySet()) {
+//            HobbyCategory category = entry.getKey();
+//            List<String> hobbyNames = entry.getValue();
+//
+//            for (String hobbyName : hobbyNames) {
+//                String hobbyKey = hobbyName + ":" + category;
+//                if (!existingHobbyKeys.contains(hobbyKey)) {
+//                    hobbiesToSave.add(Hobby.builder()
+//                            .hobbyName(hobbyName)
+//                            .hobbyCategory(category)
+//                            .build());
+//                }
+//            }
+//        }
+//
+//        if (!hobbiesToSave.isEmpty()) {
+//            hobbyRepository.saveAll(hobbiesToSave);
+//            log.info("취미 데이터 {}개 생성 완료", hobbiesToSave.size());
+//        } else {
+//            log.info("모든 취미 데이터가 이미 존재합니다.");
+//        }
+//    }
 }
