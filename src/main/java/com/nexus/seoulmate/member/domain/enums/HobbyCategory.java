@@ -1,6 +1,9 @@
 package com.nexus.seoulmate.member.domain.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.nexus.seoulmate.exception.CustomException;
+import com.nexus.seoulmate.exception.status.ErrorStatus;
 
 public enum HobbyCategory {
     SPORTS("스포츠"),
@@ -21,5 +24,15 @@ public enum HobbyCategory {
     @JsonValue
     public String getDisplayName(){
         return displayName;
+    }
+
+    @JsonCreator
+    public static HobbyCategory fromDisplayName(String input){
+        for (HobbyCategory category : values()) {
+            if(category.displayName.equalsIgnoreCase(input) || category.name().equalsIgnoreCase(input)){
+                return category;
+            }
+        }
+        throw  new CustomException(ErrorStatus.CATEGORY_NOT_FOUND, input);
     }
 }

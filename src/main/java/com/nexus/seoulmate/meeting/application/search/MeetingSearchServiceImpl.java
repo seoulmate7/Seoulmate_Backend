@@ -21,10 +21,6 @@ public class MeetingSearchServiceImpl implements MeetingSearchService{
     public List<MeetingListRes> searchMeetings(MeetingSearchReq req){
         List<Meeting> meetings = meetingRepository.findBySearchCondition(req);
 
-        if(meetings.isEmpty()){
-            throw new CustomException(ErrorStatus.MEETING_NOT_FOUND);
-        }
-
         return meetings.stream()
                 .map(m -> new MeetingListRes(
                         m.getId(),
