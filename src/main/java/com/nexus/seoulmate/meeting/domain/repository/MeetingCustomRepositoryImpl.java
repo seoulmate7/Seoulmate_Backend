@@ -26,9 +26,9 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository{
         Map<String, Object> params = new HashMap<>();
 
         // 카테고리
-        if(req.getCategory() != null && !req.getCategory().isBlank()){
+        if(req.getHobbyCategory() != null){
             queryBuilder.append(" AND m.category = :category");
-            params.put("category", req.getCategory());
+            params.put("category", req.getHobbyCategory());
         }
 
         // 키워드 (제목, 호스트 메시지)

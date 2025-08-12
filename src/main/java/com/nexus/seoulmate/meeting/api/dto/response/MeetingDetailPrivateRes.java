@@ -14,8 +14,7 @@ public record MeetingDetailPrivateRes(
         int current_participants,
         String language,
         String host_message,
-        int price,
-        int compatibility_score // 궁합 추가
+        int price
 ) {
     public record HostInfo(
             Long id,

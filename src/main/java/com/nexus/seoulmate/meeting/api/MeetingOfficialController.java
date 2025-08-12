@@ -28,7 +28,7 @@ public class MeetingOfficialController {
     }
 
     @Operation(summary = "official 모임 상세 조회 API")
-    @GetMapping("/official/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Response<MeetingDetailOfficialRes>> getOfficialMeetingDetail(@PathVariable Long id){
         return ResponseEntity.ok(officialMeetingService.getOfficialMeetingDetail(id));
     }

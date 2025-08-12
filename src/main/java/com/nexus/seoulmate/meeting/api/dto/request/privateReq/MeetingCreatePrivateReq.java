@@ -1,5 +1,6 @@
 package com.nexus.seoulmate.meeting.api.dto.request.privateReq;
 
+import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import com.nexus.seoulmate.member.domain.enums.Languages;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -15,8 +16,8 @@ public record MeetingCreatePrivateReq(
         @Schema(description = "장소", example = "여의도 한강공원")
         String location,
 
-        @Schema(description = "카테고리", example = "언어교환")
-        String category,
+        @Schema(description = "카테고리", example = "스포츠")
+        HobbyCategory hobbyCategory,
 
         @Schema(description = "모임 날짜 (dd/MM/yyyy)", example = "28/07/2025")
         String meeting_day,

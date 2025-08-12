@@ -6,7 +6,6 @@ public record MeetingListRes(
         String image,
         String title,
         String meeting_day,
-        String start_time,
-        int compatibility_score // 궁합 추가
+        String start_time
 ) {
 }

@@ -1,5 +1,6 @@
 package com.nexus.seoulmate.meeting.api.dto.request;
 
+import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class MeetingSearchReq {
 
     @Schema(description = "카테고리", example = "문화교류")
-    private String category;
+    private HobbyCategory hobbyCategory;
 
     @Schema(description = "키워드", example = "언어")
     private String keyword;

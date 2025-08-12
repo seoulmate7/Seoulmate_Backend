@@ -1,6 +1,7 @@
 package com.nexus.seoulmate.meeting.domain;
 
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import com.nexus.seoulmate.member.domain.enums.Languages;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,7 +33,9 @@ public class Meeting {
     @JoinColumn(name = "user_id")
     private Member userId;
 
-    private String category;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "hobby_category", nullable = false)
+    private HobbyCategory hobbyCategory;
 
     @Column(name = "meeting_day")
     private LocalDate meetingDay;
@@ -71,16 +74,16 @@ public class Meeting {
     private LocalDateTime updated;
 
     @Column(name = "language_level")
-    private Integer languageLevel;
+    private Integer languageLevel; // 호스트의 언어 레벨
 
     // private 모임 update 메서드
-    public void updatePrivateMeeting(String title, String image, String location, String category,
+    public void updatePrivateMeeting(String title, String image, String location, HobbyCategory hobbyCategory ,
                                      LocalDate meetingDay, LocalTime startTime, int minParticipants,
                                      int maxParticipants, Languages language, String hostMessage, int price){
         this.title = title;
         this.image = image;
         this.location = location;
-        this.category = category;
+        this.hobbyCategory = hobbyCategory;
         this.meetingDay = meetingDay;
         this.startTime = startTime;
         this.minParticipants = minParticipants;
@@ -91,17 +94,22 @@ public class Meeting {
     }
 
     // official 모임 update 메서드
-    public void updateOfficialMeeting(String title, String image, String location, String category,
+    public void updateOfficialMeeting(String title, String image, String location, HobbyCategory hobbyCategory ,
                                       LocalDate meetingDay, LocalTime startTime,
                                       int maxParticipants, String hostMessage, int price){
         this.title = title;
         this.image = image;
         this.location = location;
-        this.category = category;
+        this.hobbyCategory = hobbyCategory;
         this.meetingDay = meetingDay;
         this.startTime = startTime;
         this.maxParticipants = maxParticipants;
         this.hostMessage = hostMessage;
         this.price = price;
+    }
+
+    // 언어레벨 업데이트
+    public void updateLanguageLevel(Integer languageLevel){
+        this.languageLevel = languageLevel;
     }
 }
