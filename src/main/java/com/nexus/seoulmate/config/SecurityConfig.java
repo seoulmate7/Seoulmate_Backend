@@ -71,7 +71,7 @@ public class SecurityConfig {
                         // 인증 관련 경로들
                         .requestMatchers("/oauth2/**", "/login/**", "/signup/**", "/auth/status", "/auth/logout").permitAll()
                         // /seoulmate는 인증 필요
-                         .requestMatchers("/home/**").authenticated()
+                        .requestMatchers("/home/**").authenticated()
                         .anyRequest().authenticated());
 
         return http.build();
