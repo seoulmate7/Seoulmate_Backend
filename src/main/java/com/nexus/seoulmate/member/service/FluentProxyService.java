@@ -42,8 +42,8 @@ public class FluentProxyService {
         // 2. 음성 파일 제출
         String postId = null;
         switch (language){
-            case KOREAN -> postId = "P_Korean";
-            case ENGLISH -> postId = "P555324012"; // 영어 버전
+            case KOREAN -> postId = "P163524106";
+            case ENGLISH -> postId = "P174024107";
         }
 
         // 3. 오디오파일 업로드
@@ -55,7 +55,6 @@ public class FluentProxyService {
 
         // 4. 채점 요청 및 결과 받기
         String result = getScore(xAccessToken, postId, audioUrl);
-        // Todo : 이걸 회원가입 dto 에 저장하기
 
         return result;
     }

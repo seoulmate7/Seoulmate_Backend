@@ -51,43 +51,44 @@ public class Member {
 
     @ElementCollection
     @CollectionTable(name = "MEMBER_LANGUAGE", joinColumns = @JoinColumn(name = "USER_ID"))
+    @MapKeyEnumerated(EnumType.STRING)
     @MapKeyColumn(name = "LANGUAGE")
     @Column(name = "LEVEL")
-    private Map<String, Integer> languages = new HashMap<>();
+    @Builder.Default
+    @SuppressWarnings("unchecked")
+    private Map<Languages, Integer> languages = new HashMap<>();
     // 언어 + 언어 레벨
 
     @ManyToMany
+    @Builder.Default
     private List<Hobby> hobbies = new ArrayList<>();
 
     @Column(nullable = false)
-    private String univCertificate;
+    private String univCertificate; // 학교 인증서
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private University univ;
+    private University univ; // 학교 이름
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private VerificationStatus isVerified;
-
-    @Column(nullable = false)
-    private boolean isDeleted;
+    private VerificationStatus univVerification; // 학교 인증 됐는지
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;
+    private Role role; // user, admin
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AuthProvider authProvider;
+    private AuthProvider authProvider; // 일반 회원가입, google 등
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserStatus userStatus;
+    private UserStatus userStatus; // 탈퇴인지 아닌지
 
     public static Member createGoogleUser(String email, String firstName, String lastName,
                                         LocalDate DOB, Countries country, String bio, String profileImage, List<Hobby> hobbies,
-                                        String univCertificate, University univ, Map<String, Integer> languages,
+                                        String univCertificate, University univ, Map<Languages, Integer> languages,
                                         VerificationStatus verificationStatus, AuthProvider authProvider){
         Member user = new Member();
         user.email = email;
@@ -102,8 +103,7 @@ public class Member {
         user.univCertificate = univCertificate;
         user.univ = univ;
         user.languages = languages;
-        user.isVerified = verificationStatus;
-        user.isDeleted = false; // 정해진 값
+        user.univVerification = verificationStatus;
         user.role = Role.USER;  // 정해진 값
         user.authProvider = authProvider;
         user.userStatus = UserStatus.ACTIVE;  // 정해진 값

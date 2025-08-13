@@ -6,11 +6,14 @@ import com.nexus.seoulmate.friend.domain.entity.Friendship;
 import com.nexus.seoulmate.friend.dto.FriendResponseDTO;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.domain.enums.Languages;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.nexus.seoulmate.member.domain.enums.Languages.*;
 
 @Component
 public class FriendConverter {
@@ -72,41 +75,38 @@ public class FriendConverter {
                 .map(Hobby::getHobbyName)
                 .collect(Collectors.toList());
 
-        String nativeLang = switch (member.getCountry()) {
-            case KOREA -> "Korean";
-            case NETHERLANDS -> "Dutch";
-            case NEPAL -> "Nepali";
-            case NORWAY -> "Norwegian";
-            case GERMANY -> "German";
-            case RUSSIA -> "Russian";
-            case MONGOLIA -> "Mongolian";
-            case USA -> "English";
-            case BANGLADESH -> "Bengali";
-            case VIETNAM -> "Vietnamese";
-            case BELGIUM -> "Dutch,French,German";
-            case SWEDEN -> "Swedish";
-            case SWITZERLAND -> "German,French,Italian";
-            case SPAIN -> "Spanish";
-            case UK -> "English";
-            case AUSTRIA -> "German";
-            case UZBEKISTAN -> "Uzbek";
-            case ITALY -> "Italian";
-            case INDIA -> "Hindi";
-            case INDONESIA -> "Indonesian";
-            case JAPAN -> "Japanese";
-            case CHINA -> "Chinese";
-            case KAZAKHSTAN -> "Kazakh";
-            case CANADA -> "English,French";
-            case THAILAND -> "Thai";
-            case PAKISTAN -> "Urdu";
-            case FRANCE -> "French";
-            case PHILIPPINES -> "Filipino";
-            case AUSTRALIA -> "English";
-            default -> "";
+        Languages nativeLang = switch (member.getCountry()) {
+            case KOREA -> KOREAN;
+            case NETHERLANDS -> DUTCH;
+            case NEPAL -> NEPALI;
+            case NORWAY -> NORWEGIAN;
+            case GERMANY, AUSTRIA -> GERMAN;
+            case USA, AUSTRALIA, UK -> ENGLISH;
+            case VIETNAM -> VIETNAMESE;
+            case SWEDEN -> SWEDISH;
+            case RUSSIA -> RUSSIAN;
+            case SPAIN -> SPANISH;
+            case ITALY -> ITALIAN;
+            case JAPAN -> JAPANESE;
+            case CHINA -> CHINESE;
+            case FRANCE -> FRENCH;
+//            case MONGOLIA -> "Mongolian";
+//            case BANGLADESH -> "Bengali";
+//            case BELGIUM -> DUTCH, FRENCH, GERMAN;
+//            case SWITZERLAND -> GERMAN , FRENCH, ITALIAN;
+//            case UZBEKISTAN -> "Uzbek";
+//            case INDIA -> "Hindi";
+//            case INDONESIA -> "Indonesian";
+//            case KAZAKHSTAN -> "Kazakh";
+//            case CANADA -> ENGLISH, FRENCH;
+//            case THAILAND -> "Thai";
+//            case PAKISTAN -> "Urdu";
+//            case PHILIPPINES -> "Filipino";
+            default -> null;
         };
 
-        Map<String, Integer> languageLevels = member.getLanguages().entrySet().stream()
-                .filter(entry -> !entry.getKey().equalsIgnoreCase(nativeLang))  // 모국어 제외
+        Map<Languages, Integer> languageLevels = member.getLanguages().entrySet().stream()
+                .filter(entry -> !entry.getKey().equals(nativeLang))  // 모국어 제외
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return FriendResponseDTO.FriendDetailDTO.builder()

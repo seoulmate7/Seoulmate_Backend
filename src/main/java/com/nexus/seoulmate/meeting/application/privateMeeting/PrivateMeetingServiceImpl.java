@@ -1,7 +1,11 @@
 package com.nexus.seoulmate.meeting.application.privateMeeting;
 
+import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
+import com.nexus.seoulmate.member.domain.enums.Languages;
 import com.nexus.seoulmate.member.domain.enums.Role;
+import com.nexus.seoulmate.member.repository.HobbyRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.exception.Response;
@@ -28,6 +32,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
 
     private final MeetingRepository meetingRepository;
     private final MemberRepository memberRepository;
+    private final HobbyRepository hobbyRepository;
 
     @Override
     @Transactional
@@ -43,6 +48,26 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
         LocalDate meetingDay = LocalDate.parse(req.meeting_day(), formatter);
         LocalTime startTime = LocalTime.parse(req.start_time());
 
+
+        // 세부 취미 조회
+        String raw = req.primaryHobbyName();
+        if(raw == null || raw.isBlank()) {
+            throw new CustomException(ErrorStatus.HOBBY_NOT_FOUND);
+        }
+        String name = raw.trim();
+
+        Hobby primaryHobby = hobbyRepository.findByHobbyNameIgnoreCase(name)
+                .orElseThrow(() -> new CustomException(ErrorStatus.HOBBY_NOT_FOUND));
+
+        HobbyCategory hobbyCategory = primaryHobby.getHobbyCategory();
+
+        // 언어와 호스트 언어 레벨 연동
+        Languages meetingLang = req.language(); // null값 허용하지 않음
+        Integer hostLangLevel = null;
+        if(meetingLang != null && member.getLanguages() != null){
+            hostLangLevel = member.getLanguages().get(meetingLang.name());
+        }
+
         Meeting meeting = Meeting.builder()
                 .meetingType(MeetingType.PRIVATE)
                 .meetingDay(meetingDay)
@@ -52,12 +77,13 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
                 .maxParticipants(req.max_participants())
                 .currentParticipants(0)
                 .price(req.price())
-                .category(req.category())
+                .hobbyCategory(hobbyCategory) // 자동 세팅
+                .primaryHobby(primaryHobby) // 세부 취미 연결
                 .image(req.image())
                 .title(req.title())
                 .hostMessage(req.host_message())
-                .language(req.language())
-                .languageLevel(null)
+                .language(meetingLang)
+                .languageLevel(hostLangLevel) // 호스트의 해당 언어 레벨
                 .userId(member)
                 .build();
 
@@ -65,6 +91,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
         return Response.success(SuccessStatus.CREATE_MEETING, meeting.getId());
     }
 
+    @Transactional(readOnly = true)
     public Response<MeetingDetailPrivateRes> getPrivateMeetingDetail(Long meetingId, Long userId) {
         Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
@@ -75,8 +102,6 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
 
         // 호스트 정보
         Member host = meeting.getUserId();
-        // 궁합 정보
-        int compatibilityScore = 85; // 추후 알고리즘 개발 후 수정
 
         MeetingDetailPrivateRes dto = new MeetingDetailPrivateRes(
                 meeting.getId(),
@@ -89,6 +114,8 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
                         host.getProfileImage()
                 ),
                 meeting.getLocation(),
+                meeting.getHobbyCategory(),
+                meeting.getPrimaryHobby().getHobbyName(),
                 meeting.getMeetingDay().toString(),
                 meeting.getStartTime().toString(),
                 meeting.getMinParticipants(),
@@ -96,8 +123,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
                 meeting.getCurrentParticipants(),
                 meeting.getLanguage().name(),
                 meeting.getHostMessage(),
-                meeting.getPrice(),
-                compatibilityScore // 궁합 추후 수정
+                meeting.getPrice()
         );
         return Response.success(SuccessStatus.READ_MEETING_DETAIL, dto);
     }
@@ -119,19 +145,41 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
         LocalDate meetingDay = LocalDate.parse(req.meeting_day(), formatter);
         LocalTime startTime = LocalTime.parse(req.start_time());
 
+        // 세부 취미 재조회
+        String raw = req.primaryHobbyName();
+        if (raw == null || raw.isBlank()) {
+            throw new CustomException(ErrorStatus.HOBBY_NOT_FOUND);
+        }
+        String name = raw.trim();
+
+        Hobby primaryHobby = hobbyRepository.findByHobbyNameIgnoreCase(name)
+                .orElseThrow(() -> new CustomException(ErrorStatus.HOBBY_NOT_FOUND));
+        HobbyCategory hobbyCategory = primaryHobby.getHobbyCategory();
+
+        // 언어와 언어 레벨 갱신
+        Languages meetingLang = req.language();
+        Integer hostLangLevel = null;
+        if(meetingLang != null && meeting.getUserId().getLanguages() != null) {
+            hostLangLevel = meeting.getUserId().getLanguages().get(meetingLang.name());
+        }
+
         meeting.updatePrivateMeeting(
                 req.title(),
                 req.image(),
                 req.location(),
-                req.category(),
+                hobbyCategory,
                 meetingDay,
                 startTime,
                 req.min_participants(),
                 req.max_participants(),
-                req.language(),
+                meetingLang,
                 req.host_message(),
                 req.price()
         );
+
+        meeting.updatePrimaryHobby(primaryHobby);
+        // 언어 레벨도 갱신
+        meeting.updateLanguageLevel(hostLangLevel);
 
         return Response.success(SuccessStatus.UPDATE_MEETING, meeting.getId());
     }

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>아임포트 테스트 결제</title>
+    <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+</head>
+<body>
+<h2>아임포트 결제 테스트</h2>
+<button onclick="requestPay()">결제하기</button>
+
+<script>
+    const IMP = window.IMP;
+    IMP.init("imp82638088"); // ⚠️ 여기에 본인의 아임포트 '가맹점 식별코드' 입력
+
+    function requestPay() {
+        IMP.request_pay({
+            pg: "html5_inicis", // 테스트용 PG사
+            pay_method: "card",
+            merchant_uid: "order_" + new Date().getTime(),
+            name: "테스트 상품",
+            amount: 100, // 100원
+            buyer_email: "test@naver.com",
+            buyer_name: "홍길동",
+            buyer_tel: "010-1234-5678",
+            buyer_addr: "서울특별시 강남구",
+            buyer_postcode: "123-456"
+        }, function (rsp) {
+            if (rsp.success) {
+                alert("결제 성공! imp_uid: " + rsp.imp_uid);
+                console.log(rsp);
+            } else {
+                alert("결제 실패: " + rsp.error_msg);
+            }
+        });
+    }
+</script>
+</body>
+</html>

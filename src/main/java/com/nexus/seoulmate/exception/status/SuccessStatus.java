@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum SuccessStatus {
     // SUCCESS 2XX
-    SUCCESS(HttpStatus.OK, "COMMON200", "요청이 성공적으로 처리되었습니다."),
-    CREATED(HttpStatus.CREATED, "COMMON201", "리소스가 성공적으로 생성되었습니다."),
+    SUCCESS(HttpStatus.OK, "COMMON 200", "요청이 성공적으로 처리되었습니다."),
+    CREATED(HttpStatus.CREATED, "COMMON 201", "리소스가 성공적으로 생성되었습니다."),
 
     // Member
     GOOGLE_PROFILE_SUCCESS(HttpStatus.OK, "SIGNUP 200", "구글 회원가입 성공"),
@@ -21,15 +21,25 @@ public enum SuccessStatus {
     HOBBY_SUCCESS(HttpStatus.OK, "SIGNUP 200", "취미 선택 완료"),
     // REGISTER_SUCCESS(HttpStatus.OK, "SIGNUP 200", "학교 인증 신청 성공"),
     MEMBER_CREATED(HttpStatus.CREATED, "SIGNUP 201", "회원가입 성공"),
+    LOGIN_SUCCESS(HttpStatus.OK, "LOGIN 200", "로그인 성공"),
+    LOGOUT_SUCCESS(HttpStatus.OK, "LOGOUT 200", "로그아웃 성공"),
 
     // Meeting
     CREATE_MEETING(HttpStatus.CREATED, "MEETING201", "모임이 성공적으로 생성되었습니다."),
     UPDATE_MEETING(HttpStatus.OK, "MEETING200","모임이 성공적으로 수정되었습니다."),
     DELETE_MEETING(HttpStatus.OK, "MEETING200","모임이 성공적으로 삭제되었습니다."),
     READ_MEETING_DETAIL(HttpStatus.OK, "MEETING200","모임 상세 조회에 성공했습니다."),
+    GET_PARTICIPANTS(HttpStatus.OK, "PARTICIPANTS200","모임 참가자 조회에 성공했습니다."),
 
     // Search
     SEARCH_SUCCESS(HttpStatus.OK, "COMMON202", "조회에 성공하였습니다."),
+
+    // Payment
+    CREATE_ORDER(HttpStatus.CREATED, "ORDER201", "주문이 성공적으로 생성되었습니다."),
+    VERIFY_PAYMENT(HttpStatus.OK, "PAYMENT200", "결제 검증 성공."),
+    PAYMENT_WEBHOOK_RECEIVED(HttpStatus.OK, "PAYMENT_WEBHOOK200", "웹훅 수신 완료."),
+    GET_ORDER(HttpStatus.OK, "ORDER200", "주문 정보 조회에 성공했습니다."),
+    PAYMENT_SUCCESS(HttpStatus.OK, "PAYMENT200", "결제에 성공했습니다."),
 
     // Friend
     FRIEND_REQUEST_SENT(HttpStatus.CREATED, "FRIEND201", "친구 요청이 성공적으로 전송되었습니다."),
@@ -39,7 +49,14 @@ public enum SuccessStatus {
     FRIEND_DETAIL_FETCHED(HttpStatus.OK, "FRIEND200", "사용자 상세 정보 조회 성공"),
     FRIEND_DELETED(HttpStatus.OK,"FRIEND200", "친구 삭제 완료"),
     FRIEND_SEARCH_RESULT_FETCHED(HttpStatus.OK,"FRIEND200" ,"친구 검색 결과 조회 성공"),
-    FRIEND_RECOMMENDATION_FETCHED(HttpStatus.OK, "FRIEND200", "추천 친구 목록 조회 성공");
+    FRIEND_RECOMMENDATION_FETCHED(HttpStatus.OK, "FRIEND200", "추천 친구 목록 조회 성공"),
+
+    // MyPage
+    MY_PAGE_FETCH_SUCCESS(HttpStatus.OK, "MYPAGE 200", "마이페이지 조회 성공"),
+    PROFILE_IMAGE_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "프로필 이미지 수정 성공"),
+    PROFILE_BIO_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "프로필 한 줄 소개 수정 성공"),
+    HOBBY_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "취미 수정 성공"),
+    LANGUAGE_LEVEL_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "언어 레벨 수정 성공");
 
 
     private final HttpStatus status;

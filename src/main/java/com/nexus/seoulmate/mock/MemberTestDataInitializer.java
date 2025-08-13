@@ -7,6 +7,7 @@ import com.nexus.seoulmate.member.repository.HobbyRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.language.bm.Lang;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -36,9 +37,9 @@ public class MemberTestDataInitializer implements CommandLineRunner {
         String testEmail1 = "test1@example.com";
         if (memberRepository.findByEmail(testEmail1).isEmpty()) {
 
-            Map<String, Integer> languages1 = new HashMap<>();
-            languages1.put("Korean", 90);
-            languages1.put("English", 70);
+            Map<Languages, Integer> languages1 = new HashMap<>();
+            languages1.put(Languages.KOREAN, 90);
+            languages1.put(Languages.ENGLISH, 70);
 
             // Hobby 엔티티 3개 조회
             Hobby hobby1 = hobbyRepository.findByHobbyNameAndHobbyCategory("축구", HobbyCategory.SPORTS).orElse(null);
@@ -63,7 +64,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
                     University.SOOKMYUNG,
                     languages1,
                     VerificationStatus.VERIFIED,
-                    AuthProvider.GOOGLE
+                    AuthProvider.LOCAL
             );
             membersToSave.add(member1);
         } else {
@@ -74,10 +75,10 @@ public class MemberTestDataInitializer implements CommandLineRunner {
         String testEmail2 = "test2@example.com";
         if (memberRepository.findByEmail(testEmail2).isEmpty()) {
 
-            Map<String, Integer> languages2 = new HashMap<>();
-            languages2.put("Korean", 75);
-            languages2.put("English", 99);
-            languages2.put("Japanese", 60);
+            Map<Languages, Integer> languages2 = new HashMap<>();
+            languages2.put(Languages.KOREAN, 75);
+            languages2.put(Languages.ENGLISH, 99);
+            languages2.put(Languages.JAPANESE, 60);
 
             // 두 번째 사용자를 위한 다른 취미들
             Hobby hobby4 = hobbyRepository.findByHobbyNameAndHobbyCategory("노래", HobbyCategory.HOBBY).orElse(null);
@@ -102,7 +103,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
                     University.YONSEI,
                     languages2,
                     VerificationStatus.VERIFIED,
-                    AuthProvider.GOOGLE
+                    AuthProvider.LOCAL
             );
             membersToSave.add(member2);
         } else {

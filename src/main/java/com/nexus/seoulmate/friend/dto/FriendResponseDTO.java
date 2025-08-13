@@ -18,6 +18,7 @@ public class FriendResponseDTO {
         private Long userId;
         private String name;
         private String profileImage;
+        private int chemistry;
     }
 
     @Getter
@@ -29,24 +30,26 @@ public class FriendResponseDTO {
         private Long senderId;
         private String name;
         private String profileImage;
+        private int chemistry;
     }
 
-    @Getter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class FriendDetailDTO {
-        private Long userId;
-        private String name;
-        private String profileImage;
-        private String bio;
-        private String university;
-        private int age;
-        private String country;
-        private Map<String, Integer> languageLevels;
-        private boolean isFriend;
-        private List<String> hobbyList;
-    }
+        @Getter
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class FriendDetailDTO {
+            private Long userId;
+            private String name;
+            private String profileImage;
+            private String bio;
+            private String university;
+            private int age;
+            private String country;
+            private Map<String, Integer> languageLevels;
+            private boolean isFriend;
+            private int chemistry;
+            private List<String> hobbyList;
+        }
 
     @Getter
     @Builder

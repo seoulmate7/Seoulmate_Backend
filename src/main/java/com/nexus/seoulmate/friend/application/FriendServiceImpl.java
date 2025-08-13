@@ -11,6 +11,7 @@ import com.nexus.seoulmate.friend.domain.repository.FriendshipRepository;
 import com.nexus.seoulmate.friend.dto.FriendRequestDTO;
 import com.nexus.seoulmate.friend.dto.FriendResponseDTO;
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -192,8 +193,26 @@ public class FriendServiceImpl implements FriendService {
         return recommendations;
     }
 
-    public Member getCurrentLoginMember() {
-        return memberRepository.findWithLanguagesById(1L)
-                .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
+    private Member getCurrentLoginMember() {
+        return Member.builder()
+                .userId(1L) // 테스트용 ID
+                .email("dummy@seoulmate.com")
+                .firstName("Dummy")
+                .lastName("User")
+                .DOB(LocalDate.of(2000, 1, 1))
+                .country(Countries.KOREA)
+                .bio("더미 사용자입니다.")
+                .profileImage("https://cdn.seoulmate.com/profile/dummy.png")
+                .languages(Map.of("Korean", 5, "English", 3))
+                .hobbies(new ArrayList<>())
+                .univCertificate("dummy_cert.png")
+                .univ(University.SUNGSIL)
+                .isVerified(VerificationStatus.VERIFIED)
+                .isDeleted(false)
+                .role(Role.USER)
+                .authProvider(AuthProvider.GOOGLE)
+                .userStatus(UserStatus.ACTIVE)
+                .password("oauth2")
+                .build();
     }
 }
