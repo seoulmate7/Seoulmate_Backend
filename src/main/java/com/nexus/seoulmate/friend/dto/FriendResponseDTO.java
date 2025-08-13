@@ -1,6 +1,5 @@
 package com.nexus.seoulmate.friend.dto;
 
-import com.nexus.seoulmate.member.domain.enums.Languages;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,10 +45,54 @@ public class FriendResponseDTO {
             private String university;
             private int age;
             private String country;
-            private Map<Languages, Integer> languageLevels;
+            private Map<String, Integer> languageLevels;
             private boolean isFriend;
             private int chemistry;
             private List<String> hobbyList;
         }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class FriendSearchResultDTO {
+        private Long userId;
+        private String name;
+        private String profileImage;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FriendRecommendationDTO {
+        private Long userId;
+        private String name;
+        private String profileImage;
+        private List<MatchedLanguageDTO> matchedLanguages;
+        private int totalMatchedLanguages;
+
+        @Getter
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class MatchedLanguageDTO {
+            private String languageName;
+            private int myLevel;
+            private int theirLevel;
+        }
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HobbyRecommendationDTO {
+        private Long userId;
+        private String name;
+        private String profileImage;
+        private List<String> matchedHobbies;
+        private int totalMatchedHobbies;
+    }
 
 }

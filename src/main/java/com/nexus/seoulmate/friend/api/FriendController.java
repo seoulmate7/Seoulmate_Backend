@@ -7,8 +7,10 @@ import com.nexus.seoulmate.friend.dto.FriendRequestDTO;
 import com.nexus.seoulmate.friend.dto.FriendResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/friends")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "Friend", description = "친구 관련 API")
 public class FriendController {
 
@@ -81,6 +84,40 @@ public class FriendController {
     public ResponseEntity<Response<Void>> deleteFriend(@PathVariable Long userId) {
         friendService.deleteFriend(userId);
         return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_DELETED, null));
+    }
+
+    @GetMapping("/search")
+    @Operation(
+            summary = "친구 검색",
+            description = "키워드를 통해 친구가 아닌 사용자를 검색합니다."
+    )
+    public ResponseEntity<Response<List<FriendResponseDTO.FriendSearchResultDTO>>> searchFriends(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "1") @Min(1) int page,
+            @RequestParam(defaultValue = "20") @Min(1) int size
+    ) {
+        List<FriendResponseDTO.FriendSearchResultDTO> results = friendService.searchFriends(query, page, size);
+        return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_SEARCH_RESULT_FETCHED, results));
+    }
+
+    @GetMapping("/recommendations/language")
+    @Operation(
+            summary = "언어 실력 기반 추천 친구 조회",
+            description = "사용자와 언어 실력이 유사한 사람들을 친구로 추천합니다. (각 언어별 ±10 수준 이내)"
+    )
+    public ResponseEntity<Response<List<FriendResponseDTO.FriendRecommendationDTO>>> getLanguageBasedRecommendations() {
+        List<FriendResponseDTO.FriendRecommendationDTO> results = friendService.getLanguageBasedRecommendations();
+        return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_RECOMMENDATION_FETCHED, results));
+    }
+
+    @GetMapping("/recommendations/hobby")
+    @Operation(
+            summary = "관심사(취미) 기반 추천 친구 조회",
+            description = "내 취미와 많이 겹치는 사용자 순으로 추천합니다."
+    )
+    public ResponseEntity<Response<List<FriendResponseDTO.HobbyRecommendationDTO>>> getHobbyBasedRecommendations() {
+        List<FriendResponseDTO.HobbyRecommendationDTO> results = friendService.getHobbyBasedRecommendations();
+        return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_RECOMMENDATION_FETCHED, results));
     }
 
 }
