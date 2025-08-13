@@ -24,7 +24,6 @@ public enum Languages {
     NEPALI("네팔어"),
     NORWEGIAN("노르웨이어"),
     RUSSIAN("러시아어"),
-    LANGUAGE_EXCHANGE("언어교환"),
     MONGOLIAN("몽골어"),
     BENGALI("벵골어"),   // 값 보강
     UZBEK("우즈베크어"),
