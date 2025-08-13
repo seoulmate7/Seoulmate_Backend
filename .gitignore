@@ -39,3 +39,6 @@ out/
 ### yml ###
 src/**/application-prod.yml
 src/**/application-dev.yml
+
+### 의존성 강제 주입 ###
+libs/*

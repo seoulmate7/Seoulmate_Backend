@@ -4,6 +4,7 @@ import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.member.domain.GoogleInfo;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.dto.InProgressResponse;
 import com.nexus.seoulmate.member.dto.signup.*;
 import com.nexus.seoulmate.member.repository.HobbyRepository;
 import com.nexus.seoulmate.member.repository.GoogleInfoRepository;
@@ -30,6 +31,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final HobbyRepository hobbyRepository;
     private final GoogleInfoRepository googleInfoRepository;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     // 1. 프로필 생성
     public void saveProfile(ProfileCreateRequest profileCreateRequest, String googleId){
@@ -119,19 +121,17 @@ public class MemberService {
     }
 
     // 현재 로그인한 사용자의 학교 인증서 처리 상태 받기
-    public String inProgress() {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
+    public InProgressResponse inProgress(HttpServletRequest request) {
+        Member member = getCurrentUser();
 
-        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof OAuth2User oAuth2User)) {
-            throw new CustomException(UNAUTHORIZED);
-        }
+        String jsessionId = getSessionId(request);
+        customOAuth2UserService.changeJsessionId(request);
 
-        String email = oAuth2User.getAttribute("email");
-
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
-
-        return "학교 인증 진행 상황 : " + member.getUnivVerification();
+        return new InProgressResponse(
+                member.getRole(),
+                member.getUnivVerification(),
+                "JSESSIONID=" + jsessionId
+        );
     }
 
     private String extractJsessionId(HttpServletRequest request) {

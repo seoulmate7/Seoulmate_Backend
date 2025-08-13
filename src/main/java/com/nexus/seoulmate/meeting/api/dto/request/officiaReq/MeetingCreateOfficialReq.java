@@ -1,5 +1,6 @@
 package com.nexus.seoulmate.meeting.api.dto.request.officiaReq;
 
+import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "공식 모임 생성 요청 DTO")
@@ -13,9 +14,6 @@ public record MeetingCreateOfficialReq(
 
         @Schema(description = "장소", example = "서울시청 앞 광장")
         String location,
-
-        @Schema(description = "카테고리", example = "문화교류")
-        String category,
 
         @Schema(description = "모임 날짜 (dd/MM/yyyy)", example = "30/07/2025")
         String meeting_day,

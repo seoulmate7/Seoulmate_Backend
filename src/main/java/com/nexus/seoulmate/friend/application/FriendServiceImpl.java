@@ -132,7 +132,7 @@ public class FriendServiceImpl implements FriendService {
                 .country(Countries.KOREA)
                 .bio("더미 사용자입니다.")
                 .profileImage("https://cdn.seoulmate.com/profile/dummy.png")
-                .languages(Map.of("Korean", 5, "English", 3))
+                .languages(Map.of(Languages.KOREAN, 5, Languages.ENGLISH, 3))
                 .hobbies(new ArrayList<>())
                 .univCertificate("dummy_cert.png")
                 .univ(University.SUNGSIL)
