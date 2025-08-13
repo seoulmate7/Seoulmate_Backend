@@ -110,4 +110,14 @@ public class FriendController {
         return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_RECOMMENDATION_FETCHED, results));
     }
 
+    @GetMapping("/recommendations/hobby")
+    @Operation(
+            summary = "관심사(취미) 기반 추천 친구 조회",
+            description = "내 취미와 많이 겹치는 사용자 순으로 추천합니다."
+    )
+    public ResponseEntity<Response<List<FriendResponseDTO.HobbyRecommendationDTO>>> getHobbyBasedRecommendations() {
+        List<FriendResponseDTO.HobbyRecommendationDTO> results = friendService.getHobbyBasedRecommendations();
+        return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_RECOMMENDATION_FETCHED, results));
+    }
+
 }

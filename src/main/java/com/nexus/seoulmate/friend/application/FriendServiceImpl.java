@@ -10,9 +10,11 @@ import com.nexus.seoulmate.friend.domain.repository.FriendRequestRepository;
 import com.nexus.seoulmate.friend.domain.repository.FriendshipRepository;
 import com.nexus.seoulmate.friend.dto.FriendRequestDTO;
 import com.nexus.seoulmate.friend.dto.FriendResponseDTO;
+import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.repository.MemberRepository;
+import com.nexus.seoulmate.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,20 +34,21 @@ public class FriendServiceImpl implements FriendService {
     private final FriendshipRepository friendshipRepository;
     private final FriendConverter friendConverter;
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     @Override
     @Transactional
     public void sendFriendRequest(FriendRequestDTO.FriendRequestCreateDTO request) {
 
-        Long senderId = 1L; // 임의로 로그인된 사용자 지정
+        Member currentUser = memberService.getCurrentUser();
 
-        Member sender = memberRepository.findById(senderId)
+        Member sender = memberRepository.findById(currentUser.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
 
         Member receiver = memberRepository.findById(request.getReceiverId())
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
 
-        if (senderId.equals(request.getReceiverId())) {
+        if (currentUser.getUserId().equals(request.getReceiverId())) {
             throw new CustomException(ErrorStatus.FRIEND_REQUEST_SELF);
         }
 
@@ -81,9 +81,9 @@ public class FriendServiceImpl implements FriendService {
     @Override
     @Transactional(readOnly = true)
     public List<FriendResponseDTO.FriendRequestListDTO> getFriendRequests() {
-        Member currentUser = getCurrentLoginMember();
+        Member currentUser = memberService.getCurrentUser();
 
-        List<FriendRequest> requestList = friendRequestRepository.findByReceiverAndStatus(currentUser, FriendRequestStatus.PENDING);
+        List<FriendRequest> requestList = friendRequestRepository.findBySenderAndStatus(currentUser, FriendRequestStatus.PENDING);
 
         return requestList.stream().map(friendConverter::toFriendRequestListDTO).collect(Collectors.toList());
     }
@@ -91,7 +91,7 @@ public class FriendServiceImpl implements FriendService {
     @Override
     @Transactional(readOnly = true)
     public List<FriendResponseDTO.FriendListDTO> getFriends() {
-        Member currentUser = getCurrentLoginMember();
+        Member currentUser = memberService.getCurrentUser();
         List<Friendship> friendships = friendshipRepository.findByUser(currentUser);
 
         return friendships.stream()
@@ -102,7 +102,7 @@ public class FriendServiceImpl implements FriendService {
     @Override
     @Transactional(readOnly = true)
     public FriendResponseDTO.FriendDetailDTO getFriendDetail(Long userId) {
-        Member currentUser = getCurrentLoginMember();
+        Member currentUser = memberService.getCurrentUser();
 
         Member targetUser = memberRepository.findWithLanguagesById(userId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
@@ -114,7 +114,7 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public void deleteFriend(Long userId) {
-        Member currentUser = getCurrentLoginMember();
+        Member currentUser = memberService.getCurrentUser();
 
         Member targetUser = memberRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
@@ -130,7 +130,7 @@ public class FriendServiceImpl implements FriendService {
     @Transactional(readOnly = true)
     public List<FriendResponseDTO.FriendSearchResultDTO> searchFriends(String query, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        Member currentUser = getCurrentLoginMember();
+        Member currentUser = memberService.getCurrentUser();
 
         List<Friendship> friendships = friendshipRepository.findByUser(currentUser);
         List<Long> friendIds = friendships.stream()
@@ -154,15 +154,17 @@ public class FriendServiceImpl implements FriendService {
     @Override
     @Transactional(readOnly = true)
     public List<FriendResponseDTO.FriendRecommendationDTO> getLanguageBasedRecommendations() {
-        Member currentUser = getCurrentLoginMember();
-        Map<String, Integer> myLanguages = currentUser.getLanguages();
+        Member currentUser = memberService.getCurrentUser();
+        Map<String, Integer> myLanguages = currentUser.getLanguages().entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey().name(), Map.Entry::getValue));
 
         List<Member> candidates = memberRepository.findAllExcludingFriendsAndSelf(currentUser.getUserId());
 
         List<FriendResponseDTO.FriendRecommendationDTO> recommendations = new ArrayList<>();
 
         for (Member candidate : candidates) {
-            Map<String, Integer> theirLanguages = candidate.getLanguages();
+            Map<String, Integer> theirLanguages = candidate.getLanguages().entrySet().stream()
+                    .collect(Collectors.toMap(e -> e.getKey().name(), Map.Entry::getValue));
             List<FriendResponseDTO.FriendRecommendationDTO.MatchedLanguageDTO> matchedLanguages = new ArrayList<>();
             int matchedCount = 0;
 
@@ -193,26 +195,41 @@ public class FriendServiceImpl implements FriendService {
         return recommendations;
     }
 
-    private Member getCurrentLoginMember() {
-        return Member.builder()
-                .userId(1L) // 테스트용 ID
-                .email("dummy@seoulmate.com")
-                .firstName("Dummy")
-                .lastName("User")
-                .DOB(LocalDate.of(2000, 1, 1))
-                .country(Countries.KOREA)
-                .bio("더미 사용자입니다.")
-                .profileImage("https://cdn.seoulmate.com/profile/dummy.png")
-                .languages(Map.of("Korean", 5, "English", 3))
-                .hobbies(new ArrayList<>())
-                .univCertificate("dummy_cert.png")
-                .univ(University.SUNGSIL)
-                .isVerified(VerificationStatus.VERIFIED)
-                .isDeleted(false)
-                .role(Role.USER)
-                .authProvider(AuthProvider.GOOGLE)
-                .userStatus(UserStatus.ACTIVE)
-                .password("oauth2")
-                .build();
+    @Override
+    @Transactional(readOnly = true)
+    public List<FriendResponseDTO.HobbyRecommendationDTO> getHobbyBasedRecommendations() {
+        Member currentUser = memberService.getCurrentUser();
+
+        var myHobbyIds = (currentUser.getHobbies() == null ? List.<Hobby>of() : currentUser.getHobbies())
+                .stream()
+                .map(Hobby::getHobbyId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<Member> candidates = memberRepository.findAllExcludingFriendsAndSelf(currentUser.getUserId());
+
+        List<FriendResponseDTO.HobbyRecommendationDTO> out = new ArrayList<>();
+
+        for (Member candidate : candidates) {
+            var hobbies = candidate.getHobbies();
+            if (hobbies == null || hobbies.isEmpty()) continue;
+
+            List<String> matchedHobbyNames = hobbies.stream()
+                    .filter(h -> h.getHobbyId() != null && myHobbyIds.contains(h.getHobbyId()))
+                    .map(Hobby::getHobbyName)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            if (!matchedHobbyNames.isEmpty()) {
+                out.add(friendConverter.toHobbyRecommendationDTO(candidate, matchedHobbyNames));
+            }
+        }
+
+        out.sort(Comparator
+                .comparingInt(FriendResponseDTO.HobbyRecommendationDTO::getTotalMatchedHobbies).reversed());
+
+        return out;
     }
+
 }

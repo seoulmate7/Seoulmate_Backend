@@ -83,4 +83,16 @@ public class FriendResponseDTO {
         }
     }
 
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HobbyRecommendationDTO {
+        private Long userId;
+        private String name;
+        private String profileImage;
+        private List<String> matchedHobbies;
+        private int totalMatchedHobbies;
+    }
+
 }

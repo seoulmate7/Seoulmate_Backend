@@ -6,11 +6,11 @@ import com.nexus.seoulmate.friend.domain.entity.Friendship;
 import com.nexus.seoulmate.friend.dto.FriendResponseDTO;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.domain.enums.Countries;
 import com.nexus.seoulmate.member.domain.enums.Languages;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.nexus.seoulmate.member.domain.enums.Languages.*;
@@ -75,39 +75,20 @@ public class FriendConverter {
                 .map(Hobby::getHobbyName)
                 .collect(Collectors.toList());
 
-        Languages nativeLang = switch (member.getCountry()) {
-            case KOREA -> KOREAN;
-            case NETHERLANDS -> DUTCH;
-            case NEPAL -> NEPALI;
-            case NORWAY -> NORWEGIAN;
-            case GERMANY, AUSTRIA -> GERMAN;
-            case USA, AUSTRALIA, UK -> ENGLISH;
-            case VIETNAM -> VIETNAMESE;
-            case SWEDEN -> SWEDISH;
-            case RUSSIA -> RUSSIAN;
-            case SPAIN -> SPANISH;
-            case ITALY -> ITALIAN;
-            case JAPAN -> JAPANESE;
-            case CHINA -> CHINESE;
-            case FRANCE -> FRENCH;
-//            case MONGOLIA -> "Mongolian";
-//            case BANGLADESH -> "Bengali";
-//            case BELGIUM -> DUTCH, FRENCH, GERMAN;
-//            case SWITZERLAND -> GERMAN , FRENCH, ITALIAN;
-//            case UZBEKISTAN -> "Uzbek";
-//            case INDIA -> "Hindi";
-//            case INDONESIA -> "Indonesian";
-//            case KAZAKHSTAN -> "Kazakh";
-//            case CANADA -> ENGLISH, FRENCH;
-//            case THAILAND -> "Thai";
-//            case PAKISTAN -> "Urdu";
-//            case PHILIPPINES -> "Filipino";
-            default -> null;
-        };
+        Set<Languages> nativeLangs = defaultNativeLanguagesByCountry(member.getCountry());
 
-        Map<Languages, Integer> languageLevels = member.getLanguages().entrySet().stream()
-                .filter(entry -> !entry.getKey().equals(nativeLang))  // 모국어 제외
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Integer> languageLevels =
+                Optional.ofNullable(member.getLanguages()).orElseGet(Collections::emptyMap)
+                        .entrySet().stream()
+                        .filter(e -> e.getKey() != null)
+                        .filter(e -> !nativeLangs.contains(e.getKey()))
+                        .collect(Collectors.toMap(
+                                e -> e.getKey().name(),
+                                Map.Entry::getValue,
+                                Integer::max,
+                                LinkedHashMap::new
+                        ));
+
 
         return FriendResponseDTO.FriendDetailDTO.builder()
                 .userId(member.getUserId())
@@ -155,5 +136,55 @@ public class FriendConverter {
                 return member.getFirstName() + " " + member.getLastName();
         }
     }
+
+    private Set<Languages> defaultNativeLanguagesByCountry(Countries country) {
+        if (country == null) return Collections.emptySet();
+        switch (country) {
+            case KOREA:       return Set.of(KOREAN);
+            case USA:         return Set.of(ENGLISH);
+            case CHINA:       return Set.of(CHINESE);
+            case JAPAN:       return Set.of(JAPANESE);
+            case NETHERLANDS: return Set.of(DUTCH);
+            case NEPAL:       return Set.of(NEPALI);
+            case NORWAY:      return Set.of(NORWEGIAN);
+            case GERMANY:     return Set.of(GERMAN);
+            case RUSSIA:      return Set.of(RUSSIAN);
+            case MONGOLIA:    return Set.of(MONGOLIAN);
+            case BANGLADESH:  return Set.of(BENGALI);
+            case VIETNAM:     return Set.of(VIETNAMESE);
+            case BELGIUM:     return Set.of(DUTCH, FRENCH, GERMAN);
+            case SWEDEN:      return Set.of(SWEDISH);
+            case SWITZERLAND: return Set.of(GERMAN, FRENCH, ITALIAN);
+            case SPAIN:       return Set.of(SPANISH);
+            case UK:          return Set.of(ENGLISH);
+            case AUSTRIA:     return Set.of(GERMAN);
+            case UZBEKISTAN:  return Set.of(UZBEK);
+            case ITALY:       return Set.of(ITALIAN);
+            case INDIA:       return Set.of(HINDI); // 필요시 ENGLISH 추가 고려
+            case INDONESIA:   return Set.of(INDONESIAN);
+            case KAZAKHSTAN:  return Set.of(KAZAKH);
+            case CANADA:      return Set.of(ENGLISH, FRENCH);
+            case THAILAND:    return Set.of(THAI);
+            case PAKISTAN:    return Set.of(URDU);
+            case FRANCE:      return Set.of(FRENCH);
+            case PHILIPPINES: return Set.of(FILIPINO);
+            case AUSTRALIA:   return Set.of(ENGLISH);
+            default:          return Collections.emptySet();
+        }
+    }
+
+    public FriendResponseDTO.HobbyRecommendationDTO toHobbyRecommendationDTO(
+            Member candidate,
+            List<String> matchedHobbies
+    ) {
+        return FriendResponseDTO.HobbyRecommendationDTO.builder()
+                .userId(candidate.getUserId())
+                .name(formatName(candidate))
+                .profileImage(candidate.getProfileImage())
+                .matchedHobbies(matchedHobbies)
+                .totalMatchedHobbies(matchedHobbies.size())
+                .build();
+    }
+
 
 }
