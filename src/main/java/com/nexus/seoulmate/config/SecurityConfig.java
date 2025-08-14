@@ -61,24 +61,28 @@ public class SecurityConfig {
             String email = null;
             if (authentication.getPrincipal() instanceof CustomOAuth2User customOAuth2User) {
                 email = customOAuth2User.getOAuth2Response().getEmail();
-                System.out.println("CustomOAuth2User에서 추출한 이메일: " + email);
             } else if (authentication.getPrincipal() instanceof OAuth2User oAuth2User) {
                 email = oAuth2User.getAttribute("email");
-                System.out.println("일반 OAuth2User에서 추출한 이메일: " + email);
             }
 
             if (email != null) {
                 Optional<Member> member = memberRepository.findByEmail(email);
 
+                String redirectUrl;
                 if (member.isPresent()) {
                     if (VerificationStatus.SUBMITTED.equals(member.get().getUnivVerification())) {
-                        response.sendRedirect("/signup/in-progress");
+                        redirectUrl = "/signup/in-progress";
                     } else {
-                        response.sendRedirect("/home");
+                        redirectUrl = "/home";
                     }
                 } else {
-                    response.sendRedirect("/signup/profile-info");
+                    redirectUrl = "/signup/profile-info";
                 }
+
+                // `redirect` 대신 `forward`를 사용하여 서버 내부에서 요청을 전달
+                System.out.println("Forwarding to URL: " + redirectUrl);
+                request.getRequestDispatcher(redirectUrl).forward(request, response);
+
             } else {
                 response.sendRedirect("/login-failure");
             }
