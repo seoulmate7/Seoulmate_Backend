@@ -1,3 +1,5 @@
+## application.yml
+
 spring:
   profiles:
     active: dev
@@ -60,15 +62,3 @@ logging:
   level:
     org.hibernate.SQL: warn
     org.hibernate.type.descriptor.sql: warn
-
-fluent:
-  api:
-    key: ${fluent.api.key}
-    username: ${fluent.api.username}
-    password: ${fluent.api.password}
-
-imp:
-  api:
-    client-code: ${IMP_API_CLIENT_CODE}
-    key: ${IMP_API_KEY}
-    secret-key: ${IMP_API_SECRET_KEY}

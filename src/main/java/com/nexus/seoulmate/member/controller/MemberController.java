@@ -47,6 +47,8 @@ public class MemberController {
     public Response<Object> getProfileInfo(@AuthenticationPrincipal OAuth2User oAuth2User,
                                          HttpServletRequest request){
         System.out.println("=== 프로필 기본 정보 요청 ===");
+        System.out.println("OAuth2User 타입: " + (oAuth2User != null ? oAuth2User.getClass().getName() : "null"));
+        System.out.println("OAuth2User 인스턴스: " + oAuth2User);
 
         if (oAuth2User instanceof CustomOAuth2User customUser) {
             OAuth2Response oAuth2Response = customUser.getOAuth2Response();
@@ -75,6 +77,37 @@ public class MemberController {
             }
         } else {
             System.out.println("OAuth2User가 CustomOAuth2User 인스턴스가 아닙니다.");
+            if (oAuth2User != null) {
+                System.out.println("OAuth2User 속성들: " + oAuth2User.getAttributes());
+                
+                // 일반 OAuth2User에서도 이메일을 추출해보기
+                String email = oAuth2User.getAttribute("email");
+                String providerId = oAuth2User.getAttribute("sub"); // Google의 경우 sub가 providerId
+                
+                if (email != null && providerId != null) {
+                    System.out.println("일반 OAuth2User에서 추출한 이메일: " + email);
+                    System.out.println("일반 OAuth2User에서 추출한 providerId: " + providerId);
+                    
+                    // TempStorage에서 저장된 SignupResponse 가져오기
+                    SignupResponse dto = tempStorage.getSignupResponse(providerId);
+                    
+                    if (dto != null) {
+                        String jsessionId = memberService.getSessionId(request);
+                        customOAuth2UserService.changeJsessionId(request);
+
+                        // 쿠키를 포함한 새로운 SignupResponse 생성
+                        SignupResponse dtoWithCookies = SignupResponse.builder()
+                                .googleId(dto.getGoogleId())
+                                .email(dto.getEmail())
+                                .firstName(dto.getFirstName())
+                                .lastName(dto.getLastName())
+                                .sessionId("JSESSIONID=" + jsessionId)
+                                .build();
+
+                        return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, dtoWithCookies);
+                    }
+                }
+            }
         }
 
         // SignupResponse가 없는 경우 빈 데이터 반환
@@ -214,9 +247,15 @@ public class MemberController {
     // OAuth2User에서 googleId 추출하는 헬퍼 메서드
     private String getGoogleIdFromOAuth2User(OAuth2User oAuth2User) {
         if (oAuth2User instanceof CustomOAuth2User) {
-            CustomOAuth2User customUser =
-                (CustomOAuth2User) oAuth2User;
+            CustomOAuth2User customUser = (CustomOAuth2User) oAuth2User;
             return customUser.getOAuth2Response().getProviderId();
+        } else if (oAuth2User != null) {
+            // 일반 OAuth2User에서 providerId 추출 시도
+            String providerId = oAuth2User.getAttribute("sub"); // Google의 경우 sub가 providerId
+            if (providerId != null) {
+                System.out.println("일반 OAuth2User에서 추출한 providerId: " + providerId);
+                return providerId;
+            }
         }
         return null;
     }

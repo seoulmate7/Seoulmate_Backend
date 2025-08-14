@@ -36,13 +36,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        System.out.println(oAuth2User.getAttributes());
+        System.out.println("=== CustomOAuth2UserService.loadUser 호출 ===");
+        System.out.println("원본 OAuth2User 속성: " + oAuth2User.getAttributes());
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         OAuth2Response oAuth2Response = null; // DTO
 
         if (registrationId.equals("google")) {
             oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
+            System.out.println("GoogleResponse 생성 완료: " + oAuth2Response);
         } else {
             return null;
         }
@@ -71,14 +73,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             tempStorage.save(signupResponse);
             
             // 임시로 USER 역할을 가진 CustomOAuth2User 반환
-            return new CustomOAuth2User(oAuth2Response, Role.USER);
+            CustomOAuth2User customOAuth2User = new CustomOAuth2User(oAuth2Response, Role.USER);
+            System.out.println("새 사용자용 CustomOAuth2User 생성: " + customOAuth2User.getClass().getName());
+            return customOAuth2User;
         } else { // 회원가입 되어있는 경우
             System.out.println("기존 회원 - 로그인 처리");
             Member member = existingUser.get();
             Role role = member.getRole();
             System.out.println("기존 회원 로그인 성공 - 역할: " + role);
 
-            return new CustomOAuth2User(oAuth2Response, role);
+            CustomOAuth2User customOAuth2User = new CustomOAuth2User(oAuth2Response, role);
+            System.out.println("기존 사용자용 CustomOAuth2User 생성: " + customOAuth2User.getClass().getName());
+            return customOAuth2User;
         }
     }
 
