@@ -13,6 +13,7 @@ import com.nexus.seoulmate.exception.status.SuccessStatus;
 import com.nexus.seoulmate.member.dto.signup.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -46,73 +47,80 @@ public class MemberController {
     @Operation(summary = "구글에서 받아온 정보 반환", description = "회원가입하지 않은 사용자의 리디렉션 경로")
     @GetMapping("/profile-info")
     public Response<Object> getProfileInfo(@AuthenticationPrincipal OAuth2User oAuth2User,
-                                         HttpServletRequest request){
+                                           HttpServletRequest request){
         System.out.println("=== 프로필 기본 정보 요청 ===");
-        System.out.println("OAuth2User 타입: " + (oAuth2User != null ? oAuth2User.getClass().getName() : "null"));
+        System.out.println("요청 URL: " + request.getRequestURL());
+        System.out.println("세션 ID (요청): " + request.getSession(false));
+
+        // SecurityContextHolder에서 직접 Principal 가져오기 시도
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("SecurityContextHolder 인증 객체: " + (authentication != null ? authentication.getClass().getName() : "null"));
+        System.out.println("SecurityContextHolder Principal: " + (authentication != null ? authentication.getPrincipal() : "null"));
+
+        System.out.println("OAuth2User 타입 (@AuthenticationPrincipal): " + (oAuth2User != null ? oAuth2User.getClass().getName() : "null"));
         System.out.println("OAuth2User 인스턴스: " + oAuth2User);
 
-        if (oAuth2User instanceof CustomOAuth2User customUser) {
+        String providerId = null;
+        String email = null;
+        Object principal = null;
+
+        if (oAuth2User != null) {
+            principal = oAuth2User;
+        } else if (authentication != null && authentication.getPrincipal() instanceof OAuth2User) {
+            principal = authentication.getPrincipal();
+            System.out.println("SecurityContextHolder에서 OAuth2User를 성공적으로 가져왔습니다.");
+        }
+
+        if (principal instanceof CustomOAuth2User customUser) {
             OAuth2Response oAuth2Response = customUser.getOAuth2Response();
-            System.out.println("ProviderId: " + oAuth2Response.getProviderId());
-
-            // TempStorage에서 저장된 SignupResponse 가져오기
-            SignupResponse dto = tempStorage.getSignupResponse(oAuth2Response.getProviderId());
-
-            if (dto != null) {
-                String jsessionId = memberService.getSessionId(request);
-                customOAuth2UserService.changeJsessionId(request);
-
-                // 쿠키를 포함한 새로운 SignupResponse 생성
-                SignupResponse dtoWithCookies = SignupResponse.builder()
-                        .googleId(dto.getGoogleId())
-                        .email(dto.getEmail())
-                        .firstName(dto.getFirstName())
-                        .lastName(dto.getLastName())
-                        .sessionId("JSESSIONID=" + jsessionId)
-                        .build();
-
-                return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, dtoWithCookies);
-            } else {
-                System.out.println("TempStorage에서 SignupResponse를 찾을 수 없습니다.");
-                System.out.println("ProviderId: " + oAuth2Response.getProviderId());
-            }
+            providerId = oAuth2Response.getProviderId();
+            email = oAuth2Response.getEmail();
+            System.out.println("CustomOAuth2User에서 추출한 providerId: " + providerId);
+            System.out.println("CustomOAuth2User에서 추출한 이메일: " + email);
+        } else if (principal instanceof OAuth2User normalOAuth2User) {
+            providerId = normalOAuth2User.getAttribute("sub");
+            email = normalOAuth2User.getAttribute("email");
+            System.out.println("일반 OAuth2User에서 추출한 providerId: " + providerId);
+            System.out.println("일반 OAuth2User에서 추출한 이메일: " + email);
         } else {
-            System.out.println("OAuth2User가 CustomOAuth2User 인스턴스가 아닙니다.");
-            if (oAuth2User != null) {
-                System.out.println("OAuth2User 속성들: " + oAuth2User.getAttributes());
-                
-                // 일반 OAuth2User에서도 이메일을 추출해보기
-                String email = oAuth2User.getAttribute("email");
-                String providerId = oAuth2User.getAttribute("sub"); // Google의 경우 sub가 providerId
-                
-                if (email != null && providerId != null) {
-                    System.out.println("일반 OAuth2User에서 추출한 이메일: " + email);
-                    System.out.println("일반 OAuth2User에서 추출한 providerId: " + providerId);
-                    
-                    // TempStorage에서 저장된 SignupResponse 가져오기
-                    SignupResponse dto = tempStorage.getSignupResponse(providerId);
-                    
-                    if (dto != null) {
-                        String jsessionId = memberService.getSessionId(request);
-                        customOAuth2UserService.changeJsessionId(request);
+            System.out.println("Principal 객체가 OAuth2User 타입이 아닙니다. (혹은 null)");
+        }
 
-                        // 쿠키를 포함한 새로운 SignupResponse 생성
-                        SignupResponse dtoWithCookies = SignupResponse.builder()
-                                .googleId(dto.getGoogleId())
-                                .email(dto.getEmail())
-                                .firstName(dto.getFirstName())
-                                .lastName(dto.getLastName())
-                                .sessionId("JSESSIONID=" + jsessionId)
-                                .build();
+        if (providerId == null || email == null) {
+            System.out.println("ProviderId 또는 Email을 추출하지 못했습니다. OAuth2 인증이 실패했거나 세션이 만료되었을 수 있습니다.");
+            return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, Map.of("error", "Failed to get user info from OAuth2 principal."));
+        }
 
-                        return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, dtoWithCookies);
-                    }
-                }
-            }
+        // TempStorage에서 저장된 SignupResponse 가져오기
+        SignupResponse dto = tempStorage.getSignupResponse(providerId);
+
+        if (dto != null) {
+            System.out.println("TempStorage에서 SignupResponse를 찾았습니다. Google ID: " + dto.getGoogleId());
+            String jsessionId = memberService.getSessionId(request);
+            System.out.println("현재 요청의 JSESSIONID: " + jsessionId);
+            customOAuth2UserService.changeJsessionId(request);
+            String newJsessionId = memberService.getSessionId(request);
+            System.out.println("changeJsessionId 호출 후 JSESSIONID: " + newJsessionId);
+
+            // 쿠키를 포함한 새로운 SignupResponse 생성
+            SignupResponse dtoWithCookies = SignupResponse.builder()
+                    .googleId(dto.getGoogleId())
+                    .email(dto.getEmail())
+                    .firstName(dto.getFirstName())
+                    .lastName(dto.getLastName())
+                    .sessionId("JSESSIONID=" + jsessionId)
+                    .build();
+
+            System.out.println("프로필 정보 반환 성공.");
+            return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, dtoWithCookies);
+        } else {
+            System.out.println("TempStorage에서 providerId " + providerId + "에 해당하는 SignupResponse를 찾을 수 없습니다.");
         }
 
         // SignupResponse가 없는 경우 빈 데이터 반환
         Map<String, Object> data = new HashMap<>();
+        data.put("message", "Temporary user data not found.");
+        System.out.println("임시 데이터가 없으므로 빈 응답을 반환합니다.");
         return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, data);
     }
 
