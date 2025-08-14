@@ -60,7 +60,6 @@ dependencies {
 
     // redis 사용
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.springframework.session:spring-session-data-redis'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'org.apache.commons:commons-pool2'
     // implementation files('/libs/commons-pool2-2.11.1.jar')
