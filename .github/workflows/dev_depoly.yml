@@ -28,6 +28,9 @@ jobs:
       FLUENT_API_PASSWORD: ${{ secrets.FLUENT_API_PASSWORD }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      IMP_API_CLIENT_CODE : ${{ secrets.IMP_API_CLIENT_CODE }}
+      IMP_API_KEY : ${{ secrets.IMP_API_KEY }}
+      IMP_API_SECRET_KEY: ${{ secrets.IMP_API_SECRET_KEY }}
 
     steps:
       - uses: actions/checkout@v3
