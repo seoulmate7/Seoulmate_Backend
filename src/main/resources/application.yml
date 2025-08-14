@@ -16,19 +16,6 @@ spring:
       max-request-size: 10MB
       file-size-threshold: 2KB
 
-  data:
-    redis:
-      host: localhost      # Redis 서버의 호스트 주소
-      port: 6379           # Redis 서버의 포트 번호 (기본)
-      timeout: 2000ms      # 연결 타임아웃 시간 (2초)
-      database: 0          # Redis 데이터베이스 번호
-      lettuce:
-        pool:
-          max-active: 8    # 최대 활성 연결 수
-          max-idle: 8      # 최대 유휴 연결 수
-          min-idle: 0      # 최소 유휴 연결 수
-          max-wait: -1ms   # 연결 대기 시간
-
   jpa:
     hibernate:
       ddl-auto: update
