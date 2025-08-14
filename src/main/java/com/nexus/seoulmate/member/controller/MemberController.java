@@ -14,6 +14,7 @@ import com.nexus.seoulmate.member.dto.signup.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -246,6 +247,15 @@ public class MemberController {
 
     // OAuth2User에서 googleId 추출하는 헬퍼 메서드
     private String getGoogleIdFromOAuth2User(OAuth2User oAuth2User) {
+        // oAuth2User가 null인 경우 SecurityContextHolder에서 가져오기 시도
+        if (oAuth2User == null) {
+            var authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.getPrincipal() instanceof OAuth2User) {
+                oAuth2User = (OAuth2User) authentication.getPrincipal();
+                System.out.println("SecurityContextHolder에서 OAuth2User를 가져왔습니다.");
+            }
+        }
+        
         if (oAuth2User instanceof CustomOAuth2User) {
             CustomOAuth2User customUser = (CustomOAuth2User) oAuth2User;
             return customUser.getOAuth2Response().getProviderId();

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -38,6 +39,10 @@ public class SecurityConfig {
 
         http
                 .httpBasic((basic) -> basic.disable());
+
+        http
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 
         http
                 .oauth2Login((oauth2) -> oauth2
@@ -82,7 +87,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                         // 인증 관련 경로들
                         .requestMatchers("/oauth2/**", "/login/**", "/signup/**", "/auth/status", "/auth/logout").permitAll()
-                        // /seoulmate는 인증 필요
+                        // /home은 인증 필요
                         .requestMatchers("/home/**").authenticated()
                         .anyRequest().authenticated());
 
