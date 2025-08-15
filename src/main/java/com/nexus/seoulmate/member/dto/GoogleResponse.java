@@ -46,4 +46,16 @@ public class GoogleResponse implements OAuth2Response{
     public Map<String, Object> getAttributes() {
         return attribute;
     }
+
+    @Override
+    public String toString() {
+        return "GoogleResponse{" +
+                "provider='" + getProvider() + '\'' +
+                ", providerId='" + getProviderId() + '\'' +
+                ", email='" + getEmail() + '\'' +
+                ", name='" + getName() + '\'' +
+                ", givenName='" + getGivenName() + '\'' +
+                ", familyName='" + getFamilyName() + '\'' +
+                '}';
+    }
 }

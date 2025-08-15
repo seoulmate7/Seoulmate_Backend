@@ -34,51 +34,80 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        System.out.println("=== CustomOAuth2UserService.loadUser 호출 ===");
+        System.out.println("UserRequest의 ClientRegistrationId: " + userRequest.getClientRegistration().getRegistrationId());
 
+        // 기본 OAuth2User 로드
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        System.out.println(oAuth2User.getAttributes());
+        System.out.println("원본 OAuth2User 로드 완료. 속성: " + oAuth2User.getAttributes());
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         OAuth2Response oAuth2Response = null; // DTO
 
-        if (registrationId.equals("google")) {
+        if ("google".equals(registrationId)) {
             oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
+            System.out.println("GoogleResponse DTO 생성 완료: " + oAuth2Response);
         } else {
+            System.out.println("지원하지 않는 registrationId: " + registrationId);
             return null;
         }
 
+        // DTO에서 주요 정보 추출
         String email = oAuth2Response.getEmail();
         String givenName = oAuth2Response.getGivenName();
         String familyName = oAuth2Response.getFamilyName();
+        String providerId = oAuth2Response.getProviderId();
 
-        Optional<Member> existingUser = memberRepository.findByEmail(email);
         System.out.println("=== OAuth2 처리 로그 ===");
-        System.out.println("이메일: " + email);
-        System.out.println("기존 회원 존재: " + existingUser.isPresent());
+        System.out.println("추출된 이메일: " + email);
+        System.out.println("추출된 providerId: " + providerId);
 
-        if (existingUser.isEmpty()) { // 회원가입 안 되어있는 경우
-            System.out.println("회원가입 안 된 사용자 - SignupResponse 생성");
-            
+        // 데이터베이스에서 회원 존재 여부 확인
+        Optional<Member> existingUser = memberRepository.findByEmail(email);
+        System.out.println("데이터베이스 조회 결과 - 기존 회원 존재 여부: " + existingUser.isPresent());
+
+        if (existingUser.isEmpty()) { // 회원가입이 안 되어 있는 경우
+            System.out.println("------------------------------------");
+            System.out.println("--- 신규 사용자 회원가입 프로세스 시작 ---");
+            System.out.println("------------------------------------");
+
+            System.out.println("SignupResponse DTO 생성 중...");
             SignupResponse signupResponse = SignupResponse.builder()
-                    .googleId(oAuth2Response.getProviderId())
+                    .googleId(providerId)
                     .email(email)
                     .firstName(givenName)
                     .lastName(familyName)
-                    .sessionId(null)
+                    .sessionId(null) // 세션 ID는 여기서 아직 알 수 없음
                     .build();
+            System.out.println("생성된 SignupResponse: " + signupResponse);
 
-            // 임시 저장소에 구글 회원가입 정보 저장
+            System.out.println("임시 저장소(TempStorage)에 SignupResponse 저장 중...");
             tempStorage.save(signupResponse);
-            
+            System.out.println("임시 저장 완료. key: " + providerId);
+            System.out.println("임시 저장소에 SignupResponse가 잘 저장되었는지 확인 (get): " + tempStorage.getSignupResponse(providerId));
+
             // 임시로 USER 역할을 가진 CustomOAuth2User 반환
-            return new CustomOAuth2User(oAuth2Response, Role.USER);
-        } else { // 회원가입 되어있는 경우
-            System.out.println("기존 회원 - 로그인 처리");
+            CustomOAuth2User customOAuth2User = new CustomOAuth2User(oAuth2Response, Role.USER);
+            System.out.println("신규 사용자를 위한 CustomOAuth2User 생성 및 반환. 역할: " + Role.USER);
+            System.out.println("------------------------------------");
+            System.out.println("--- 신규 사용자 회원가입 프로세스 종료 ---");
+            System.out.println("------------------------------------");
+            return customOAuth2User;
+        } else { // 이미 회원가입이 되어 있는 경우
+            System.out.println("------------------------------------");
+            System.out.println("--- 기존 사용자 로그인 프로세스 시작 ---");
+            System.out.println("------------------------------------");
+
             Member member = existingUser.get();
             Role role = member.getRole();
-            System.out.println("기존 회원 로그인 성공 - 역할: " + role);
+            System.out.println("기존 회원 로그인 성공. DB에 저장된 역할: " + role);
 
-            return new CustomOAuth2User(oAuth2Response, role);
+            CustomOAuth2User customOAuth2User = new CustomOAuth2User(oAuth2Response, role);
+            System.out.println("기존 사용자를 위한 CustomOAuth2User 생성 및 반환. 역할: " + role);
+            System.out.println("------------------------------------");
+            System.out.println("--- 기존 사용자 로그인 프로세스 종료 ---");
+            System.out.println("------------------------------------");
+            return customOAuth2User;
         }
     }
 

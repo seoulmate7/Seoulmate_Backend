@@ -1,18 +1,20 @@
 package com.nexus.seoulmate.config;
 
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.domain.enums.VerificationStatus;
+import com.nexus.seoulmate.member.dto.CustomOAuth2User;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.member.service.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import java.util.Optional;
-
-import static com.nexus.seoulmate.member.domain.enums.VerificationStatus.SUBMITTED;
 
 @Configuration
 @EnableWebSecurity
@@ -21,58 +23,69 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final MemberRepository memberRepository;
 
-    public SecurityConfig(CustomOAuth2UserService customOAuth2UserService, MemberRepository memberRepository){
+    public SecurityConfig(CustomOAuth2UserService customOAuth2UserService, MemberRepository memberRepository) {
         this.customOAuth2UserService = customOAuth2UserService;
         this.memberRepository = memberRepository;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http
-                .csrf((csrf) -> csrf.disable());
-
-        http
-                .formLogin((login) -> login.disable());
-
-        http
-                .httpBasic((basic) -> basic.disable());
-
-        http
-                .oauth2Login((oauth2) -> oauth2
-                        .userInfoEndpoint((userInfoEndpointConfig) ->
+                .csrf(csrf -> csrf.disable())
+                .formLogin(login -> login.disable())
+                .httpBasic(basic -> basic.disable())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfoEndpointConfig ->
                                 userInfoEndpointConfig.userService(customOAuth2UserService))
-                        .successHandler((request, response, authentication) -> {
-                            // OAuth2User에서 이메일 추출
-                            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-                            String email = oAuth2User.getAttribute("email");
-
-                            // 이메일로 회원 조회
-                            Optional<Member> member = memberRepository.findByEmail(email);
-
-                            if (member.isPresent()) { // 회원가입된 사용자 (로그인 성공하면)
-                                if (member.get().getUnivVerification().equals(SUBMITTED)){
-                                    response.sendRedirect("/signup/in-progress");
-                                } else {
-                                    response.sendRedirect("/home");
-                                }
-                            } else { // 회원가입되지 않은 사용자는 기존 경로로 리디렉트
-                                response.sendRedirect("/signup/profile-info");
-                            }
-                        }));
+                        .successHandler(customAuthenticationSuccessHandler()));
 
         http
-                .authorizeHttpRequests((auth) -> auth
-                        // 정적 리소스는 인증 없이 접근 가능
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/index.html", "/static/**", "/health-check").permitAll()
-                        // Swagger UI 관련 경로들
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
-                        // 인증 관련 경로들
                         .requestMatchers("/oauth2/**", "/login/**", "/signup/**", "/auth/status", "/auth/logout").permitAll()
-                        // /seoulmate는 인증 필요
-                        .requestMatchers("/home/**").authenticated()
                         .anyRequest().authenticated());
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
+        return (request, response, authentication) -> {
+            System.out.println("=== OAuth2 로그인 성공 핸들러 ===");
+            System.out.println("Authentication Principal 타입: " + (authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName() : "null"));
+            System.out.println("Authentication Principal: " + authentication.getPrincipal());
+
+            String email = null;
+            if (authentication.getPrincipal() instanceof CustomOAuth2User customOAuth2User) {
+                email = customOAuth2User.getOAuth2Response().getEmail();
+            } else if (authentication.getPrincipal() instanceof OAuth2User oAuth2User) {
+                email = oAuth2User.getAttribute("email");
+            }
+
+            if (email != null) {
+                Optional<Member> member = memberRepository.findByEmail(email);
+
+                String redirectUrl;
+                if (member.isPresent()) {
+                    if (VerificationStatus.SUBMITTED.equals(member.get().getUnivVerification())) {
+                        redirectUrl = "/signup/in-progress";
+                    } else {
+                        redirectUrl = "/home";
+                    }
+                } else {
+                    redirectUrl = "/signup/profile-info";
+                }
+
+                // `redirect` 대신 `forward`를 사용하여 서버 내부에서 요청을 전달
+                System.out.println("Forwarding to URL: " + redirectUrl);
+                request.getRequestDispatcher(redirectUrl).forward(request, response);
+
+            } else {
+                response.sendRedirect("/login-failure");
+            }
+        };
     }
 }

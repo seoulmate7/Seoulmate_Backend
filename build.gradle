@@ -49,11 +49,21 @@ dependencies {
 
     // PortOne (결제)
     implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
+    //  implementation files(
+    //       'libs/iamport-rest-client-java-0.2.23.jar',
+    //       'libs/retrofit-2.9.0.jar',
+    //       'libs/converter-gson-2.9.0.jar',
+    //       'libs/okhttp-3.14.9.jar',
+    //       'libs/gson-2.8.9.jar',
+    //       'libs/okio-1.17.2.jar'
+    //  )
 
     // redis 사용
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.session:spring-session-data-redis'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'org.apache.commons:commons-pool2'
+    // implementation files('/libs/commons-pool2-2.11.1.jar')
 }
 
 tasks.named('test') {
