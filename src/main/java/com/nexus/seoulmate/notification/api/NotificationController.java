@@ -7,6 +7,7 @@ import com.nexus.seoulmate.notification.application.NotificationPushService;
 import com.nexus.seoulmate.notification.application.NotificationService;
 import com.nexus.seoulmate.notification.domain.LinkTargetType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/notifications")
+@Slf4j
 public class NotificationController {
 
     private final NotificationPushService notificationPushService;
@@ -26,6 +28,9 @@ public class NotificationController {
     // SSE 구독
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@RequestHeader("userId") Long userId){
+        // 로그 코드 추가
+        log.info("[SSE] subscribe request userId={}", userId);
+
         return notificationPushService.subscribe(userId);
     }
 

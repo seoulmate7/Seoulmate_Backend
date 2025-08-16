@@ -9,6 +9,8 @@ import com.nexus.seoulmate.notification.support.NotificationTemplates;
 import com.nexus.seoulmate.payment.domain.PaymentStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -21,7 +23,11 @@ public class NotificationEventHandler {
 
     // 결제 성공 시 호스트에게 내 모임 참가 알림 (저장 후 즉시 푸시)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) // 트랜잭션 커밋 성공 후 실행
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onPaymentCaptured(PaymentCaptureEvent event) {
+        // 로그
+        System.out.println("[PAYMENT] handler IN hostId=" + event.hostId() + " meetingId=" + event.meetingId());
+
         if(event.status() != PaymentStatus.PAID) return;
 
         Notification n = new Notification().initWithTarget(
@@ -32,10 +38,10 @@ public class NotificationEventHandler {
                 event.meetingId()
 
         );
-        n = notificationRepository.save(n); // db 저장
 
-        // 실시간 푸시 (빨간 점 표시 : isRead=false)
-        notificationPushService.pushNew(n.getReceiverId(), toPush(n));
+        Notification saved = notificationRepository.save(n); // db 저장
+
+        notificationPushService.pushNew(saved.getReceiverId(), toPush(saved));
     }
 
     // 친구 신청 도착 (수신자에게 저장 후 푸시)
@@ -67,11 +73,15 @@ public class NotificationEventHandler {
     }
 
     private NotificationPushDto toPush(Notification n) {
+        String link = (n.getLink() != null && !n.getLink().isBlank())
+                ? n.getLink()
+                : (n.getTargetType() == LinkTargetType.MEETING ? "/meetings/" + n.getTargetId() : null);
+
         return new NotificationPushDto(
                 n.getId(),
                 n.getTitle(),
                 n.getMessage(),
-                n.getLink(),
+                link,
                 n.getTargetType(),
                 n.isRead(),
                 n.getCreatedAt()

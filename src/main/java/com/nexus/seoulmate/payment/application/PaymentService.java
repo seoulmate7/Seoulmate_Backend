@@ -35,6 +35,7 @@ public class PaymentService {
     }
 
     // 웹훅 처리
+    @Transactional
     public void handleWebhook(WebhookPayload payload){
         processPaymentValidation(payload.getImp_uid(), payload.getMerchant_uid());
     }
@@ -44,7 +45,7 @@ public class PaymentService {
             Payment payment = iamportClient.paymentByImpUid(impUid).getResponse();
 
             // 주문 조회
-            Order order = orderRepository.findByOrderUid(merchantUid)
+            Order order = orderRepository.findDetailByMerchantUid(merchantUid)
                     .orElseThrow(() -> new CustomException(ErrorStatus.ORDER_NOT_FOUND));
 
             // 금액 검증

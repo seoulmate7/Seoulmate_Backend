@@ -1,6 +1,8 @@
 package com.nexus.seoulmate.notification.application;
 
 import com.nexus.seoulmate.notification.api.dto.NotificationPushDto;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -11,21 +13,31 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@Slf4j
 public class NotificationPushService {
 
-    private static final long TIMEOUT_MS = 60 * 60 * 1000L; // SSE 연결 타임아웃 1시간
+    private static final long TIMEOUT_MS = 0L; //  무제한
     private final Map<Long, Set<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
     // 클라이언트가 /notifications/stream으로 접속
     public SseEmitter subscribe(Long userId) {
+
         SseEmitter emitter = new SseEmitter(TIMEOUT_MS);
         emitters.computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet()).add(emitter);
+
+        // 로그 코드 추가
+        log.info(" [SSE-구독] userId={} SSE 연결 요청", userId);
+        try { emitter.send(SseEmitter.event().name("init").data("connected")); } catch (IOException ignored) {}
+        emitter.onCompletion(() -> System.out.println("[SSE] onCompletion userId=" + userId));
+        emitter.onTimeout(() -> System.out.println("[SSE] onTimeout userId=" + userId));
+        emitter.onError(e -> System.out.println("[SSE] onError userId=" + userId + " " + e));
 
         // 연결 종료, 타임아웃, 에러 시 정리
         emitter.onCompletion(() -> remove(userId, emitter));
         emitter.onTimeout(() -> remove(userId, emitter));
         emitter.onError(e -> remove(userId, emitter));
 
+        log.info(" [SSE-구독완료] userId={} SSE emitter 등록 완료", userId);
         return emitter;
     }
 
@@ -50,6 +62,8 @@ public class NotificationPushService {
                         .id(nowId())
                         .data(data));
             } catch (IOException e) {
+                // 로그 코드 추가
+                System.out.println("[SSE] send failed userId=" + userId + " : " + e.getClass().getSimpleName() + " - " + e.getMessage());
                 remove(userId, emitter);
             }
         }

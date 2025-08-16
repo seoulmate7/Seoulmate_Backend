@@ -78,6 +78,7 @@ public class Order {
     }
 
     // 편의 메서드
+    @Transient
     public Member getParticipant(){
         return this.member;
     }
