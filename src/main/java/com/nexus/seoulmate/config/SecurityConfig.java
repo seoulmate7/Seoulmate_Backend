@@ -68,15 +68,10 @@ public class SecurityConfig {
                         // Swagger UI 관련 경로들
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
 
-                        //테스트
-                        .requestMatchers("/notifications/**").permitAll()
-
                         // 인증 관련 경로들
                         .requestMatchers("/oauth2/**", "/login/**", "/signup/**", "/auth/status", "/auth/logout").permitAll()
                         // /seoulmate는 인증 필요
                         .requestMatchers("/home/**").authenticated()
-                        // 테스트
-                        .requestMatchers("/notifications/stream", "/payment/**", "/orders/**").permitAll()
 
                         .anyRequest().authenticated());
 
