@@ -15,7 +15,9 @@ import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.member.service.MemberService;
+import com.nexus.seoulmate.notification.event.FriendRequestedEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,7 @@ public class FriendServiceImpl implements FriendService {
     private final FriendConverter friendConverter;
     private final MemberRepository memberRepository;
     private final MemberService memberService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -58,6 +61,12 @@ public class FriendServiceImpl implements FriendService {
 
         FriendRequest friendRequest = friendConverter.toFriendRequest(sender, receiver);
         friendRequestRepository.save(friendRequest);
+
+        eventPublisher.publishEvent(new FriendRequestedEvent(
+                receiver.getUserId(),
+                sender.getUserId(),
+                sender.getFirstName()
+        ));
     }
 
     @Override
@@ -75,6 +84,15 @@ public class FriendServiceImpl implements FriendService {
         if (request.getStatus() == FriendRequestStatus.APPROVED) {
             Friendship friendship = friendConverter.toFriendship(friendRequest);
             friendshipRepository.save(friendship);
+
+            Member requester = friendRequest.getSender(); // 요청
+            Member accepter = friendRequest.getReceiver(); // 수락
+
+            eventPublisher.publishEvent(new FriendRequestedEvent(
+                    requester.getUserId(),
+                    accepter.getUserId(),
+                    accepter.getFirstName()
+            ));
         }
     }
 
@@ -231,5 +249,4 @@ public class FriendServiceImpl implements FriendService {
 
         return out;
     }
-
 }
