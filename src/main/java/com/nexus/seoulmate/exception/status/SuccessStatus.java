@@ -58,6 +58,10 @@ public enum SuccessStatus {
     HOBBY_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "취미 수정 성공"),
     LANGUAGE_LEVEL_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "언어 레벨 수정 성공"),
 
+    // notification
+    NOTIFICATION_LIST_OK(HttpStatus.OK, "NOTIFICATION200", "알림 목록 조회 성공."),
+    NOTIFICATION_READ_OK(HttpStatus.OK, "NOTIFICATION200", "알림 읽음 처리 성공."),
+  
     // Chat
     CHAT_ROOM_CREATED(HttpStatus.OK,"CHAT201", "채팅방이 성공적으로 생성되었습니다."),
     CHAT_ROOM_FETCHED(HttpStatus.OK,"CHAT200", "내 채팅방 목록 조회에 성공했습니다."),

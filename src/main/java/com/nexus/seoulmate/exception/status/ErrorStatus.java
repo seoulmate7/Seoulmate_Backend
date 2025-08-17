@@ -76,10 +76,11 @@ public enum ErrorStatus {
     CHAT_GROUP_MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT4012", "찾을 수 없는 사설모임입니다."),
     CHAT_GROUP_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT4013", "해당 사설모임의 그룹 채팅방이 존재하지 않습니다."),
     CHAT_GROUP_ALREADY_MEMBER(HttpStatus.BAD_REQUEST, "CHAT4014", "이미 그룹 채팅의 멤버입니다."),
-    CHAT_GROUP_NOT_MEETING_MEMBER(HttpStatus.FORBIDDEN,  "CHAT4015", "사설모임 참가자만 그룹 채팅에 합류할 수 있습니다.");
+    CHAT_GROUP_NOT_MEETING_MEMBER(HttpStatus.FORBIDDEN,  "CHAT4015", "사설모임 참가자만 그룹 채팅에 합류할 수 있습니다."),
 
-
-
+    // notification
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTI404", "알림을 찾을 수 없습니다."),
+    NOTIFICATION_FORBIDDEN(HttpStatus.FORBIDDEN, "NOTI403", "해당 알림에 접근할 수 없습니다.");
 
     private final HttpStatus status;
     private final String code;
