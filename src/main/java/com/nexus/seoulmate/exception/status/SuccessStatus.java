@@ -56,7 +56,11 @@ public enum SuccessStatus {
     PROFILE_IMAGE_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "프로필 이미지 수정 성공"),
     PROFILE_BIO_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "프로필 한 줄 소개 수정 성공"),
     HOBBY_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "취미 수정 성공"),
-    LANGUAGE_LEVEL_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "언어 레벨 수정 성공");
+    LANGUAGE_LEVEL_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "언어 레벨 수정 성공"),
+
+    // notification
+    NOTIFICATION_LIST_OK(HttpStatus.OK, "NOTIFICATION200", "알림 목록 조회 성공."),
+    NOTIFICATION_READ_OK(HttpStatus.OK, "NOTIFICATION200", "알림 읽음 처리 성공.");
 
 
     private final HttpStatus status;

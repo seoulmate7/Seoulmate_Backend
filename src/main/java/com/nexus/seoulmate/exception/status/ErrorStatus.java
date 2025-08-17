@@ -57,11 +57,13 @@ public enum ErrorStatus {
     PAYMENT_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT500", "결제 요청 실패"),
     AMOUNT_TAMPERED(HttpStatus.BAD_REQUEST, "PAYMENT400", "결제 금액이 일치하기 않습니다."),
     PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "PAYMENT400", "결제가 실패했습니다."),
-    IAMPORT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT500", "아임포트 API 오류 발생");
+    IAMPORT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT500", "아임포트 API 오류 발생"),
 
     // MyPage
 
-
+    // notification
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTI404", "알림을 찾을 수 없습니다."),
+    NOTIFICATION_FORBIDDEN(HttpStatus.FORBIDDEN, "NOTI403", "해당 알림에 접근할 수 없습니다.");
 
     private final HttpStatus status;
     private final String code;
