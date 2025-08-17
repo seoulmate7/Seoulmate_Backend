@@ -55,7 +55,7 @@ public class Member {
     @MapKeyColumn(name = "LANGUAGE")
     @Column(name = "LEVEL")
     @Builder.Default
-    @SuppressWarnings("unchecked")
+    // @SuppressWarnings("unchecked")
     private Map<Languages, Integer> languages = new HashMap<>();
     // 언어 + 언어 레벨
 
@@ -112,5 +112,18 @@ public class Member {
 
     public int calculateAge() {
         return Period.between(this.DOB, LocalDate.now()).getYears();
+    }
+
+    public void changeProfileImage(String profileImageUrl){
+        this.profileImage = profileImageUrl;
+    }
+
+    public void changeBio(String newBio) {
+        this.bio = newBio;
+    }
+
+    public void changeHobbies(List<Hobby> newHobbies) {
+        this.hobbies.clear();        // 기존 것 전부 삭제
+        this.hobbies.addAll(newHobbies); // 새로 입력된 취미 등록
     }
 }
