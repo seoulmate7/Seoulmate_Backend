@@ -45,7 +45,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/index.html", "/static/**", "/health-check").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
+
+                        // 인증 관련 경로들
                         .requestMatchers("/oauth2/**", "/login/**", "/signup/**", "/auth/status", "/auth/logout").permitAll()
+                        // /seoulmate는 인증 필요
+                        .requestMatchers("/home/**").authenticated()
+
                         .anyRequest().authenticated());
 
         return http.build();

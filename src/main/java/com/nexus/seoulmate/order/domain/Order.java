@@ -76,4 +76,10 @@ public class Order {
     public void markCancelled(){
         this.status = OrderStatus.CANCELLED;
     }
+
+    // 편의 메서드
+    @Transient
+    public Member getParticipant(){
+        return this.member;
+    }
 }

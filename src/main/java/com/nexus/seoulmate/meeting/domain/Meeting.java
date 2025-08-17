@@ -120,4 +120,9 @@ public class Meeting {
     public void updatePrimaryHobby(Hobby hobby){
         this.primaryHobby = hobby;
     }
+
+    // 편의 메서드
+    public Member getHost(){
+        return this.userId;
+    }
 }
