@@ -40,4 +40,12 @@ public class CustomOAuth2User implements OAuth2User {
     public String getName() {
         return oAuth2Response.getName();
     }
+
+    @Override
+    public String toString() {
+        return "CustomOAuth2User{" +
+                "oAuth2Response=" + oAuth2Response +
+                ", role=" + role +
+                '}';
+    }
 }
