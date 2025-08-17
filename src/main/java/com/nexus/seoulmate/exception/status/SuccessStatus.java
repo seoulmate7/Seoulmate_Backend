@@ -56,8 +56,14 @@ public enum SuccessStatus {
     PROFILE_IMAGE_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "프로필 이미지 수정 성공"),
     PROFILE_BIO_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "프로필 한 줄 소개 수정 성공"),
     HOBBY_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "취미 수정 성공"),
-    LANGUAGE_LEVEL_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "언어 레벨 수정 성공");
+    LANGUAGE_LEVEL_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "언어 레벨 수정 성공"),
 
+    // Chat
+    CHAT_ROOM_CREATED(HttpStatus.OK,"CHAT201", "채팅방이 성공적으로 생성되었습니다."),
+    CHAT_ROOM_FETCHED(HttpStatus.OK,"CHAT200", "내 채팅방 목록 조회에 성공했습니다."),
+    CHAT_ROOMS_FETCHED(HttpStatus.OK,"CHAT200", "내 채팅방 목록 조회에 성공했습니다."),
+    CHAT_MESSAGE_SENT(HttpStatus.OK,"CHAT200", "메시지가 성공적으로 전송되었습니다."),
+    CHAT_MESSAGES_FETCHED(HttpStatus.OK,"CHAT200", "채팅 메시지 목록 조회에 성공했습니다.");
 
     private final HttpStatus status;
     private final String code;
