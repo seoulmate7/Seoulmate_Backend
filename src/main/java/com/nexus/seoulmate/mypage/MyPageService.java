@@ -9,14 +9,11 @@ import com.nexus.seoulmate.member.service.FluentProxyService;
 import com.nexus.seoulmate.member.service.MemberService;
 import com.nexus.seoulmate.mypage.dto.MyPageResponse;
 import com.nexus.seoulmate.mypage.dto.HobbyUpdateRequest;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +34,11 @@ public class MyPageService {
     }
 
     // 마이페이지 get
+    @Transactional(readOnly = true)
     public MyPageResponse getMyProfile(){
         Member member = memberService.getCurrentUser();
+
+        // member.getHobbies().size();
 
         return new MyPageResponse(
                 member.getProfileImage(),
@@ -60,6 +60,8 @@ public class MyPageService {
 
         member.changeProfileImage(profileImageUrl);
 
+        memberRepository.save(member);
+
         // 전에 있던 거 지우고 새로 등록
         // 전 프로필 사진은 S3에서도 지울 수 있나?
     }
@@ -70,6 +72,8 @@ public class MyPageService {
 
         // 전에 있던 거 다 지우고 새로 등록
         member.changeBio(newBio);
+
+        memberRepository.save(member);
     }
 
     // 취미 수정
@@ -91,6 +95,7 @@ public class MyPageService {
         }
         
         member.changeHobbies(newHobbies);
+        memberRepository.save(member);
     }
 
     // 언어 레벨테스트 재응시
