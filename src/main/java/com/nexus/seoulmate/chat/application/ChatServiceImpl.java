@@ -126,6 +126,7 @@ public class ChatServiceImpl implements ChatService {
                 .type(RoomType.GROUP)
                 .title(title)
                 .chatImage(image)
+                .meetingId(req.getMeetingId())
                 .build();
         chatRoomRepository.save(room);
 
@@ -341,5 +342,66 @@ public class ChatServiceImpl implements ChatService {
         } else {
             return chatConverter.toHeaderGroup(room, participants);
         }
+    }
+
+    @Override
+    @Transactional
+    public ChatRoomDTO.RoomSummary joinGroupRoom(ChatRoomDTO.GroupJoinRequest req) {
+        Member me = memberService.getCurrentUser();
+        Long meId = me.getUserId();
+
+        if (req.getMeetingId() == null) {
+            throw new CustomException(ErrorStatus.CHAT_GROUP_MEETING_REQUIRED);
+        }
+
+        Meeting meeting = meetingRepository.findWithUserById(req.getMeetingId())
+                .orElseThrow(() -> new CustomException(ErrorStatus.CHAT_GROUP_MEETING_NOT_FOUND));
+        if (meeting.getMeetingType() != MeetingType.PRIVATE) {
+            throw new CustomException(ErrorStatus.INVALID_MEETING_TYPE);
+        }
+
+        ChatRoom room = chatRoomRepository.findByMeetingIdAndType(req.getMeetingId(), RoomType.GROUP)
+                .orElseThrow(() -> new CustomException(ErrorStatus.CHAT_GROUP_ROOM_NOT_FOUND));
+
+        if (chatRoomMemberRepository.existsByRoomIdAndUserId(room.getId(), meId)) {
+            // participants 구성 후 반환
+            List<ChatRoomMember> members = chatRoomMemberRepository.findByRoomId(room.getId());
+            Map<Long, Member> userMap = memberRepository.findAllById(
+                    members.stream().map(ChatRoomMember::getUserId).toList()
+            ).stream().collect(Collectors.toMap(Member::getUserId, m -> m));
+
+            List<ChatRoomDTO.Participant> participants = members.stream()
+                    .map(cm -> chatConverter.toParticipant(
+                            userMap.get(cm.getUserId()),
+                            cm.getUserId(),
+                            cm.getRole().name(  ),
+                            cm.getUserId().equals(meId)
+                    ))
+                    .toList();
+
+            return chatConverter.toRoomSummaryGroup(room, meId, participants);
+        }
+
+        chatRoomMemberRepository.save(ChatRoomMember.builder()
+                .roomId(room.getId())
+                .userId(meId)
+                .role(Role.PARTICIPANT)
+                .build());
+
+        List<ChatRoomMember> members = chatRoomMemberRepository.findByRoomId(room.getId());
+        Map<Long, Member> userMap = memberRepository.findAllById(
+                members.stream().map(ChatRoomMember::getUserId).toList()
+        ).stream().collect(Collectors.toMap(Member::getUserId, m -> m));
+
+        List<ChatRoomDTO.Participant> participants = members.stream()
+                .map(cm -> chatConverter.toParticipant(
+                        userMap.get(cm.getUserId()),
+                        cm.getUserId(),
+                        cm.getRole().name(),
+                        cm.getUserId().equals(meId)
+                ))
+                .toList();
+
+        return chatConverter.toRoomSummaryGroup(room, meId, participants);
     }
 }

@@ -20,4 +20,6 @@ public class ChatRoom extends BaseEntity {
     private String title;
 
     private String chatImage;
+
+    private Long meetingId;
 }

@@ -21,4 +21,5 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, 
 
     @Query("select m from ChatRoomMember m where m.roomId = :roomId")
     List<ChatRoomMember> findByRoomId(Long roomId);
+
 }

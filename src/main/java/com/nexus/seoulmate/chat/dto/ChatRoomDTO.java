@@ -84,4 +84,12 @@ public class ChatRoomDTO {
         private String roomImageUrl;
         private List<Participant> participants;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class GroupJoinRequest {
+        private Long meetingId;
+    }
 }

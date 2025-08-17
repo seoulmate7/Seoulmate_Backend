@@ -25,4 +25,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     """)
     Page<ChatRoom> findMyRoomsOrderByLatestMessage(Long userId, RoomType type, Pageable pageable);
 
+    Optional<ChatRoom> findByMeetingIdAndType(Long meetingId, RoomType type);
 }

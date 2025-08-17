@@ -72,8 +72,12 @@ public enum ErrorStatus {
     CHAT_FILE_INFO_REQUIRED(HttpStatus.BAD_REQUEST, "CHAT4008", "파일 메시지의 첨부 정보가 필요합니다."),
     CHAT_MESSAGE_PUBLISH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "CHAT4009", "메시지 발행에 실패했습니다."),
     CHAT_MESSAGE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "CHAT4010", "메시지 저장에 실패했습니다."),
-    CHAT_GROUP_MEETING_REQUIRED(HttpStatus.BAD_REQUEST, "CHAT_4002", "그룹 채팅 생성 시 meetingId는 필수입니다."),
-    CHAT_GROUP_MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT_4003", "찾을 수 없는 사설모임입니다.");
+    CHAT_GROUP_MEETING_REQUIRED(HttpStatus.BAD_REQUEST, "CHAT4011", "그룹 채팅 생성 시 meetingId는 필수입니다."),
+    CHAT_GROUP_MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT4012", "찾을 수 없는 사설모임입니다."),
+    CHAT_GROUP_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT4013", "해당 사설모임의 그룹 채팅방이 존재하지 않습니다."),
+    CHAT_GROUP_ALREADY_MEMBER(HttpStatus.BAD_REQUEST, "CHAT4014", "이미 그룹 채팅의 멤버입니다."),
+    CHAT_GROUP_NOT_MEETING_MEMBER(HttpStatus.FORBIDDEN,  "CHAT4015", "사설모임 참가자만 그룹 채팅에 합류할 수 있습니다.");
+
 
 
 

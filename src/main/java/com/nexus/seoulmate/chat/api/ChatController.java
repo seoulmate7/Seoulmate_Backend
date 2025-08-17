@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -97,4 +96,17 @@ public class ChatController {
         var header = chatService.getRoomHeader(roomId);
         return ResponseEntity.ok(Response.success(SuccessStatus.CHAT_ROOM_FETCHED, header));
     }
+
+    @PostMapping("/group/join")
+    @Operation(
+            summary = "사설모임 그룹 채팅 합류",
+            description = "meetingId로 연결된 그룹 채팅방에 현재 사용자를 멤버로 추가합니다. 이미 멤버인 경우 idempotent하게 방 요약을 반환합니다."
+    )
+    public ResponseEntity<Response<ChatRoomDTO.RoomSummary>> joinGroup(
+            @RequestBody ChatRoomDTO.GroupJoinRequest req
+    ) {
+        ChatRoomDTO.RoomSummary summary = chatService.joinGroupRoom(req);
+        return ResponseEntity.ok(Response.success(SuccessStatus.CHAT_ROOM_JOINED, summary));
+    }
+
 }

@@ -12,4 +12,5 @@ public interface ChatService {
     MessageDTO.Sent sendMessage(Long roomId, MessageDTO.SendRequest req);
     MessageDTO.Page getMessages(Long roomId, Long cursor, int size);
     ChatRoomDTO.RoomHeader getRoomHeader(Long roomId);
+    ChatRoomDTO.RoomSummary joinGroupRoom(ChatRoomDTO.GroupJoinRequest req);
 }
