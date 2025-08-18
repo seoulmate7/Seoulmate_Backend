@@ -26,4 +26,18 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
       )""")
     List<Member> findAllExcludingFriendsAndSelf(@Param("currentUserId") Long currentUserId);
 
+    @Query("""
+        SELECT m FROM Member m
+         WHERE m.userId IN :friendIds
+           AND (
+                LOWER(m.firstName) LIKE LOWER(CONCAT('%', :q, '%'))
+             OR LOWER(m.lastName)  LIKE LOWER(CONCAT('%', :q, '%'))
+           )
+        """)
+    Page<Member> searchMyFriendsByName(
+            @Param("friendIds") List<Long> friendIds,
+            @Param("q") String q,
+            Pageable pageable
+    );
+
 }
