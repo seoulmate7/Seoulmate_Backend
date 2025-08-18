@@ -18,12 +18,24 @@ public class GoogleInfo {
     @Column(nullable = false)
     private String googleId;
 
+    @Column(nullable = false, length = 50)
+    private String email;
+
+    @Column(nullable = false, length = 20)
+    private String firstName;
+
+    @Column(nullable = false, length = 20)
+    private String lastName;
+
     public void updateSessionId(String sessionId){
         this.sessionId = sessionId;
     }
 
-    public GoogleInfo(String sessionId, String googleId) {
-        this.sessionId = sessionId;
+    public GoogleInfo(String sessionId, String googleId, String email, String firstName, String lastName) {
+        this.sessionId = "JSESSIONID=" + sessionId;
         this.googleId = googleId;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 }
