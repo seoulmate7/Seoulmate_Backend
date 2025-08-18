@@ -18,7 +18,6 @@ public class FriendResponseDTO {
         private Long userId;
         private String name;
         private String profileImage;
-        private int chemistry;
     }
 
     @Getter
@@ -30,7 +29,6 @@ public class FriendResponseDTO {
         private Long senderId;
         private String name;
         private String profileImage;
-        private int chemistry;
     }
 
         @Getter
@@ -47,7 +45,6 @@ public class FriendResponseDTO {
             private String country;
             private Map<String, Integer> languageLevels;
             private boolean isFriend;
-            private int chemistry;
             private List<String> hobbyList;
         }
 
