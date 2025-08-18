@@ -95,7 +95,10 @@ jobs:
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
           set -e
           cd /home/$EC2_USERNAME/app
-          docker-compose up -d --no-deps --build app
+          docker-compose stop app || true
+          docker-compose rm -f app || true
+
+          DOCKER_BUILDKIT=1 docker-compose up -d --no-deps --build app
           "
           
           rm -f private_key.pem
