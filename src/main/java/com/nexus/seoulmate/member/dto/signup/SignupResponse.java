@@ -22,7 +22,7 @@ public class SignupResponse {
         this.email = email; // 다시 수정할 일 없음
         this.firstName = firstName;
         this.lastName = lastName;
-        authProvider = String.valueOf(AuthProvider.GOOGLE);
+        authProvider = AuthProvider.GOOGLE.name(); // enum 이름으로 저장
         this.sessionId = sessionId;
     }
 

@@ -25,6 +25,10 @@ public class Member {
     @Column(name = "USER_ID")
     private Long userId;
 
+    @OneToOne
+    @JoinColumn(name = "GOOGLE_INFO_ID")
+    private GoogleInfo googleInfoId;
+
     @Column(nullable = false, length = 50)
     private String email;
 
@@ -49,17 +53,17 @@ public class Member {
     @Column(nullable = false)
     private String profileImage;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "MEMBER_LANGUAGE", joinColumns = @JoinColumn(name = "USER_ID"))
     @MapKeyEnumerated(EnumType.STRING)
     @MapKeyColumn(name = "LANGUAGE")
     @Column(name = "LEVEL")
     @Builder.Default
-    @SuppressWarnings("unchecked")
+    // @SuppressWarnings("unchecked")
     private Map<Languages, Integer> languages = new HashMap<>();
     // 언어 + 언어 레벨
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @Builder.Default
     private List<Hobby> hobbies = new ArrayList<>();
 
@@ -112,5 +116,18 @@ public class Member {
 
     public int calculateAge() {
         return Period.between(this.DOB, LocalDate.now()).getYears();
+    }
+
+    public void changeProfileImage(String profileImageUrl){
+        this.profileImage = profileImageUrl;
+    }
+
+    public void changeBio(String newBio) {
+        this.bio = newBio;
+    }
+
+    public void changeHobbies(List<Hobby> newHobbies) {
+        this.hobbies.clear();        // 기존 것 전부 삭제
+        this.hobbies.addAll(newHobbies); // 새로 입력된 취미 등록
     }
 }

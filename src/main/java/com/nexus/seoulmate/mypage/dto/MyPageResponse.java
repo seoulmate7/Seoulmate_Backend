@@ -4,10 +4,12 @@ import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.enums.Languages;
 import com.nexus.seoulmate.member.domain.enums.University;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.List;
 import java.util.Map;
 
+@Getter
 @AllArgsConstructor
 public class MyPageResponse {
     private String profileImageUrl;
