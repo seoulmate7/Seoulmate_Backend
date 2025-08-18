@@ -104,18 +104,21 @@ public class MemberService {
         // JSESSIONID 추출
         String jsessionId = extractJsessionId(request);
 
-        // Member 저장
-        Member savedMember = memberRepository.save(member);
+        System.out.println(member);
+        System.out.println(jsessionId);
 
-        // GoogleInfo 저장 (회원가입 시에만 생성)
-        if (jsessionId != null) {
-            saveGoogleInfo(savedMember, jsessionId, memberCreateRequest.getGoogleId());
-        }
+        // Member 저장
+        memberRepository.save(member);
+
+        // // GoogleInfo 저장 (회원가입 시에만 생성)
+        // if (jsessionId != null) {
+        //     saveGoogleInfo(savedMember, jsessionId, memberCreateRequest.getGoogleId());
+        // }
     }
 
-    private void saveGoogleInfo(Member member, String jsessionId, String googleId) {
+    private void saveGoogleInfo(String jsessionId, String googleId) {
             // 새로운 GoogleInfo 생성 및 저장
-            GoogleInfo googleInfo = new GoogleInfo(member, jsessionId, googleId);
+            GoogleInfo googleInfo = new GoogleInfo(jsessionId, googleId);
             googleInfoRepository.save(googleInfo);
             System.out.println("GoogleInfo 저장 완료");
     }

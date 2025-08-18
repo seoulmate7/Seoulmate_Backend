@@ -5,6 +5,8 @@ import com.nexus.seoulmate.exception.status.ErrorStatus;
 import com.nexus.seoulmate.exception.status.SuccessStatus;
 import com.nexus.seoulmate.member.domain.GoogleInfo;
 import com.nexus.seoulmate.member.domain.Member;
+import com.nexus.seoulmate.member.dto.GoogleResponse;
+import com.nexus.seoulmate.member.dto.OAuth2Response;
 import com.nexus.seoulmate.member.dto.StatusResponse;
 import com.nexus.seoulmate.member.repository.GoogleInfoRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
@@ -44,20 +46,25 @@ public class AuthController {
         if (authentication != null && authentication.isAuthenticated() &&
                 authentication.getPrincipal() instanceof OAuth2User oAuth2User) {
 
-            String email = oAuth2User.getAttribute("email");
+            // OAuth2User에서 email과 providerId (googleId)를 추출
+            OAuth2Response oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
+            String email = oAuth2Response.getEmail();
+            String googleId = oAuth2Response.getProviderId();
 
             Optional<Member> member = memberRepository.findByEmail(email);
 
             if (member.isPresent()) {
                 Member user = member.get();
-                Optional<GoogleInfo> googleIdOpt = googleInfoRepository.findByUserId(user);
 
-                String googleId = googleIdOpt.map(info -> String.valueOf(info.getGoogleId())).orElse(null);
+                // GoogleId로 GoogleInfo를 찾아야 합니다.
+                Optional<GoogleInfo> googleInfoOpt = googleInfoRepository.findByGoogleId(googleId);
+
+                String googleIdFromDb = googleInfoOpt.map(GoogleInfo::getGoogleId).orElse(null);
 
                 StatusResponse statusResponse = new StatusResponse(
                         user.getUnivVerification(),
                         user.getUserStatus(),
-                        googleId
+                        googleIdFromDb
                 );
 
                 return Response.success(SuccessStatus.SUCCESS, statusResponse);

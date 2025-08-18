@@ -25,6 +25,10 @@ public class Member {
     @Column(name = "USER_ID")
     private Long userId;
 
+    @OneToOne
+    @JoinColumn(name = "GOOGLE_INFO_ID")
+    private GoogleInfo googleInfoId;
+
     @Column(nullable = false, length = 50)
     private String email;
 
