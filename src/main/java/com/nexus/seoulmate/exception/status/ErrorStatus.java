@@ -61,6 +61,23 @@ public enum ErrorStatus {
 
     // MyPage
 
+    // Chat
+    CHAT_INVALID_PARTNER(HttpStatus.BAD_REQUEST, "CHAT4001", "유효하지 않은 상대 사용자입니다."),
+    CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT4002", "채팅방을 찾을 수 없습니다."),
+    CHAT_NOT_MEMBER(HttpStatus.FORBIDDEN, "CHAT4003", "해당 채팅방 멤버가 아닙니다."),
+    CHAT_GROUP_MIN_MEMBERS(HttpStatus.BAD_REQUEST, "CHAT4004", "그룹 채팅은 최소 3인 이상이어야 합니다."),
+    CHAT_INVALID_MESSAGE_TYPE(HttpStatus.BAD_REQUEST, "CHAT4005", "유효하지 않은 메시지 타입입니다."),
+    CHAT_SYSTEM_MESSAGE_FORBIDDEN(HttpStatus.FORBIDDEN, "CHAT4006", "시스템 메시지는 전송할 수 없습니다."),
+    CHAT_EMPTY_MESSAGE(HttpStatus.BAD_REQUEST, "CHAT4007", "메시지 내용이 비어 있습니다."),
+    CHAT_FILE_INFO_REQUIRED(HttpStatus.BAD_REQUEST, "CHAT4008", "파일 메시지의 첨부 정보가 필요합니다."),
+    CHAT_MESSAGE_PUBLISH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "CHAT4009", "메시지 발행에 실패했습니다."),
+    CHAT_MESSAGE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "CHAT4010", "메시지 저장에 실패했습니다."),
+    CHAT_GROUP_MEETING_REQUIRED(HttpStatus.BAD_REQUEST, "CHAT4011", "그룹 채팅 생성 시 meetingId는 필수입니다."),
+    CHAT_GROUP_MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT4012", "찾을 수 없는 사설모임입니다."),
+    CHAT_GROUP_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT4013", "해당 사설모임의 그룹 채팅방이 존재하지 않습니다."),
+    CHAT_GROUP_ALREADY_MEMBER(HttpStatus.BAD_REQUEST, "CHAT4014", "이미 그룹 채팅의 멤버입니다."),
+    CHAT_GROUP_NOT_MEETING_MEMBER(HttpStatus.FORBIDDEN,  "CHAT4015", "사설모임 참가자만 그룹 채팅에 합류할 수 있습니다."),
+
     // notification
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTI404", "알림을 찾을 수 없습니다."),
     NOTIFICATION_FORBIDDEN(HttpStatus.FORBIDDEN, "NOTI403", "해당 알림에 접근할 수 없습니다.");
