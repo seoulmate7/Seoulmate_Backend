@@ -54,21 +54,24 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             googleInfoRepository.save(googleInfo);
             System.out.println("신규 사용자 - GoogleInfo 객체 생성 및 저장 완료.");
         }
+        
+        // 리디렉션 경로
+        response.sendRedirect("local/oauth2/code/google");
 
         // 회원 상태에 따른 리디렉션
-        String email = oAuth2User.getOAuth2Response().getEmail();
-        Optional<Member> member = memberRepository.findByEmail(email);
+        // String email = oAuth2User.getOAuth2Response().getEmail();
+        // Optional<Member> member = memberRepository.findByEmail(email);
 
-        if (member.isEmpty()) {
-            // DB에 회원이 없는 경우 (신규 회원)
-            response.sendRedirect("/signup/profile-info");
-        } else {
-            Member existingMember = member.get();
-            if (VerificationStatus.SUBMITTED.equals(existingMember.getUnivVerification())) {
-                response.sendRedirect("/signup/in-progress");
-            } else {
-                response.sendRedirect("/home");
-            }
-        }
+        // if (member.isEmpty()) {
+        //     // DB에 회원이 없는 경우 (신규 회원)
+        //     response.sendRedirect("/signup/profile-info");
+        // } else {
+        //     Member existingMember = member.get();
+        //     if (VerificationStatus.SUBMITTED.equals(existingMember.getUnivVerification())) {
+        //         response.sendRedirect("/signup/in-progress");
+        //     } else {
+        //         response.sendRedirect("/home");
+        //     }
+        // }
     }
 }
