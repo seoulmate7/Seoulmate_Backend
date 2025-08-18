@@ -13,21 +13,16 @@ public class GoogleInfo {
     @Column(name = "GOOGLE_INFO_ID")
     private Long googleInfoId;
 
-    @OneToOne
-    @JoinColumn(name = "USER_ID")
-    private Member userId;
-
     private String sessionId;
 
-    // @Column(nullable = false)
+    @Column(nullable = false)
     private String googleId;
 
     public void updateSessionId(String sessionId){
         this.sessionId = sessionId;
     }
 
-    public GoogleInfo(Member userId, String sessionId, String googleId) {
-        this.userId = userId;
+    public GoogleInfo(String sessionId, String googleId) {
         this.sessionId = sessionId;
         this.googleId = googleId;
     }

@@ -1,13 +1,11 @@
 package com.nexus.seoulmate.member.service;
 
 import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.member.domain.GoogleInfo;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.dto.InProgressResponse;
 import com.nexus.seoulmate.member.dto.signup.*;
 import com.nexus.seoulmate.member.repository.HobbyRepository;
-import com.nexus.seoulmate.member.repository.GoogleInfoRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +28,6 @@ public class MemberService {
     private final TempStorage tempStorage;
     private final MemberRepository memberRepository;
     private final HobbyRepository hobbyRepository;
-    private final GoogleInfoRepository googleInfoRepository;
     private final CustomOAuth2UserService customOAuth2UserService;
 
     // 1. 프로필 생성
@@ -104,20 +101,16 @@ public class MemberService {
         // JSESSIONID 추출
         String jsessionId = extractJsessionId(request);
 
+        System.out.println(member);
+        System.out.println(jsessionId);
+
         // Member 저장
-        Member savedMember = memberRepository.save(member);
+        memberRepository.save(member);
 
-        // GoogleInfo 저장 (회원가입 시에만 생성)
-        if (jsessionId != null) {
-            saveGoogleInfo(savedMember, jsessionId, memberCreateRequest.getGoogleId());
-        }
-    }
-
-    private void saveGoogleInfo(Member member, String jsessionId, String googleId) {
-            // 새로운 GoogleInfo 생성 및 저장
-            GoogleInfo googleInfo = new GoogleInfo(member, jsessionId, googleId);
-            googleInfoRepository.save(googleInfo);
-            System.out.println("GoogleInfo 저장 완료");
+        // // GoogleInfo 저장 (회원가입 시에만 생성)
+        // if (jsessionId != null) {
+        //     saveGoogleInfo(savedMember, jsessionId, memberCreateRequest.getGoogleId());
+        // }
     }
 
     // 현재 로그인한 사용자의 학교 인증서 처리 상태 받기

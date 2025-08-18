@@ -11,6 +11,7 @@ import com.nexus.seoulmate.member.repository.GoogleInfoRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -26,7 +27,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final TempStorage tempStorage;
     private final GoogleInfoRepository googleInfoRepository;
 
-    public CustomOAuth2UserService(MemberRepository memberRepository, TempStorage tempStorage, GoogleInfoRepository googleInfoRepository){
+    public CustomOAuth2UserService(MemberRepository memberRepository, TempStorage tempStorage, GoogleInfoRepository googleInfoRepository) {
         this.memberRepository = memberRepository;
         this.tempStorage = tempStorage;
         this.googleInfoRepository = googleInfoRepository;
@@ -46,7 +47,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         if ("google".equals(registrationId)) {
             oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
-            System.out.println("GoogleResponse DTO 생성 완료: " + oAuth2Response);
         } else {
             System.out.println("지원하지 않는 registrationId: " + registrationId);
             return null;
@@ -58,20 +58,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String familyName = oAuth2Response.getFamilyName();
         String providerId = oAuth2Response.getProviderId();
 
-        System.out.println("=== OAuth2 처리 로그 ===");
-        System.out.println("추출된 이메일: " + email);
-        System.out.println("추출된 providerId: " + providerId);
-
-        // 데이터베이스에서 회원 존재 여부 확인
         Optional<Member> existingUser = memberRepository.findByEmail(email);
-        System.out.println("데이터베이스 조회 결과 - 기존 회원 존재 여부: " + existingUser.isPresent());
 
-        if (existingUser.isEmpty()) { // 회원가입이 안 되어 있는 경우
+        if (existingUser.isEmpty()) {
             System.out.println("------------------------------------");
             System.out.println("--- 신규 사용자 회원가입 프로세스 시작 ---");
             System.out.println("------------------------------------");
 
-            System.out.println("SignupResponse DTO 생성 중...");
             SignupResponse signupResponse = SignupResponse.builder()
                     .googleId(providerId)
                     .email(email)
@@ -79,21 +72,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .lastName(familyName)
                     .sessionId(null) // 세션 ID는 여기서 아직 알 수 없음
                     .build();
-            System.out.println("생성된 SignupResponse: " + signupResponse);
 
-            System.out.println("임시 저장소(TempStorage)에 SignupResponse 저장 중...");
             tempStorage.save(signupResponse);
-            System.out.println("임시 저장 완료. key: " + providerId);
-            System.out.println("임시 저장소에 SignupResponse가 잘 저장되었는지 확인 (get): " + tempStorage.getSignupResponse(providerId));
+            System.out.println("임시 저장소(TempStorage)에 SignupResponse 저장 완료. key: " + providerId);
 
-            // 임시로 USER 역할을 가진 CustomOAuth2User 반환
             CustomOAuth2User customOAuth2User = new CustomOAuth2User(oAuth2Response, Role.USER);
             System.out.println("신규 사용자를 위한 CustomOAuth2User 생성 및 반환. 역할: " + Role.USER);
             System.out.println("------------------------------------");
             System.out.println("--- 신규 사용자 회원가입 프로세스 종료 ---");
             System.out.println("------------------------------------");
             return customOAuth2User;
-        } else { // 이미 회원가입이 되어 있는 경우
+        } else {
             System.out.println("------------------------------------");
             System.out.println("--- 기존 사용자 로그인 프로세스 시작 ---");
             System.out.println("------------------------------------");
