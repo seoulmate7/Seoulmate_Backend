@@ -59,7 +59,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         }
         
         // 리디렉션 경로
-        response.sendRedirect("local/oauth2/code/google");
+        response.sendRedirect("/local/oauth2/code/google");
 
         // 회원 상태에 따른 리디렉션
         // Optional<Member> member = memberRepository.findByEmail(email);
