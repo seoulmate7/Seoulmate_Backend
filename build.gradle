@@ -65,6 +65,7 @@ dependencies {
     implementation 'org.apache.commons:commons-pool2'
     // implementation files('/libs/commons-pool2-2.11.1.jar')
 
+    // chatting
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 }

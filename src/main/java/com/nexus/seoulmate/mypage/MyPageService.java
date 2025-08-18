@@ -38,11 +38,9 @@ public class MyPageService {
     public MyPageResponse getMyProfile(){
         Member member = memberService.getCurrentUser();
 
-        // member.getHobbies().size();
-
         return new MyPageResponse(
                 member.getProfileImage(),
-                member.getLastName() + " " + member.getFirstName(), // FIXME : 영어, 한국어 이름 어떻게 나누기로 했더라
+                formatName(member),
                 member.getEmail(),
                 member.getBio(),
                 member.getHobbies(),
@@ -50,6 +48,17 @@ public class MyPageService {
                 member.calculateAge(),
                 member.getLanguages()
         );
+    }
+
+    private String formatName(Member member) {
+        switch (member.getCountry()) {
+            case KOREA:
+            case CHINA:
+            case JAPAN:
+                return member.getLastName() + member.getFirstName();
+            default:
+                return member.getFirstName() + " " + member.getLastName();
+        }
     }
 
     // 프로필 사진 수정
