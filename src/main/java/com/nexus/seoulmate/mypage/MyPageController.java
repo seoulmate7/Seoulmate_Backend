@@ -2,8 +2,10 @@ package com.nexus.seoulmate.mypage;
 
 import com.nexus.seoulmate.exception.Response;
 import com.nexus.seoulmate.member.domain.enums.Languages;
+import com.nexus.seoulmate.mypage.dto.HobbyUpdateRequest;
 import com.nexus.seoulmate.mypage.dto.MyPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.http.MediaType;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,9 +31,9 @@ public class MyPageController {
     }
 
     @Operation(summary = "프로필 이미지 수정 API")
-    @PutMapping("/update-profile-image")
-    public Response<Object> updateProfileImage(){
-        myPageService.updateProfileImage();
+    @PutMapping(value = "/update-profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Response<Object> updateProfileImage(@RequestPart("profileImage") MultipartFile profileImage){
+        myPageService.updateProfileImage(profileImage);
         return Response.success(PROFILE_IMAGE_UPDATE_SUCCESS, null);
     }
 
@@ -44,13 +46,13 @@ public class MyPageController {
 
     @Operation(summary = "취미 수정 API")
     @PutMapping("/update-hobby")
-    public Response<Object> updateHobbies(){
-        myPageService.updateHobbies();
+    public Response<Object> updateHobbies(HobbyUpdateRequest hobbyUpdateRequest){
+        myPageService.updateHobbies(hobbyUpdateRequest);
         return Response.success(HOBBY_UPDATE_SUCCESS, null);
     }
 
     @Operation(summary = "언어 레벨테스트 재응시 API")
-    @PatchMapping("/update-language-level")
+    @PatchMapping(value = "/update-language-level", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<Object> updateLanguageLevel(@RequestPart("audioFile") MultipartFile audioFile,
                                                 @RequestParam("language") Languages language){
         myPageService.updateLanguageLevel(audioFile, language);
