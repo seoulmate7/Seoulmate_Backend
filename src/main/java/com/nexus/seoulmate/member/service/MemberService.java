@@ -106,11 +106,6 @@ public class MemberService {
 
         // Member 저장
         memberRepository.save(member);
-
-        // // GoogleInfo 저장 (회원가입 시에만 생성)
-        // if (jsessionId != null) {
-        //     saveGoogleInfo(savedMember, jsessionId, memberCreateRequest.getGoogleId());
-        // }
     }
 
     // 현재 로그인한 사용자의 학교 인증서 처리 상태 받기
