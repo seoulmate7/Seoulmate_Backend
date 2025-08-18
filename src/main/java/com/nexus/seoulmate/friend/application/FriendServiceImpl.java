@@ -249,4 +249,44 @@ public class FriendServiceImpl implements FriendService {
 
         return out;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FriendResponseDTO.FriendListDTO> searchAmongMyFriends(String query, int page, int size) {
+        Member currentUser = memberService.getCurrentUser();
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        List<Friendship> friendships = friendshipRepository.findByUser(currentUser);
+
+        // 친구 id 집합
+        List<Long> friendIds = friendships.stream()
+                .map(f -> {
+                    Member u1 = f.getUserId1();
+                    Member u2 = f.getUserId2();
+                    return u1.getUserId().equals(currentUser.getUserId()) ? u2.getUserId() : u1.getUserId();
+                })
+                .toList();
+
+        if (friendIds.isEmpty()) {
+            return List.of();
+        }
+
+        // 이름 LIKE로 "내 친구"만 DB에서 필터링
+        Page<Member> matchedFriendsPage =
+                memberRepository.searchMyFriendsByName(friendIds, query, pageable);
+
+        // 빠른 매핑을 위해: otherId -> Friendship 매핑 준비
+        Map<Long, Friendship> byOtherId = friendships.stream().collect(Collectors.toMap(
+                f -> f.getUserId1().getUserId().equals(currentUser.getUserId())
+                        ? f.getUserId2().getUserId()
+                        : f.getUserId1().getUserId(),
+                f -> f
+        ));
+
+        // FriendListDTO로 변환 (컨버터는 Friendship 기반이니 그대로 재사용)
+        return matchedFriendsPage.stream()
+                .map(m -> friendConverter.toFriendListDTO(currentUser, byOtherId.get(m.getUserId())))
+                .toList();
+    }
+
 }
