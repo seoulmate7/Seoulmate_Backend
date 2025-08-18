@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public class TempStorage {
                 "email", dto.getEmail(),
                 "firstName", dto.getFirstName(),
                 "lastName", dto.getLastName(),
-                "authProvider", dto.getAuthProvider()
+                "authProvider", dto.getAuthProvider() // 문자열 그대로 저장
         );
         redisTemplate.opsForHash().putAll(key, map);
         redisTemplate.expire(key, TTL);
@@ -128,7 +129,7 @@ public class TempStorage {
                 country = (Countries) countryObj;
             } else if (countryObj instanceof String countryStr) {
                 try {
-                    country = Countries.valueOf(countryStr);
+                    country = Countries.fromDisplayName(countryStr);
                 } catch (IllegalArgumentException e) {
                     System.out.println("잘못된 country 값: " + countryStr);
                 }
@@ -157,7 +158,7 @@ public class TempStorage {
                 univ = (University) univObj;
             } else if (univObj instanceof String univStr) {
                 try {
-                    univ = University.valueOf(univStr);
+                    univ = University.fromDisplayName(univStr);
                 } catch (IllegalArgumentException e) {
                     System.out.println("잘못된 university 값: " + univStr);
                 }
@@ -167,9 +168,24 @@ public class TempStorage {
             Object langObj = raw.get("languages");
             if (langObj instanceof Map<?, ?> langMap) {
                 try {
-                    languages = (Map<Languages, Integer>) langMap;
-                } catch (ClassCastException e) {
-                    System.out.println("languages 형변환 실패: " + langMap);
+                    // Redis에서 가져온 Map을 새로운 Map으로 변환
+                    Map<Languages, Integer> convertedLanguages = new HashMap<>();
+                    for (Map.Entry<?, ?> entry : langMap.entrySet()) {
+                        Object key = entry.getKey();
+                        Object value = entry.getValue();
+                        
+                        if (key instanceof String keyStr && value instanceof Integer intValue) {
+                            try {
+                                Languages language = Languages.fromDisplayName(keyStr);
+                                convertedLanguages.put(language, intValue);
+                            } catch (Exception e) {
+                                System.out.println("잘못된 language 값: " + keyStr);
+                            }
+                        }
+                    }
+                    languages = convertedLanguages;
+                } catch (Exception e) {
+                    System.out.println("languages 변환 실패: " + e.getMessage());
                 }
             }
 
