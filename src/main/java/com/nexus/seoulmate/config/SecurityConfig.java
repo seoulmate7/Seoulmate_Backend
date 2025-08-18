@@ -63,30 +63,33 @@ public class SecurityConfig {
             System.out.println("Authentication Principal 타입: " + (authentication.getPrincipal() != null ? authentication.getPrincipal().getClass().getName() : "null"));
             System.out.println("Authentication Principal: " + authentication.getPrincipal());
 
-            String email = null;
-            if (authentication.getPrincipal() instanceof CustomOAuth2User customOAuth2User) {
-                email = customOAuth2User.getOAuth2Response().getEmail();
-                System.out.println("CustomOAuth2User에서 추출한 이메일: " + email);
-            } else if (authentication.getPrincipal() instanceof OAuth2User oAuth2User) {
-                email = oAuth2User.getAttribute("email");
-                System.out.println("일반 OAuth2User에서 추출한 이메일: " + email);
-            }
+            // 리디렉션 경로
+            response.sendRedirect("/login/oauth2/code/google");
 
-            if (email != null) {
-                Optional<Member> member = memberRepository.findByEmail(email);
+            // String email = null;
+            // if (authentication.getPrincipal() instanceof CustomOAuth2User customOAuth2User) {
+            //     email = customOAuth2User.getOAuth2Response().getEmail();
+            //     System.out.println("CustomOAuth2User에서 추출한 이메일: " + email);
+            // } else if (authentication.getPrincipal() instanceof OAuth2User oAuth2User) {
+            //     email = oAuth2User.getAttribute("email");
+            //     System.out.println("일반 OAuth2User에서 추출한 이메일: " + email);
+            // }
 
-                if (member.isPresent()) {
-                    if (VerificationStatus.SUBMITTED.equals(member.get().getUnivVerification())) {
-                        response.sendRedirect("/signup/in-progress");
-                    } else {
-                        response.sendRedirect("/home");
-                    }
-                } else {
-                    response.sendRedirect("/signup/profile-info");
-                }
-            } else {
-                response.sendRedirect("/login-failure");
-            }
+            // if (email != null) {
+            //     Optional<Member> member = memberRepository.findByEmail(email);
+
+            //     if (member.isPresent()) {
+            //         if (VerificationStatus.SUBMITTED.equals(member.get().getUnivVerification())) {
+            //             response.sendRedirect("/signup/in-progress");
+            //         } else {
+            //             response.sendRedirect("/home");
+            //         }
+            //     } else {
+            //         response.sendRedirect("/signup/profile-info");
+            //     }
+            // } else {
+            //     response.sendRedirect("/login-failure");
+            // }
         };
     }
 }
