@@ -15,5 +15,6 @@ public interface FriendService {
     List<FriendResponseDTO.FriendSearchResultDTO> searchFriends(String query, int page, int size);
     List<FriendResponseDTO.FriendRecommendationDTO> getLanguageBasedRecommendations();
     List<FriendResponseDTO.HobbyRecommendationDTO> getHobbyBasedRecommendations();
+    List<FriendResponseDTO.FriendListDTO> searchAmongMyFriends(String query, int page, int size);
 
 }
