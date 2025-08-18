@@ -1,19 +1,18 @@
 package com.nexus.seoulmate.member.controller;
 
+import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.member.domain.GoogleInfo;
 import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.dto.CustomOAuth2User;
 import com.nexus.seoulmate.member.dto.InProgressResponse;
-import com.nexus.seoulmate.member.dto.OAuth2Response;
-import com.nexus.seoulmate.member.service.CustomOAuth2UserService;
+import com.nexus.seoulmate.member.repository.GoogleInfoRepository;
 import com.nexus.seoulmate.member.service.FluentProxyService;
 import com.nexus.seoulmate.member.service.MemberService;
-import com.nexus.seoulmate.member.service.TempStorage;
 import com.nexus.seoulmate.exception.Response;
 import com.nexus.seoulmate.exception.status.SuccessStatus;
 import com.nexus.seoulmate.member.dto.signup.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -25,8 +24,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
 import static com.nexus.seoulmate.exception.status.SuccessStatus.*;
 
@@ -38,91 +36,9 @@ public class MemberController {
 
     private final FluentProxyService fluentProxyService;
     private final MemberService memberService;
-    private final TempStorage tempStorage;
-    private final CustomOAuth2UserService customOAuth2UserService;
+    private final GoogleInfoRepository googleInfoRepository;
 
     // 소셜 회원가입
-
-    // 1-1. 프로필 기본 정보 받아오기
-    @Operation(summary = "구글에서 받아온 정보 반환", description = "회원가입하지 않은 사용자의 리디렉션 경로")
-    @GetMapping("/profile-info")
-    public Response<Object> getProfileInfo(@AuthenticationPrincipal OAuth2User oAuth2User,
-                                           HttpServletRequest request){
-        System.out.println("=== 프로필 기본 정보 요청 ===");
-        System.out.println("요청 URL: " + request.getRequestURL());
-        System.out.println("세션 ID (요청): " + request.getSession(false));
-
-        // SecurityContextHolder에서 직접 Principal 가져오기 시도
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("SecurityContextHolder 인증 객체: " + (authentication != null ? authentication.getClass().getName() : "null"));
-        System.out.println("SecurityContextHolder Principal: " + (authentication != null ? authentication.getPrincipal() : "null"));
-
-        System.out.println("OAuth2User 타입 (@AuthenticationPrincipal): " + (oAuth2User != null ? oAuth2User.getClass().getName() : "null"));
-        System.out.println("OAuth2User 인스턴스: " + oAuth2User);
-
-        String providerId = null;
-        String email = null;
-        Object principal = null;
-
-        if (oAuth2User != null) {
-            principal = oAuth2User;
-        } else if (authentication != null && authentication.getPrincipal() instanceof OAuth2User) {
-            principal = authentication.getPrincipal();
-            System.out.println("SecurityContextHolder에서 OAuth2User를 성공적으로 가져왔습니다.");
-        }
-
-        if (principal instanceof CustomOAuth2User customUser) {
-            OAuth2Response oAuth2Response = customUser.getOAuth2Response();
-            providerId = oAuth2Response.getProviderId();
-            email = oAuth2Response.getEmail();
-            System.out.println("CustomOAuth2User에서 추출한 providerId: " + providerId);
-            System.out.println("CustomOAuth2User에서 추출한 이메일: " + email);
-        } else if (principal instanceof OAuth2User normalOAuth2User) {
-            providerId = normalOAuth2User.getAttribute("sub");
-            email = normalOAuth2User.getAttribute("email");
-            System.out.println("일반 OAuth2User에서 추출한 providerId: " + providerId);
-            System.out.println("일반 OAuth2User에서 추출한 이메일: " + email);
-        } else {
-            System.out.println("Principal 객체가 OAuth2User 타입이 아닙니다. (혹은 null)");
-        }
-
-        if (providerId == null || email == null) {
-            System.out.println("ProviderId 또는 Email을 추출하지 못했습니다. OAuth2 인증이 실패했거나 세션이 만료되었을 수 있습니다.");
-            return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, Map.of("error", "Failed to get user info from OAuth2 principal."));
-        }
-
-        // TempStorage에서 저장된 SignupResponse 가져오기
-        SignupResponse dto = tempStorage.getSignupResponse(providerId);
-
-        if (dto != null) {
-            System.out.println("TempStorage에서 SignupResponse를 찾았습니다. Google ID: " + dto.getGoogleId());
-            String jsessionId = memberService.getSessionId(request);
-            System.out.println("현재 요청의 JSESSIONID: " + jsessionId);
-            customOAuth2UserService.changeJsessionId(request);
-            String newJsessionId = memberService.getSessionId(request);
-            System.out.println("changeJsessionId 호출 후 JSESSIONID: " + newJsessionId);
-
-            // 쿠키를 포함한 새로운 SignupResponse 생성
-            SignupResponse dtoWithCookies = SignupResponse.builder()
-                    .googleId(dto.getGoogleId())
-                    .email(dto.getEmail())
-                    .firstName(dto.getFirstName())
-                    .lastName(dto.getLastName())
-                    .sessionId("JSESSIONID=" + jsessionId)
-                    .build();
-
-            System.out.println("프로필 정보 반환 성공.");
-            return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, dtoWithCookies);
-        } else {
-            System.out.println("TempStorage에서 providerId " + providerId + "에 해당하는 SignupResponse를 찾을 수 없습니다.");
-        }
-
-        // SignupResponse가 없는 경우 빈 데이터 반환
-        Map<String, Object> data = new HashMap<>();
-        data.put("message", "Temporary user data not found.");
-        System.out.println("임시 데이터가 없으므로 빈 응답을 반환합니다.");
-        return Response.success(SuccessStatus.PROFILE_INFO_SUCCESS, data);
-    }
 
     // 1-2. 프로필 생성 (DTO + 파일 동시 처리)
     @Operation(summary = "1. 프로필 생성 API")
@@ -134,28 +50,42 @@ public class MemberController {
                                         @RequestParam("bio") String bio,
                                         @RequestPart(value = "profileImage") MultipartFile profileImage,
                                         @AuthenticationPrincipal OAuth2User oAuth2User){
-        // 현재 로그인한 사용자의 googleId 가져오기
-        String googleId = getGoogleIdFromOAuth2User(oAuth2User);
-        System.out.println("추출된 googleId: " + googleId);
-
-        String profileImageUrl = memberService.uploadProfileImage(googleId, profileImage);
-
-        // String을 Countries enum으로 변환 (한글 표시명 또는 enum 상수명 모두 지원)
-        Countries country;
-        try {
-            // 먼저 enum 상수명으로 시도
-            country = Countries.valueOf(countryStr);
-        } catch (IllegalArgumentException e) {
-            // enum 상수명이 아니면 한글 표시명으로 시도
-            country = Countries.fromDisplayName(countryStr);
+        if (oAuth2User == null) {
+            return Response.fail(ErrorStatus.UNAUTHORIZED);
         }
 
+        // @AuthenticationPrincipal에서 googleId(sub)를 직접 가져오기
+        String googleId = oAuth2User.getAttribute("sub");
+        if (googleId == null) {
+            return Response.fail(ErrorStatus.BAD_REQUEST);
+        }
+
+        System.out.println("추출된 googleId: " + googleId);
+
+        // GoogleInfo 테이블에서 googleId로 정보 조회
+        Optional<GoogleInfo> googleInfoOpt = googleInfoRepository.findByGoogleId(googleId);
+        if (googleInfoOpt.isEmpty()) {
+            return Response.fail(ErrorStatus.MEMBER_NOT_FOUND);
+        }
+
+        // DB에서 가져온 GoogleInfo 객체를 사용하여 정보 저장
+        GoogleInfo googleInfo = googleInfoOpt.get();
+        String profileImageUrl = memberService.uploadProfileImage(googleInfo.getGoogleId(), profileImage);
+
+        Countries country;
+        try {
+            country = Countries.valueOf(countryStr);
+        } catch (IllegalArgumentException e) {
+            country = Countries.fromDisplayName(countryStr);
+        }
+        
         // ProfileCreateRequest 객체 생성
         ProfileCreateRequest profileCreateRequest = new ProfileCreateRequest(
                 firstName, lastName, LocalDate.parse(DOB), country, bio, profileImageUrl
         );
-        
-        memberService.saveProfile(profileCreateRequest, googleId);
+
+        // memberService.saveProfile 메서드를 호출하여 프로필 저장
+        memberService.saveProfile(profileCreateRequest, googleInfo.getGoogleId());
         System.out.println("프로필 저장 완료");
         return Response.success(SuccessStatus.PROFILE_SUCCESS, null);
     }

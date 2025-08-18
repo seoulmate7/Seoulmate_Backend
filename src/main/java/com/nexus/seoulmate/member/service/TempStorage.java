@@ -30,7 +30,7 @@ public class TempStorage {
                 "email", dto.getEmail(),
                 "firstName", dto.getFirstName(),
                 "lastName", dto.getLastName(),
-                "authProvider", dto.getAuthProvider() // 문자열 그대로 저장
+                "authProvider", dto.getAuthProvider() 
         );
         redisTemplate.opsForHash().putAll(key, map);
         redisTemplate.expire(key, TTL);
