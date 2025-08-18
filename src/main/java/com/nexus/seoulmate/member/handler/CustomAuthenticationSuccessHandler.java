@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -59,19 +60,21 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         }
         
         // 리디렉션 경로
-        // response.sendRedirect("local/oauth2/code/google");
+        response.sendRedirect("http://localhost:5173/login/oauth2/code/google");
+
+        // http://localhost:5173/login/oauth2/code/google
 
         // 회원 상태에 따른 리디렉션
-        Optional<Member> member = memberRepository.findByEmail(email);
-        if (member.isEmpty()) {
-            response.sendRedirect("/auth/profile-info");
-        } else {
-            Member existingMember = member.get();
-            if (VerificationStatus.SUBMITTED.equals(existingMember.getUnivVerification())) {
-                response.sendRedirect("/signup/in-progress");
-            } else {
-                response.sendRedirect("/home");
-            }
-        }
+        // Optional<Member> member = memberRepository.findByEmail(email);
+        // if (member.isEmpty()) {
+        //     response.sendRedirect("/auth/profile-info");
+        // } else {
+        //     Member existingMember = member.get();
+        //     if (VerificationStatus.SUBMITTED.equals(existingMember.getUnivVerification())) {
+        //         response.sendRedirect("/signup/in-progress");
+        //     } else {
+        //         response.sendRedirect("/home");
+        //     }
+        // }
     }
 }
