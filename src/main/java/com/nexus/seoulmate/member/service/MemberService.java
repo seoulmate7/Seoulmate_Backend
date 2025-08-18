@@ -73,13 +73,20 @@ public class MemberService {
         MemberCreateRequest memberCreateRequest = tempStorage.collect(googleId);
 
         // 기존 Hobby 엔티티들을 조회
-        List<Hobby> existingHobbies = new ArrayList<>();
+        // List<Hobby> existingHobbies = new ArrayList<>();
         if (memberCreateRequest.getHobbies() != null) {
             for (Hobby hobby : memberCreateRequest.getHobbies()) {
                 // hobbyName으로 기존 Hobby 엔티티 조회
                 hobbyRepository.findByHobbyNameAndHobbyCategory(hobby.getHobbyName(), hobby.getHobbyCategory())
                         .ifPresent(existingHobbies::add);
             }
+        }
+
+        // Redis에서 넘어온 취미 이름(String) 리스트를 Hobby 엔티티 리스트로 변환
+        List<Hobby> hobbyNames = memberCreateRequest.getHobbies();
+        List<Hobby> existingHobbies = new ArrayList<>();
+        if (hobbyNames != null && !hobbyNames.isEmpty()) {
+            existingHobbies = hobbyRepository.findByHobbyNameIn(hobbyNames);
         }
 
         Member member = Member.createGoogleUser(

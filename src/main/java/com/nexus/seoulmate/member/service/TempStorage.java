@@ -1,6 +1,7 @@
 package com.nexus.seoulmate.member.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nexus.seoulmate.exception.CustomException;
+import com.nexus.seoulmate.exception.status.ErrorStatus;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.dto.signup.*;
@@ -19,7 +20,6 @@ import java.util.Map;
 public class TempStorage {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final ObjectMapper objectMapper;
     private static final Duration TTL = Duration.ofMinutes(30); // 저장 시간
 
     // 1. 구글 회원가입 정보 저장
@@ -34,41 +34,6 @@ public class TempStorage {
         );
         redisTemplate.opsForHash().putAll(key, map);
         redisTemplate.expire(key, TTL);
-    }
-
-    // 1-1. 구글 회원가입 정보 가져오기
-    public SignupResponse getSignupResponse(String googleId) {
-        try {
-            if (googleId == null || googleId.isEmpty()) {
-                System.out.println("googleId가 null이거나 비어있습니다.");
-                return null;
-            }
-
-            Map<Object, Object> raw = redisTemplate.opsForHash().entries(googleId);
-            System.out.println("Redis에서 가져온 데이터: " + raw);
-
-            if (raw.isEmpty()) {
-                System.out.println("Redis에서 데이터를 찾을 수 없습니다. googleId: " + googleId);
-                return null;
-            }
-
-            String email = (String) raw.get("email");
-            String firstName = (String) raw.get("firstName");
-            String lastName = (String) raw.get("lastName");
-            String sessionId = (String) raw.get("sessionId");
-
-            return SignupResponse.builder()
-                    .googleId(googleId)
-                    .email(email)
-                    .firstName(firstName)
-                    .lastName(lastName)
-                    .sessionId(sessionId)
-                    .build();
-        } catch (Exception e) {
-            System.out.println("getSignupResponse에서 오류 발생: " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
     }
 
     // 2. 프로필 생성 정보 저장
@@ -87,25 +52,32 @@ public class TempStorage {
 
     // 3. 언어 테스트 정보 저장
     public void save(LevelTestRequest dto, String googleId) {
-        String key = googleId;
-        redisTemplate.opsForHash().put(key, "languages", dto.getLanguages());
+
+        redisTemplate.opsForHash().put(googleId, "languages", dto.getLanguages());
     }
 
     // 4. 취미 저장
     public void save(HobbyRequest dto, String googleId) {
-        String key = googleId;
-        redisTemplate.opsForHash().put(key, "hobbies", dto.getHobbies());
+        if (dto == null || dto.getHobbies() == null) {
+            throw new CustomException(ErrorStatus.NULL_PARAMETER);
+        }
+        // 로그 추가: Redis에 저장하기 직전 값 확인
+        System.out.println("로그: Redis에 저장될 구글 ID = " + googleId);
+        System.out.println("로그: Redis에 저장될 취미 리스트 = " + dto.getHobbies());
+
+        redisTemplate.opsForHash().put(googleId, "hobbies", dto.getHobbies());
+
+        System.out.println("로그: Redis에 취미 정보 저장 완료.");
     }
 
     // 5. 학교 인증 신청
     public void save(UnivAuthDto dto, String googleId) {
-        String key = googleId;
         Map<String, Object> map = Map.of(
                 "univ", dto.getUniversity(),
                 "univCertificate", dto.getUnivCertificateUrl(),
                 "verificationStatus", VerificationStatus.SUBMITTED
         );
-        redisTemplate.opsForHash().putAll(key, map);
+        redisTemplate.opsForHash().putAll(googleId, map);
     }
 
     // 최종 데이터 취합
