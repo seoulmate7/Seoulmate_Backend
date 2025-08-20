@@ -1,5 +1,6 @@
 package com.nexus.seoulmate.member.service;
 
+import com.nexus.seoulmate.aws.service.AmazonS3Service;
 import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
@@ -29,6 +30,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final HobbyRepository hobbyRepository;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final AmazonS3Service amazonS3Service;
 
     // 1. 프로필 생성
     public void saveProfile(ProfileCreateRequest profileCreateRequest, String googleId){
@@ -38,9 +40,12 @@ public class MemberService {
 
     // 1-1. 프로필 이미지 업로드
     public String uploadProfileImage(String googleId, MultipartFile profileImage) {
-        // TODO: S3 업로드 로직 구현
+
+        // S3 업로드 로직 구현
+        return amazonS3Service.uploadProfile(profileImage).getUrl();
+
         // 임시로 파일명 반환
-        return "https://seoulmate-s3-bucket.s3.amazonaws.com/profile/" + googleId + "/" + profileImage.getOriginalFilename();
+        // return "https://seoulmate-s3-bucket.s3.amazonaws.com/profile/" + googleId + "/" + profileImage.getOriginalFilename();
     }
 
     // 2. 언어 레벨 테스트
@@ -63,9 +68,11 @@ public class MemberService {
 
     // 4-1. 학교 인증서 업로드
     public String uploadUnivCertificate(String googleId, MultipartFile profileImage) {
-        // TODO: S3 업로드 로직 구현
+        // S3 업로드 로직 구현
+        return amazonS3Service.uploadCertificate(profileImage).getUrl();
+        
         // 임시로 파일명 반환
-        return "https://seoulmate-s3-bucket.s3.amazonaws.com/certificate/" + googleId + "/" + profileImage.getOriginalFilename();
+        // return "https://seoulmate-s3-bucket.s3.amazonaws.com/certificate/" + googleId + "/" + profileImage.getOriginalFilename();
     }
 
     // 정보 다 합쳐서 회원가입 완료 + 모든 회원간의 궁합 생성하기
@@ -73,20 +80,13 @@ public class MemberService {
         MemberCreateRequest memberCreateRequest = tempStorage.collect(googleId);
 
         // 기존 Hobby 엔티티들을 조회
-        // List<Hobby> existingHobbies = new ArrayList<>();
+        List<Hobby> existingHobbies = new ArrayList<>();
         if (memberCreateRequest.getHobbies() != null) {
             for (Hobby hobby : memberCreateRequest.getHobbies()) {
                 // hobbyName으로 기존 Hobby 엔티티 조회
                 hobbyRepository.findByHobbyNameAndHobbyCategory(hobby.getHobbyName(), hobby.getHobbyCategory())
                         .ifPresent(existingHobbies::add);
             }
-        }
-
-        // Redis에서 넘어온 취미 이름(String) 리스트를 Hobby 엔티티 리스트로 변환
-        List<Hobby> hobbyNames = memberCreateRequest.getHobbies();
-        List<Hobby> existingHobbies = new ArrayList<>();
-        if (hobbyNames != null && !hobbyNames.isEmpty()) {
-            existingHobbies = hobbyRepository.findByHobbyNameIn(hobbyNames);
         }
 
         Member member = Member.createGoogleUser(

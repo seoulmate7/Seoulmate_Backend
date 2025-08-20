@@ -1,5 +1,6 @@
 package com.nexus.seoulmate.mypage;
 
+import com.nexus.seoulmate.aws.service.AmazonS3Service;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.domain.enums.Languages;
@@ -8,6 +9,9 @@ import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.member.service.FluentProxyService;
 import com.nexus.seoulmate.member.service.MemberService;
 import com.nexus.seoulmate.mypage.dto.MyPageResponse;
+
+import lombok.RequiredArgsConstructor;
+
 import com.nexus.seoulmate.mypage.dto.HobbyUpdateRequest;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,19 +23,14 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class MyPageService {
 
     private final FluentProxyService fluentProxyService;
     private final MemberService memberService;
     private final MemberRepository memberRepository;
     private final HobbyRepository hobbyRepository;
-
-    public MyPageService(FluentProxyService fluentProxyService, MemberService memberService, MemberRepository memberRepository, HobbyRepository hobbyRepository){
-        this.fluentProxyService = fluentProxyService;
-        this.memberService = memberService;
-        this.memberRepository = memberRepository;
-        this.hobbyRepository = hobbyRepository;
-    }
+    private final AmazonS3Service amazonS3Service;
 
     // 마이페이지 get
     @Transactional(readOnly = true)
@@ -65,7 +64,7 @@ public class MyPageService {
     public void updateProfileImage(MultipartFile profileImage){
         Member member = memberService.getCurrentUser();
 
-        String profileImageUrl = "이미지 url"; // TODO: S3 업로드 로직 구현
+        String profileImageUrl = amazonS3Service.uploadProfile(profileImage).getUrl();
 
         member.changeProfileImage(profileImageUrl);
 
