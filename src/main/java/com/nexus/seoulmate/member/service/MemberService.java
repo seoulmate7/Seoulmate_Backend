@@ -2,12 +2,15 @@ package com.nexus.seoulmate.member.service;
 
 import com.nexus.seoulmate.aws.service.AmazonS3Service;
 import com.nexus.seoulmate.exception.CustomException;
+import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.member.domain.GoogleInfo;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.dto.InProgressResponse;
 import com.nexus.seoulmate.member.dto.signup.*;
 import com.nexus.seoulmate.member.repository.HobbyRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
+import com.nexus.seoulmate.member.repository.GoogleInfoRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +34,7 @@ public class MemberService {
     private final HobbyRepository hobbyRepository;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final AmazonS3Service amazonS3Service;
+    private final GoogleInfoRepository googleInfoRepository;
 
     // 1. 프로필 생성
     public void saveProfile(ProfileCreateRequest profileCreateRequest, String googleId){
@@ -89,7 +93,11 @@ public class MemberService {
             }
         }
 
+        GoogleInfo googleInfoId = googleInfoRepository.findByGoogleId(googleId).
+                orElseThrow(() -> new CustomException(ErrorStatus.USER_NOT_FOUND));
+
         Member member = Member.createGoogleUser(
+                googleInfoId,
                 memberCreateRequest.getEmail(),
                 memberCreateRequest.getFirstName(),
                 memberCreateRequest.getLastName(),
