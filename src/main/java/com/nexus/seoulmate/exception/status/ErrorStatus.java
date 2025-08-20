@@ -19,6 +19,9 @@ public enum ErrorStatus {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON 404", "사용자를 찾을 수 없습니다."),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "COMMON405", "허용되지 않는 HTTP Method입니다."),
 
+    // Member
+    NULL_PARAMETER(HttpStatus.BAD_REQUEST, "SIGNUP 400", "파라미터가 null입니다."),
+
     // Member > Fluent 관련 예외
     FLUENT_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "FLUENT 401", "Fluent API 로그인에 실패했습니다."),
     FLUENT_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "FLUENT 404", "Fluent API 토큰을 찾을 수 없습니다."),

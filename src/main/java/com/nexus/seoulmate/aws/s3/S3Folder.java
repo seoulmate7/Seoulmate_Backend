@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum S3Folder {
     PROFILE("profile/"),
     CERTIFICATE("certificate/"),
-    MEETING("meeting/");
+    MEETING("meeting/"),
+    AUDIO("audio/");
 
     private final String prefix;
 }
