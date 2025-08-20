@@ -52,6 +52,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
             if (hobby3 != null) selectedHobbies1.add(hobby3);
 
             Member member1 = Member.createGoogleUser(
+                    null,
                     "test1@example.com",
                     "길동",
                     "홍",
@@ -91,6 +92,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
             if (hobby6 != null) selectedHobbies2.add(hobby6);
 
             Member member2 = Member.createGoogleUser(
+                    null,
                     "test2@example.com",
                     "Robert",
                     "Daune",
