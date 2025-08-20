@@ -54,7 +54,7 @@ public class MyPageController {
     @Operation(summary = "언어 레벨테스트 재응시 API")
     @PatchMapping(value = "/update-language-level", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<Object> updateLanguageLevel(@RequestPart("audioFile") MultipartFile audioFile,
-                                                @RequestParam("language") Languages language){
+                                                @RequestParam("language") String language){
         myPageService.updateLanguageLevel(audioFile, language);
         return Response.success(LANGUAGE_LEVEL_UPDATE_SUCCESS, null);
     }

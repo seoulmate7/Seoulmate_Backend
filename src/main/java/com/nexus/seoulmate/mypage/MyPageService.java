@@ -108,8 +108,18 @@ public class MyPageService {
 
     // 언어 레벨테스트 재응시
     // FluentProxyService 에서 진행
-    public void updateLanguageLevel(MultipartFile audioFile, Languages language){
+    public void updateLanguageLevel(MultipartFile audioFile, String languageStr){
         Member member = memberService.getCurrentUser();
+
+        // String을 Languages enum으로 변환 (한글 표시명 또는 enum 상수명 모두 지원)
+        Languages language;
+        try {
+            // 먼저 enum 상수명으로 시도
+            language = Languages.valueOf(languageStr);
+        } catch (IllegalArgumentException e) {
+            // enum 상수명이 아니면 한글 표시명으로 시도
+            language = Languages.fromDisplayName(languageStr);
+        }
         String languageLevel = fluentProxyService.fluentFlow(audioFile, language);
         int intLanguageLevel = (int) Double.parseDouble(languageLevel);
 
