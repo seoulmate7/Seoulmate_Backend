@@ -53,7 +53,7 @@ public class Member {
     @Column(nullable = false)
     private String profileImage;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "MEMBER_LANGUAGE", joinColumns = @JoinColumn(name = "USER_ID"))
     @MapKeyEnumerated(EnumType.STRING)
     @MapKeyColumn(name = "LANGUAGE")
@@ -63,7 +63,7 @@ public class Member {
     private Map<Languages, Integer> languages = new HashMap<>();
     // 언어 + 언어 레벨
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @Builder.Default
     private List<Hobby> hobbies = new ArrayList<>();
 

@@ -1,6 +1,9 @@
 package com.nexus.seoulmate.mypage;
 
 import com.nexus.seoulmate.aws.service.AmazonS3Service;
+import com.nexus.seoulmate.exception.CustomException;
+import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.exception.status.ErrorStatus.*;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.domain.enums.Languages;
@@ -21,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -75,6 +79,7 @@ public class MyPageService {
     }
 
     // 프로필 한 줄 소개 수정
+    @Transactional
     public void updateProfileBio(String newBio){
         Member member = memberService.getCurrentUser();
 
@@ -85,6 +90,7 @@ public class MyPageService {
     }
 
     // 취미 수정
+    @Transactional
     public void updateHobbies(HobbyUpdateRequest dto){
         Member member = memberService.getCurrentUser();
 
@@ -103,7 +109,7 @@ public class MyPageService {
         }
         
         member.changeHobbies(newHobbies);
-        memberRepository.save(member);
+        // memberRepository.save(member);
     }
 
     // 언어 레벨테스트 재응시

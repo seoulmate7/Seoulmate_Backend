@@ -21,6 +21,7 @@ public enum ErrorStatus {
 
     // Member
     NULL_PARAMETER(HttpStatus.BAD_REQUEST, "SIGNUP 400", "파라미터가 null입니다."),
+    HOBBY_NOT_FOUND(HttpStatus.BAD_REQUEST, "HOBBY 400", "취미를 찾을 수 없습니다."),
 
     // Member > Fluent 관련 예외
     FLUENT_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "FLUENT 401", "Fluent API 로그인에 실패했습니다."),
@@ -40,7 +41,6 @@ public enum ErrorStatus {
     INVALID_LANGUAGE(HttpStatus.BAD_REQUEST, "COMMON400", "유효하지 않은 언어입니다."),
     CATEGORY_NOT_PROVIDED(HttpStatus.BAD_REQUEST, "CAT400", "카테고리가 입력되지 않았습니다."),
     CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "CAT400", "유효하지 않은 카테고리입니다."),
-    HOBBY_NOT_FOUND(HttpStatus.BAD_REQUEST, "HOBBY400", "세부 취미를 찾을 수 없습니다."),
     HOBBY_AMBIGUOUS(HttpStatus.BAD_REQUEST, "HOBBY400", "동일한 이름의 세부 취미가 여러 카테고리에 존재합니다."),
 
     // Search
