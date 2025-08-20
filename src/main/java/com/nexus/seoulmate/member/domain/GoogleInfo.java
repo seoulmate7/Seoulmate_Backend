@@ -28,7 +28,7 @@ public class GoogleInfo {
     private String lastName;
 
     public void updateSessionId(String sessionId){
-        this.sessionId = sessionId;
+        this.sessionId = "JSESSIONID=" + sessionId;
     }
 
     public GoogleInfo(String sessionId, String googleId, String email, String firstName, String lastName) {

@@ -1,5 +1,6 @@
 package com.nexus.seoulmate.member.controller;
 
+import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.exception.status.ErrorStatus;
 import com.nexus.seoulmate.member.domain.GoogleInfo;
 import com.nexus.seoulmate.member.domain.enums.*;

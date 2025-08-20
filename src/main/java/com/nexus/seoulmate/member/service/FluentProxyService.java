@@ -2,8 +2,12 @@ package com.nexus.seoulmate.member.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nexus.seoulmate.aws.service.AmazonS3Service;
 import com.nexus.seoulmate.config.FluentApiProperties;
 import com.nexus.seoulmate.member.domain.enums.Languages;
+
+import lombok.RequiredArgsConstructor;
+
 import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.exception.status.ErrorStatus;
 import org.springframework.http.*;
@@ -20,15 +24,12 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class FluentProxyService {
     private final Storage storage = StorageOptions.getDefaultInstance().getService();
     private final RestTemplate restTemplate;
     private final FluentApiProperties fluentApiProperties;
-
-    public FluentProxyService(RestTemplate restTemplate, FluentApiProperties fluentApiProperties) {
-        this.restTemplate = restTemplate;
-        this.fluentApiProperties = fluentApiProperties;
-    }
+    private final AmazonS3Service amazonS3Service;
 
     public String fluentFlow(MultipartFile audioFile, Languages language){
         System.out.println(storage.getOptions().getProjectId());
@@ -51,12 +52,11 @@ public class FluentProxyService {
         String bucketFolderName = "example-folder";
 
         // String audioUrl = "https://storage.googleapis.com/bucket-seoulmate-250826/example-folder/english-89.wav";
-        String audioUrl = uploadAudioFile(audioFile, bucketName, bucketFolderName);
+        // String audioUrl = uploadAudioFile(audioFile, bucketName, bucketFolderName);
+        String audioUrl = amazonS3Service.uploadAudio(audioFile).getUrl();
 
         // 4. 채점 요청 및 결과 받기
-        String result = getScore(xAccessToken, postId, audioUrl);
-
-        return result;
+        return getScore(xAccessToken, postId, audioUrl);
     }
 
     // 1. 로그인
@@ -154,7 +154,7 @@ public class FluentProxyService {
         }
     }
 
-    // 4. 오디오 파일 버킷에 업로드
+    // 4. 오디오 파일 구글 클라우드 버킷에 업로드
     public String uploadAudioFile(MultipartFile audioFile, String bucketName, String bucketFolderName){
         String fileName = bucketFolderName + "/" + UUID.randomUUID() + ".wav";
         BlobId blobId = BlobId.of(bucketName, fileName);

@@ -25,6 +25,10 @@ public class AmazonS3Service {
         return s3Manager.upload(file, S3Folder.MEETING);
     }
 
+    public S3UploadResult uploadAudio(MultipartFile file) {
+        return s3Manager.upload(file, S3Folder.AUDIO);
+    }
+
     public void deleteObject(String key) {
         s3Manager.delete(key);
     }
