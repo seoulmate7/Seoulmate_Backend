@@ -5,6 +5,7 @@ public record MeetingBasicInfoRes(
         String type,
         String image,
         String title,
+        String location,
         String meeting_day,
         String start_time
 ) {
