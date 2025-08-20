@@ -35,6 +35,10 @@ public enum ErrorStatus {
     FLUENT_OVERALL_POINT_NOT_FOUND(HttpStatus.NOT_FOUND, "FLUENT 404", "overall_points를 찾을 수 없습니다."),
     FLUENT_OVERALL_POINT_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FLUENT 500", "overall_points 파싱에 실패했습니다."),
 
+    // Admin
+    STATUS_CONFLICT(HttpStatus.CONFLICT, "ADMIN 409", "학교 인증서 제출 상태가 아닙니다."),
+    USER_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "ADMIN 400", "관리자가 아닙니다."),
+
     // Meeting
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING404", "모임을 찾을 수 없습니다."),
     INVALID_MEETING_TYPE(HttpStatus.BAD_REQUEST, "MEETINGTYPE400", "모임 타입이 유효하지 않습니다."),

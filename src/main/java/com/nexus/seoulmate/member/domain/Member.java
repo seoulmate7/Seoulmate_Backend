@@ -131,4 +131,12 @@ public class Member {
         this.hobbies.clear();        // 기존 것 전부 삭제
         this.hobbies.addAll(newHobbies); // 새로 입력된 취미 등록
     }
+
+    public void admitUnivCertificate(){
+        this.univVerification = VerificationStatus.VERIFIED;
+    }
+
+    public void rejectUnivCertificate(){
+        this.univVerification = VerificationStatus.NOT_SUBMITTED;
+    }
 }

@@ -24,6 +24,9 @@ public enum SuccessStatus {
     LOGIN_SUCCESS(HttpStatus.OK, "LOGIN 200", "로그인 성공"),
     LOGOUT_SUCCESS(HttpStatus.OK, "LOGOUT 200", "로그아웃 성공"),
 
+    // Admin
+    PROCESS_SUCCESS(HttpStatus.OK, "ADMIN 200", "학교 인증서 처리 성공"),
+
     // Meeting
     CREATE_MEETING(HttpStatus.CREATED, "MEETING201", "모임이 성공적으로 생성되었습니다."),
     UPDATE_MEETING(HttpStatus.OK, "MEETING200","모임이 성공적으로 수정되었습니다."),

@@ -11,10 +11,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
+    Member findByUserId(Long userId);
     Optional<Member> findByEmail(String email);
+
     @Query("SELECT m FROM Member m LEFT JOIN FETCH m.languages WHERE m.userId = :userId")
     Optional<Member> findWithLanguagesById(@Param("userId") Long userId);
+
     Page<Member> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String first, String last, Pageable pageable);
+
     @Query("""
     SELECT m FROM Member m 
     WHERE m.id <> :currentUserId 
