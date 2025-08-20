@@ -31,17 +31,44 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findAllExcludingFriendsAndSelf(@Param("currentUserId") Long currentUserId);
 
     @Query("""
-        SELECT m FROM Member m
-         WHERE m.userId IN :friendIds
-           AND (
-                LOWER(m.firstName) LIKE LOWER(CONCAT('%', :q, '%'))
-             OR LOWER(m.lastName)  LIKE LOWER(CONCAT('%', :q, '%'))
-           )
-        """)
-    Page<Member> searchMyFriendsByName(
-            @Param("friendIds") List<Long> friendIds,
-            @Param("q") String q,
-            Pageable pageable
-    );
+    SELECT m
+    FROM Member m
+    WHERE EXISTS (
+      SELECT 1
+      FROM Friendship f
+      WHERE (f.userId1 = m AND f.userId2.userId = :currentId)
+         OR (f.userId2 = m AND f.userId1.userId = :currentId)
+    )
+      AND (
+           LOWER(m.firstName) LIKE LOWER(CONCAT('%', :q, '%'))
+        OR LOWER(m.lastName)  LIKE LOWER(CONCAT('%', :q, '%'))
+        OR LOWER(CONCAT(m.lastName, m.firstName)) LIKE LOWER(CONCAT('%', :q, '%'))
+        OR LOWER(CONCAT(m.firstName, ' ', m.lastName)) LIKE LOWER(CONCAT('%', :q, '%'))
+      )
+    """)
+    Page<Member> searchMyFriendsByName(@Param("currentId") Long currentId,
+                                       @Param("q") String query,
+                                       Pageable pageable);
+
+    @Query("""
+    SELECT m
+    FROM Member m
+    WHERE m.userId <> :currentId
+      AND (
+           LOWER(m.firstName) LIKE LOWER(CONCAT('%', :q, '%'))
+        OR LOWER(m.lastName)  LIKE LOWER(CONCAT('%', :q, '%'))
+        OR LOWER(CONCAT(m.lastName, m.firstName)) LIKE LOWER(CONCAT('%', :q, '%'))
+        OR LOWER(CONCAT(m.firstName, ' ', m.lastName)) LIKE LOWER(CONCAT('%', :q, '%'))
+      )
+      AND NOT EXISTS (
+        SELECT 1
+        FROM Friendship f
+        WHERE (f.userId1 = m AND f.userId2.userId = :currentId)
+           OR (f.userId2 = m AND f.userId1.userId = :currentId)
+      )
+    """)
+    Page<Member> searchNonFriendsByName(@Param("currentId") Long currentId,
+                                        @Param("q") String query,
+                                        Pageable pageable);
 
 }

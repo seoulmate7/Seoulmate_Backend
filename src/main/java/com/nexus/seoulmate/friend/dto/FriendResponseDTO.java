@@ -92,4 +92,22 @@ public class FriendResponseDTO {
         private int totalMatchedHobbies;
     }
 
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PagedFriendSearchResultDTO {
+        private List<FriendSearchResultDTO> content;
+        private boolean hasNext;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PagedFriendListDTO {
+        private List<FriendListDTO> content;
+        private boolean hasNext;
+    }
+
 }

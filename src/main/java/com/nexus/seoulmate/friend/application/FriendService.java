@@ -12,9 +12,9 @@ public interface FriendService {
     List<FriendResponseDTO.FriendListDTO> getFriends();
     FriendResponseDTO.FriendDetailDTO getFriendDetail(Long userId);
     void deleteFriend(Long userId);
-    List<FriendResponseDTO.FriendSearchResultDTO> searchFriends(String query, int page, int size);
     List<FriendResponseDTO.FriendRecommendationDTO> getLanguageBasedRecommendations();
     List<FriendResponseDTO.HobbyRecommendationDTO> getHobbyBasedRecommendations();
-    List<FriendResponseDTO.FriendListDTO> searchAmongMyFriends(String query, int page, int size);
+    FriendResponseDTO.PagedFriendSearchResultDTO searchFriends(String query, int page, int size);
+    FriendResponseDTO.PagedFriendListDTO searchAmongMyFriends(String query, int page, int size);
 
 }

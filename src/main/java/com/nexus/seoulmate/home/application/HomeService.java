@@ -69,6 +69,7 @@ public class HomeService {
                 regular.getMeetingType().name(),
                 regular.getImage(),
                 regular.getTitle(),
+                regular.getLocation(),
                 regular.getMeetingDay().toString(),
                 regular.getStartTime().toString()
         );
