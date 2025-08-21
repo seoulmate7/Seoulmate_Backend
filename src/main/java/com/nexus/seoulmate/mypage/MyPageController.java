@@ -5,6 +5,7 @@ import com.nexus.seoulmate.mypage.dto.HobbyUpdateRequest;
 import com.nexus.seoulmate.mypage.dto.MeetingSimpleDto;
 import com.nexus.seoulmate.mypage.dto.MyPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 import static com.nexus.seoulmate.exception.status.SuccessStatus.*;
@@ -69,18 +71,18 @@ public class MyPageController {
     @Operation(summary = "내가 주최한 모임 조회 API")
     @GetMapping("/hosted")
     public ResponseEntity<Response<List<MeetingSimpleDto>>> getMyHostedMeetings(
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        log.info("[REQ] /hosted date={}", date);
-        List<MeetingSimpleDto> meetings = myPageService.getMyHostedMeetingsByDate(date);
-        meetings.forEach(m -> log.info("[RES] meetingId={}, meetingDay={}", m.meetingId(), m.meetingDay()));
+            @RequestParam int year,
+            @RequestParam int month) {
+        List<MeetingSimpleDto> meetings = myPageService.getMyHostedMeetingsByMonth(year, month);
         return ResponseEntity.ok(Response.success(MY_MEETING_HOSTED_FETCH_SUCCESS, meetings));
     }
 
     @Operation(summary = "내가 참여한 모임 조회 API")
     @GetMapping("/participated")
     public ResponseEntity<Response<List<MeetingSimpleDto>>> getMyParticipatedMeetings(
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        List<MeetingSimpleDto> meetings = myPageService.getMyParticipatedMeetingsByDate(date);
+            @RequestParam int year,
+            @RequestParam int month) {
+        List<MeetingSimpleDto> meetings = myPageService.getMyParticipatedMeetingsByMonth(year, month);
         return ResponseEntity.ok(Response.success(MY_MEETING_PARTICIPATED_FETCH_SUCCESS, meetings));
     }
 }
