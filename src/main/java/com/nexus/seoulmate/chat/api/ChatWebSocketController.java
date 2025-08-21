@@ -13,6 +13,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -31,7 +32,8 @@ public class ChatWebSocketController {
     @MessageMapping("/rooms/{roomId}/send")
     public void send(
             @DestinationVariable Long roomId,
-            @Payload MessageDTO.SendRequest request
+            @Payload MessageDTO.SendRequest request,
+            Principal principal
     ) {
         log.info("[WS] send enter roomId={}, payload={}", roomId, request);
         chatService.sendMessage(roomId, request);
