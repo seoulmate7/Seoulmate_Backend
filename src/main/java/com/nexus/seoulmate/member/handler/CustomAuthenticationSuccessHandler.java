@@ -60,7 +60,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         }
         
         // 리디렉션 경로
-        response.sendRedirect("https://seoulmate-frontend.vercel.app/login/oauth2/code/google");
+        response.sendRedirect("http://localhost:5173/login/oauth2/code/google");
 
         // http://localhost:5173/login/oauth2/code/google
         // https://seoulmate-frontend.vercel.app/login/oauth2/code/google
