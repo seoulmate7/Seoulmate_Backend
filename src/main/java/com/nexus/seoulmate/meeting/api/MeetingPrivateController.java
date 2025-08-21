@@ -7,9 +7,11 @@ import com.nexus.seoulmate.meeting.api.dto.request.privateReq.MeetingUpdatePriva
 import com.nexus.seoulmate.meeting.api.dto.response.MeetingDetailPrivateRes;
 import com.nexus.seoulmate.meeting.application.privateMeeting.PrivateMeetingService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,33 +24,29 @@ public class MeetingPrivateController {
 
     @Operation(summary = "private 모임 생성 API")
     @PostMapping
-    public ResponseEntity<Response<Long>> createMeeting(@RequestBody MeetingCreatePrivateReq req,
-                                                  @RequestHeader("userId") Long userId){
+    public ResponseEntity<Response<Long>> createMeeting(@RequestBody MeetingCreatePrivateReq req){
         return ResponseEntity
                 .status(SuccessStatus.CREATE_MEETING.getStatus())
-                .body(privateMeetingService.createMeeting(req, userId));
+                .body(privateMeetingService.createMeeting(req));
     }
 
     @Operation(summary = "private 모임 상세 조회 API")
     @GetMapping("/{meetingId}")
-    public ResponseEntity<Response<MeetingDetailPrivateRes>> getPrivateMeetingDetail(@PathVariable Long meetingId,
-                                                                           @RequestHeader("userId") Long userId){
-        return ResponseEntity.ok(privateMeetingService.getPrivateMeetingDetail(meetingId, userId));
+    public ResponseEntity<Response<MeetingDetailPrivateRes>> getPrivateMeetingDetail(@PathVariable Long meetingId){
+        return ResponseEntity.ok(privateMeetingService.getPrivateMeetingDetail(meetingId));
     }
 
     @Operation(summary = "private 모임 수정 API")
     @PutMapping("/{meetingId}")
     public ResponseEntity<Response<Long>> updateMeeting(@PathVariable Long meetingId,
-                                                    @RequestBody MeetingUpdatePrivateReq req,
-                                                    @RequestHeader("userId") Long userId){
-        return ResponseEntity.ok(privateMeetingService.updateMeeting(meetingId, req, userId));
+                                                    @RequestBody MeetingUpdatePrivateReq req){
+        return ResponseEntity.ok(privateMeetingService.updateMeeting(meetingId, req));
     }
 
     @Operation(summary = "private 모임 삭제 API")
     @DeleteMapping("/{meetingId}")
-    public ResponseEntity<Response<Long>> deleteMeeting(@PathVariable Long meetingId,
-                                                    @RequestHeader("userId") Long userId){
-        return ResponseEntity.ok(privateMeetingService.deleteMeeting(meetingId, userId));
+    public ResponseEntity<Response<Long>> deleteMeeting(@PathVariable Long meetingId){
+        return ResponseEntity.ok(privateMeetingService.deleteMeeting(meetingId));
     }
 
 }
