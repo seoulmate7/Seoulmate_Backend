@@ -1,6 +1,9 @@
 package com.nexus.seoulmate.mypage;
 
 import com.nexus.seoulmate.aws.service.AmazonS3Service;
+import com.nexus.seoulmate.meeting.domain.Meeting;
+import com.nexus.seoulmate.meeting.domain.MeetingType;
+import com.nexus.seoulmate.meeting.domain.repository.MeetingRepository;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.domain.enums.Languages;
@@ -8,8 +11,12 @@ import com.nexus.seoulmate.member.repository.HobbyRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.member.service.FluentProxyService;
 import com.nexus.seoulmate.member.service.MemberService;
+import com.nexus.seoulmate.mypage.dto.MeetingSimpleDto;
 import com.nexus.seoulmate.mypage.dto.MyPageResponse;
 
+import com.nexus.seoulmate.mypage.repository.MyMeetingQueryRepository;
+import com.nexus.seoulmate.payment.application.PaymentService;
+import com.nexus.seoulmate.payment.domain.PaymentStatus;
 import lombok.RequiredArgsConstructor;
 
 import com.nexus.seoulmate.mypage.dto.HobbyUpdateRequest;
@@ -18,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +39,7 @@ public class MyPageService {
     private final MemberRepository memberRepository;
     private final HobbyRepository hobbyRepository;
     private final AmazonS3Service amazonS3Service;
+    private final MyMeetingQueryRepository myMeetingQueryRepository;
 
     // 마이페이지 get
     @Transactional(readOnly = true)
@@ -118,5 +127,17 @@ public class MyPageService {
         languages.put(language, intLanguageLevel);
 
         memberRepository.save(member);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MeetingSimpleDto> getMyHostedMeetingsByDate(LocalDate date) {
+        Member member = memberService.getCurrentUser();
+        return myMeetingQueryRepository.findHostedByUserAndDate(member.getUserId(), date);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MeetingSimpleDto> getMyParticipatedMeetingsByDate(LocalDate date) {
+        Member member = memberService.getCurrentUser();
+        return myMeetingQueryRepository.findParticipatedConfirmedByUserAndDate(member.getUserId(), date);
     }
 }

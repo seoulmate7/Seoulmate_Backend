@@ -57,6 +57,8 @@ public enum SuccessStatus {
     PROFILE_BIO_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "프로필 한 줄 소개 수정 성공"),
     HOBBY_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "취미 수정 성공"),
     LANGUAGE_LEVEL_UPDATE_SUCCESS(HttpStatus.OK, "MYPAGE 200", "언어 레벨 수정 성공"),
+    MY_MEETING_HOSTED_FETCH_SUCCESS(HttpStatus.OK, "MYPAGE 200", " 내가 주회한 모임 조회 성공"),
+    MY_MEETING_PARTICIPATED_FETCH_SUCCESS(HttpStatus.OK, "MYPAGE 200", "내가 참여한 모임 조회 성공"),
 
     // notification
     NOTIFICATION_LIST_OK(HttpStatus.OK, "NOTIFICATION200", "알림 목록 조회 성공."),
