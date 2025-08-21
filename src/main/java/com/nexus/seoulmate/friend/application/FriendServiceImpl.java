@@ -125,7 +125,31 @@ public class FriendServiceImpl implements FriendService {
 
         boolean isFriend = friendshipRepository.findFriendshipByUsers(currentUser, targetUser).isPresent();
 
-        return friendConverter.toFriendDetailDTO(targetUser, isFriend);
+        String relation = "NONE";
+        if (isFriend) {
+            relation = "FRIEND";
+        } else {
+            var pendingToTarget = friendRequestRepository
+                    .findByReceiverAndStatus(targetUser, FriendRequestStatus.PENDING)
+                    .stream()
+                    .filter(fr -> fr.getSender().getUserId().equals(currentUser.getUserId()))
+                    .findFirst();
+
+            if (pendingToTarget.isPresent()) {
+                relation = "REQUEST_SENT";
+            } else {
+                var pendingToMe = friendRequestRepository
+                        .findByReceiverAndStatus(currentUser, FriendRequestStatus.PENDING)
+                        .stream()
+                        .filter(fr -> fr.getSender().getUserId().equals(targetUser.getUserId()))
+                        .findFirst();
+
+                if (pendingToMe.isPresent()) {
+                    relation = "REQUEST_RECEIVED";
+                }
+            }
+        }
+        return friendConverter.toFriendDetailDTO(targetUser, relation);
     }
 
     @Override

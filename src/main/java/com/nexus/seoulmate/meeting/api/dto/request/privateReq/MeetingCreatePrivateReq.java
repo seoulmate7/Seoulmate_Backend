@@ -25,10 +25,10 @@ public record MeetingCreatePrivateReq(
         String start_time,
 
         @Schema(description = "최소 인원", example = "2")
-        int min_participants,
+        String min_participants,
 
         @Schema(description = "최대 인원", example = "6")
-        int max_participants,
+        String max_participants,
 
         @Schema(description = "사용 언어", example = "한국어")
         Languages language,
@@ -37,5 +37,5 @@ public record MeetingCreatePrivateReq(
         String host_message,
 
         @Schema(description = "참가비", example = "100")
-        int price
+        String price
 ) {}

@@ -25,10 +25,10 @@ public record MeetingUpdatePrivateReq(
         String start_time,
 
         @Schema(description = "최소 인원", example = "3")
-        int min_participants,
+        String min_participants,
 
         @Schema(description = "최대 인원", example = "8")
-        int max_participants,
+        String max_participants,
 
         @Schema(description = "사용 언어", example = "FRENCH")
         Languages language,
@@ -37,5 +37,5 @@ public record MeetingUpdatePrivateReq(
         String host_message,
 
         @Schema(description = "참가비", example = "7000")
-        int price
+        String price
 ) {}

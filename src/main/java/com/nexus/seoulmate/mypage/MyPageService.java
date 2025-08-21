@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 
@@ -128,14 +129,20 @@ public class MyPageService {
     }
 
     @Transactional(readOnly = true)
-    public List<MeetingSimpleDto> getMyHostedMeetingsByDate(LocalDate date) {
+    public List<MeetingSimpleDto> getMyHostedMeetingsByMonth(int year, int month) {
         Member member = memberService.getCurrentUser();
-        return myMeetingQueryRepository.findHostedByUserAndDate(member.getUserId(), date);
+        YearMonth ym = YearMonth.of(year, month);
+        LocalDate start = ym.atDay(1);
+        LocalDate end   = ym.atEndOfMonth();
+        return myMeetingQueryRepository.findHostedByUserAndMonth(member.getUserId(), start, end);
     }
 
     @Transactional(readOnly = true)
-    public List<MeetingSimpleDto> getMyParticipatedMeetingsByDate(LocalDate date) {
+    public List<MeetingSimpleDto> getMyParticipatedMeetingsByMonth(int year, int month) {
         Member member = memberService.getCurrentUser();
-        return myMeetingQueryRepository.findParticipatedConfirmedByUserAndDate(member.getUserId(), date);
+        YearMonth ym = YearMonth.of(year, month);
+        LocalDate start = ym.atDay(1);
+        LocalDate end   = ym.atEndOfMonth();
+        return myMeetingQueryRepository.findParticipatedConfirmedByUserAndMonth(member.getUserId(), start, end);
     }
 }

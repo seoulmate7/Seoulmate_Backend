@@ -16,44 +16,45 @@ public class MyMeetingQueryRepositoryImpl implements MyMeetingQueryRepository {
     private EntityManager em;
 
     @Override
-    public List<MeetingSimpleDto> findHostedByUserAndDate(Long userId, LocalDate meetingDay) {
+    public List<MeetingSimpleDto> findHostedByUserAndMonth(Long userId, LocalDate start, LocalDate end) {
         return em.createQuery(
                         """
-                    
-                                select new com.nexus.seoulmate.mypage.dto.MeetingSimpleDto(
-                                        m.id, m.image, m.title, m.location, m.meetingDay, m.meetingType, m.startTime
-                                    )
-                                    from Meeting m
-                                    where m.userId.userId = :userId
-                                      and m.meetingDay = :meetingDay
-                                    order by m.startTime asc, m.id asc
+                        select new com.nexus.seoulmate.mypage.dto.MeetingSimpleDto(
+                                            m.id, m.image, m.title, m.location, m.meetingDay, m.meetingType, m.startTime
+                                        )
+                                        from Meeting m
+                                        where m.userId.userId = :userId
+                                          and m.meetingDay between :start and :end
+                                        order by m.meetingDay asc, m.startTime asc, m.id asc
                     """,
                         MeetingSimpleDto.class
                 )
                 .setParameter("userId", userId)
-                .setParameter("meetingDay", meetingDay)
+                .setParameter("start", start)
+                .setParameter("end", end)
                 .getResultList();
     }
 
     @Override
-    public List<MeetingSimpleDto> findParticipatedConfirmedByUserAndDate(Long userId, LocalDate meetingDay) {
+    public List<MeetingSimpleDto> findParticipatedConfirmedByUserAndMonth(Long userId, LocalDate start, LocalDate end) {
         return em.createQuery(
                         """
-                                select distinct new com.nexus.seoulmate.mypage.dto.MeetingSimpleDto(
-                               m.id, m.image, m.title, m.location, m.meetingDay, m.meetingType, m.startTime
-                           )
-                           from Order o
-                           join o.meeting m
-                           join o.member mem
-                           where mem.userId = :userId
-                             and m.meetingDay = :meetingDay
-                             and o.status = :paid
-                           order by m.startTime asc, m.id asc
+                          select distinct new com.nexus.seoulmate.mypage.dto.MeetingSimpleDto(
+                                              m.id, m.image, m.title, m.location, m.meetingDay, m.meetingType, m.startTime
+                                          )
+                                          from Order o
+                                            join o.meeting m
+                                            join o.member mem
+                                          where mem.userId = :userId
+                                            and o.status = :paid
+                                            and m.meetingDay between :start and :end
+                                          order by m.meetingDay asc, m.startTime asc, m.id asc
             """,
                         MeetingSimpleDto.class
                 )
                 .setParameter("userId", userId)
-                .setParameter("meetingDay", meetingDay)
+                .setParameter("start", start)
+                .setParameter("end", end)
                 .setParameter("paid", OrderStatus.PAID)
                 .getResultList();
     }
