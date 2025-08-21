@@ -70,7 +70,7 @@ public class FriendConverter {
                 .build();
     }
 
-    public FriendResponseDTO.FriendDetailDTO toFriendDetailDTO(Member member, boolean isFriend) {
+    public FriendResponseDTO.FriendDetailDTO toFriendDetailDTO(Member member, String relation) {
         List<String> hobbyNames = member.getHobbies().stream()
                 .map(Hobby::getHobbyName)
                 .collect(Collectors.toList());
@@ -99,7 +99,7 @@ public class FriendConverter {
                 .age(member.calculateAge())
                 .country(member.getCountry().toString())
                 .languageLevels(languageLevels)
-                .isFriend(isFriend)
+                .relation(relation)
                 .hobbyList(hobbyNames)
                 .build();
     }
