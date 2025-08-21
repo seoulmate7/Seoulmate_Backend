@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -267,7 +268,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Transactional
     public MessageDTO.Sent sendMessage(Long roomId, MessageDTO.SendRequest req) {
-        Member me = memberService.getCurrentUser();
+        Member me = getCurrentUserForMessaging();
         Long meId = me.getUserId();
         log.info("[CHAT] persist try roomId={}, meId={}, type={}, content='{}'",
                 roomId, meId, req.getType(), req.getContent());
@@ -459,4 +460,74 @@ public class ChatServiceImpl implements ChatService {
 
         chatRoomMemberRepository.updateLastRead(roomId, meId, targetMsgId);
     }
+
+    private Member getCurrentUserForMessaging() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        log.debug("[WS-AUTH] Authentication = {}", auth);
+
+        if (auth == null || !auth.isAuthenticated()) {
+            log.warn("[WS-AUTH] No authentication or not authenticated");
+            throw new CustomException(ErrorStatus.UNAUTHORIZED);
+        }
+
+        Object principal = auth.getPrincipal();
+        log.debug("[WS-AUTH] Principal class = {}, value = {}",
+                principal != null ? principal.getClass().getName() : "null", principal);
+
+        String email = null;
+
+        // 1) 표준 OAuth2User (DefaultOAuth2User 포함)
+        if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oAuth2User) {
+            Object v = oAuth2User.getAttribute("email");
+            if (v != null) {
+                email = String.valueOf(v);
+                log.info("[WS-AUTH] Extracted email from OAuth2User: {}", email);
+            }
+        }
+
+        // 2) UserDetails (폼 로그인 등)
+        if (email == null && principal instanceof org.springframework.security.core.userdetails.UserDetails ud) {
+            email = ud.getUsername();
+            log.info("[WS-AUTH] Extracted email from UserDetails: {}", email);
+        }
+
+        // 3) Map 계열 Principal
+        if (email == null && principal instanceof java.util.Map<?,?> map) {
+            Object v = map.get("email");
+            if (v != null) {
+                email = String.valueOf(v);
+                log.info("[WS-AUTH] Extracted email from Map principal: {}", email);
+            }
+        }
+
+        // 4) 리플렉션 기반 커스텀 객체
+        if (email == null && principal != null) {
+            try {
+                var m = principal.getClass().getMethod("getEmail");
+                Object v = m.invoke(principal);
+                if (v != null) {
+                    email = String.valueOf(v);
+                    log.info("[WS-AUTH] Extracted email from custom principal via reflection: {}", email);
+                }
+            } catch (NoSuchMethodException ignore) {
+                log.debug("[WS-AUTH] No getEmail() on principal {}", principal.getClass().getName());
+            } catch (Exception e) {
+                log.error("[WS-AUTH] Failed reflection call on getEmail()", e);
+            }
+        }
+
+
+        if (email == null || email.isBlank()) {
+            log.error("[WS-AUTH] Could not resolve email from principal: {}", principal);
+            throw new CustomException(ErrorStatus.UNAUTHORIZED);
+        }
+
+        log.debug("[WS-AUTH] Looking up member by email: {}", email);
+
+        return memberRepository.findByEmailWithDetails(email)
+                .orElseThrow(() -> {
+                    return new CustomException(ErrorStatus.USER_NOT_FOUND);
+                });
+    }
+
 }
