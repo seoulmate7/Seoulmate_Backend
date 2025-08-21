@@ -42,3 +42,6 @@ src/**/application-dev.yml
 
 ### 의존성 강제 주입 ###
 libs/*
+
+### Mac OS ###
+.DS_Store

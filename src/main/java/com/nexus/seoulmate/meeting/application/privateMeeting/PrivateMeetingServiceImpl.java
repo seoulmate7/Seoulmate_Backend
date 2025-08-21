@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,36 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
     private final MeetingRepository meetingRepository;
     private final MemberRepository memberRepository;
     private final HobbyRepository hobbyRepository;
+
+    // 숫자 문자열 검증
+    private static final Pattern NUMERIC = Pattern.compile("^\\d+$");
+
+    private int parsePositiveInt(String raw, String fieldName){
+        if(raw == null){
+            throw new CustomException(ErrorStatus.INVALID_PARAMETER, fieldName + " 값이 입력되지 않았습니다.");
+        }
+        String val = raw.trim();
+        if(!NUMERIC.matcher(val).matches()){
+            throw new CustomException(ErrorStatus.INVALID_PARAMETER, fieldName + " 값은 숫자여야 합니다.");
+        }
+        try{
+            return Integer.parseInt(val);
+        } catch (NumberFormatException e){
+            throw new CustomException(ErrorStatus.INVALID_PARAMETER, fieldName + " 값이 숫자 범위를 벗어났습니다.");
+        }
+    }
+
+    private void validateParticipants(int min, int max) {
+        if (min < 1) {
+            throw new CustomException(ErrorStatus.INVALID_PARAMETER, "소 인원(min_participants)은 1명 이상이어야 합니다.");
+        }
+        if (max < 1) {
+            throw new CustomException(ErrorStatus.INVALID_PARAMETER, "최대 인원(max_participants)은 1명 이상이어야 합니다.");
+        }
+        if (min > max) {
+            throw new CustomException(ErrorStatus.INVALID_PARAMETER, "최소 인원(min_participants)은 최대 인원(max_participants)보다 클 수 없습니다.");
+        }
+    }
 
     @Override
     @Transactional
@@ -68,15 +99,21 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
             hostLangLevel = member.getLanguages().get(meetingLang.name());
         }
 
+        // string -> int 변환 및 검증
+        int min = parsePositiveInt(req.min_participants(), "min_participants");
+        int max = parsePositiveInt(req.max_participants(), "max_participants");
+        validateParticipants(min, max);
+        int price = parsePositiveInt(req.price(), "price"); // 0 허용
+
         Meeting meeting = Meeting.builder()
                 .meetingType(MeetingType.PRIVATE)
                 .meetingDay(meetingDay)
                 .startTime(startTime)
                 .location(req.location())
-                .minParticipants(req.min_participants())
-                .maxParticipants(req.max_participants())
+                .minParticipants(min)
+                .maxParticipants(max)
                 .currentParticipants(0)
-                .price(req.price())
+                .price(price)
                 .hobbyCategory(hobbyCategory) // 자동 세팅
                 .primaryHobby(primaryHobby) // 세부 취미 연결
                 .image(req.image())
@@ -163,6 +200,12 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
             hostLangLevel = meeting.getUserId().getLanguages().get(meetingLang.name());
         }
 
+        // string -> int 변환 및 검증
+        int min = parsePositiveInt(req.min_participants(), "min_participants");
+        int max = parsePositiveInt(req.max_participants(), "max_participants");
+        validateParticipants(min, max);
+        int price = parsePositiveInt(req.price(), "price");
+
         meeting.updatePrivateMeeting(
                 req.title(),
                 req.image(),
@@ -170,11 +213,11 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
                 hobbyCategory,
                 meetingDay,
                 startTime,
-                req.min_participants(),
-                req.max_participants(),
+                min,
+                max,
                 meetingLang,
                 req.host_message(),
-                req.price()
+                price
         );
 
         meeting.updatePrimaryHobby(primaryHobby);
