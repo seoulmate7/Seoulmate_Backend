@@ -34,7 +34,6 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults());
 
-        // 기존에 설정하셨던 나머지 보안 설정들
         http
                 .csrf(csrf -> csrf.disable())
                 .formLogin(login -> login.disable())
@@ -61,7 +60,6 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 허용할 Origin(출처) 목록
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:8080",
                 "http://localhost:5173",
@@ -70,14 +68,9 @@ public class SecurityConfig {
                 "https://seoulmate-frontend.vercel.app"
         ));
 
-        // 허용할 HTTP 메서드 (*는 모든 메서드를 의미)
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-
-        // 허용할 헤더 (*는 모든 헤더를 의미)
         configuration.setAllowedHeaders(Arrays.asList("*"));
-
-        // 자격 증명(쿠키, 인증 토큰 등)을 포함한 요청 허용
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(true); // 쿠키 허용
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); // 모든 경로에 대해 위 설정 적용

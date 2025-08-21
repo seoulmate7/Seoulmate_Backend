@@ -1,8 +1,6 @@
 package com.nexus.seoulmate.aws.s3;
 
-import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.nexus.seoulmate.aws.entity.Uuid;
@@ -15,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Date;
 import java.util.UUID;
 
 @Slf4j

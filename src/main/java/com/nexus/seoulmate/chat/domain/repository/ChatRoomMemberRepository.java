@@ -2,7 +2,9 @@ package com.nexus.seoulmate.chat.domain.repository;
 
 import com.nexus.seoulmate.chat.domain.entity.ChatRoomMember;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,5 +23,20 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, 
 
     @Query("select m from ChatRoomMember m where m.roomId = :roomId")
     List<ChatRoomMember> findByRoomId(Long roomId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+    update ChatRoomMember crm
+       set crm.lastReadMessageId =
+           case
+             when crm.lastReadMessageId is null then :msgId
+             when crm.lastReadMessageId < :msgId then :msgId
+             else crm.lastReadMessageId
+           end
+     where crm.roomId = :roomId and crm.userId = :userId
+    """)
+    int updateLastRead(@Param("roomId") Long roomId,
+                       @Param("userId") Long userId,
+                       @Param("msgId") Long msgId);
 
 }

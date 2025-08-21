@@ -1,9 +1,7 @@
 package com.nexus.seoulmate.mypage;
 
 import com.nexus.seoulmate.aws.service.AmazonS3Service;
-import com.nexus.seoulmate.meeting.domain.Meeting;
-import com.nexus.seoulmate.meeting.domain.MeetingType;
-import com.nexus.seoulmate.meeting.domain.repository.MeetingRepository;
+import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.domain.enums.Languages;
@@ -15,8 +13,6 @@ import com.nexus.seoulmate.mypage.dto.MeetingSimpleDto;
 import com.nexus.seoulmate.mypage.dto.MyPageResponse;
 
 import com.nexus.seoulmate.mypage.repository.MyMeetingQueryRepository;
-import com.nexus.seoulmate.payment.application.PaymentService;
-import com.nexus.seoulmate.payment.domain.PaymentStatus;
 import lombok.RequiredArgsConstructor;
 
 import com.nexus.seoulmate.mypage.dto.HobbyUpdateRequest;
@@ -26,9 +22,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Map;
+
+import static com.nexus.seoulmate.exception.status.ErrorStatus.HOBBY_SAVE_FAILED;
 
 @Service
 @RequiredArgsConstructor
@@ -59,14 +57,10 @@ public class MyPageService {
     }
 
     private String formatName(Member member) {
-        switch (member.getCountry()) {
-            case KOREA:
-            case CHINA:
-            case JAPAN:
-                return member.getLastName() + member.getFirstName();
-            default:
-                return member.getFirstName() + " " + member.getLastName();
-        }
+        return switch (member.getCountry()) {
+            case KOREA, CHINA, JAPAN -> member.getLastName() + member.getFirstName();
+            default -> member.getFirstName() + " " + member.getLastName();
+        };
     }
 
     // 프로필 사진 수정
@@ -84,6 +78,7 @@ public class MyPageService {
     }
 
     // 프로필 한 줄 소개 수정
+    @Transactional
     public void updateProfileBio(String newBio){
         Member member = memberService.getCurrentUser();
 
@@ -94,21 +89,14 @@ public class MyPageService {
     }
 
     // 취미 수정
+    @Transactional
     public void updateHobbies(HobbyUpdateRequest dto){
         Member member = memberService.getCurrentUser();
 
-        List<Hobby> newHobbies = new ArrayList<>();
+        List<Hobby> newHobbies = hobbyRepository.findByHobbyNameIn(dto.getHobbies());
 
-        // DB에서 새로운 Hobby 엔티티 조회
-        if(dto.getHobbies() != null && !dto.getHobbies().isEmpty()){
-            for (String hobby : dto.getHobbies()){
-                Hobby newHobby = hobbyRepository.findByHobbyName(hobby);
-                if (newHobby != null) {
-                    newHobbies.add(newHobby); 
-                } else {
-                    throw new IllegalArgumentException("존재하지 않는 취미 : " + hobby);
-                }
-            }
+        if (newHobbies.size() != dto.getHobbies().size()){
+            throw new CustomException(HOBBY_SAVE_FAILED); // 존재하지 않는 취미가 포함되어 있습니다. 
         }
         
         member.changeHobbies(newHobbies);
@@ -117,8 +105,18 @@ public class MyPageService {
 
     // 언어 레벨테스트 재응시
     // FluentProxyService 에서 진행
-    public void updateLanguageLevel(MultipartFile audioFile, Languages language){
+    public void updateLanguageLevel(MultipartFile audioFile, String languageStr){
         Member member = memberService.getCurrentUser();
+
+        // String을 Languages enum으로 변환 (한글 표시명 또는 enum 상수명 모두 지원)
+        Languages language;
+        try {
+            // 먼저 enum 상수명으로 시도
+            language = Languages.valueOf(languageStr);
+        } catch (IllegalArgumentException e) {
+            // enum 상수명이 아니면 한글 표시명으로 시도
+            language = Languages.fromDisplayName(languageStr);
+        }
         String languageLevel = fluentProxyService.fluentFlow(audioFile, language);
         int intLanguageLevel = (int) Double.parseDouble(languageLevel);
 

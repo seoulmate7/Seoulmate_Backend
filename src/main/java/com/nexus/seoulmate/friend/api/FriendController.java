@@ -39,7 +39,7 @@ public class FriendController {
     @PatchMapping("/requests/{requestId}")
     @Operation(
             summary = "친구 요청 수락 혹은 거절",
-            description = "요청 ID에 해당하는 친구 요청을 수락하거나 거절합니다. 요청자는 로그인된 사용자이며, 요청 상태는 APPROVED 또는 REJECTED로 변경됩니다."
+            description = "요청 ID에 해당하는 친구 요청을 수락하거나 거절합니다. 요청자는 로그인된 사용자이며, 요청 상태는 APPROVED 또는 DENIED로 변경됩니다."
     )
     public ResponseEntity<Response<Void>> updateFriendRequest(
             @PathVariable Long requestId,
@@ -91,14 +91,18 @@ public class FriendController {
             summary = "친구 검색",
             description = "키워드를 통해 친구가 아닌 사용자를 검색합니다."
     )
-    public ResponseEntity<Response<List<FriendResponseDTO.FriendSearchResultDTO>>> searchFriends(
+    public ResponseEntity<Response<FriendResponseDTO.PagedFriendSearchResultDTO>> searchFriends(
             @RequestParam String query,
             @RequestParam(defaultValue = "1") @Min(1) int page,
             @RequestParam(defaultValue = "20") @Min(1) int size
     ) {
-        List<FriendResponseDTO.FriendSearchResultDTO> results = friendService.searchFriends(query, page, size);
-        return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_SEARCH_RESULT_FETCHED, results));
+        FriendResponseDTO.PagedFriendSearchResultDTO result =
+                friendService.searchFriends(query, page, size);
+        return ResponseEntity.ok(
+                Response.success(SuccessStatus.FRIEND_SEARCH_RESULT_FETCHED, result)
+        );
     }
+
 
     @GetMapping("/recommendations/language")
     @Operation(
@@ -125,13 +129,14 @@ public class FriendController {
             summary = "내 친구 중 검색",
             description = "내 친구들 중에서 이름(first/last)에 키워드가 포함된 사용자만 페이징 반환합니다."
     )
-    public ResponseEntity<Response<List<FriendResponseDTO.FriendListDTO>>> searchAmongMyFriends(
+    public ResponseEntity<Response<FriendResponseDTO.PagedFriendListDTO>> searchAmongMyFriends(
             @RequestParam String query,
             @RequestParam(defaultValue = "1") @Min(1) int page,
             @RequestParam(defaultValue = "20") @Min(1) int size
     ) {
-        var responses = friendService.searchAmongMyFriends(query, page, size);
-        return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_LIST_FETCHED, responses));
+        FriendResponseDTO.PagedFriendListDTO response =
+                friendService.searchAmongMyFriends(query, page, size);
+        return ResponseEntity.ok(Response.success(SuccessStatus.FRIEND_LIST_FETCHED, response));
     }
 
 }

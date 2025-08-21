@@ -101,7 +101,7 @@ public class FriendServiceImpl implements FriendService {
     public List<FriendResponseDTO.FriendRequestListDTO> getFriendRequests() {
         Member currentUser = memberService.getCurrentUser();
 
-        List<FriendRequest> requestList = friendRequestRepository.findBySenderAndStatus(currentUser, FriendRequestStatus.PENDING);
+        List<FriendRequest> requestList = friendRequestRepository.findByReceiverAndStatus(currentUser, FriendRequestStatus.PENDING);
 
         return requestList.stream().map(friendConverter::toFriendRequestListDTO).collect(Collectors.toList());
     }
@@ -146,27 +146,21 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<FriendResponseDTO.FriendSearchResultDTO> searchFriends(String query, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+    public FriendResponseDTO.PagedFriendSearchResultDTO searchFriends(String query, int page, int size) {
         Member currentUser = memberService.getCurrentUser();
-
-        List<Friendship> friendships = friendshipRepository.findByUser(currentUser);
-        List<Long> friendIds = friendships.stream()
-                .map(f -> {
-                    Member user1 = f.getUserId1();
-                    Member user2 = f.getUserId2();
-                    return user1.getUserId().equals(currentUser.getUserId()) ? user2.getUserId() : user1.getUserId();
-                })
-                .toList();
+        Pageable pageable = PageRequest.of(page - 1, size);
 
         Page<Member> matched = memberRepository
-                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(query, query, pageable);
+                .searchNonFriendsByName(currentUser.getUserId(), query, pageable);
 
-        return matched.stream()
-                .filter(member -> !member.getUserId().equals(currentUser.getUserId()))
-                .filter(member -> !friendIds.contains(member.getUserId()))
+        List<FriendResponseDTO.FriendSearchResultDTO> items = matched.stream()
                 .map(friendConverter::toFriendSearchResultDTO)
-                .collect(Collectors.toList());
+                .toList();
+
+        return FriendResponseDTO.PagedFriendSearchResultDTO.builder()
+                .content(items)
+                .hasNext(matched.hasNext())
+                .build();
     }
 
     @Override
@@ -252,30 +246,21 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<FriendResponseDTO.FriendListDTO> searchAmongMyFriends(String query, int page, int size) {
+    public FriendResponseDTO.PagedFriendListDTO searchAmongMyFriends(String query, int page, int size) {
         Member currentUser = memberService.getCurrentUser();
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        List<Friendship> friendships = friendshipRepository.findByUser(currentUser);
+        Page<Member> matchedFriendsPage =
+                memberRepository.searchMyFriendsByName(currentUser.getUserId(), query, pageable);
 
-        // 친구 id 집합
-        List<Long> friendIds = friendships.stream()
-                .map(f -> {
-                    Member u1 = f.getUserId1();
-                    Member u2 = f.getUserId2();
-                    return u1.getUserId().equals(currentUser.getUserId()) ? u2.getUserId() : u1.getUserId();
-                })
-                .toList();
-
-        if (friendIds.isEmpty()) {
-            return List.of();
+        if (matchedFriendsPage.isEmpty()) {
+            return FriendResponseDTO.PagedFriendListDTO.builder()
+                    .content(List.of())
+                    .hasNext(false)
+                    .build();
         }
 
-        // 이름 LIKE로 "내 친구"만 DB에서 필터링
-        Page<Member> matchedFriendsPage =
-                memberRepository.searchMyFriendsByName(friendIds, query, pageable);
-
-        // 빠른 매핑을 위해: otherId -> Friendship 매핑 준비
+        List<Friendship> friendships = friendshipRepository.findByUser(currentUser);
         Map<Long, Friendship> byOtherId = friendships.stream().collect(Collectors.toMap(
                 f -> f.getUserId1().getUserId().equals(currentUser.getUserId())
                         ? f.getUserId2().getUserId()
@@ -283,10 +268,13 @@ public class FriendServiceImpl implements FriendService {
                 f -> f
         ));
 
-        // FriendListDTO로 변환 (컨버터는 Friendship 기반이니 그대로 재사용)
-        return matchedFriendsPage.stream()
+        List<FriendResponseDTO.FriendListDTO> items = matchedFriendsPage.stream()
                 .map(m -> friendConverter.toFriendListDTO(currentUser, byOtherId.get(m.getUserId())))
                 .toList();
-    }
 
+        return FriendResponseDTO.PagedFriendListDTO.builder()
+                .content(items)
+                .hasNext(matchedFriendsPage.hasNext())
+                .build();
+    }
 }

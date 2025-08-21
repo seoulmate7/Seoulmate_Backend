@@ -1,9 +1,6 @@
 package com.nexus.seoulmate.mypage;
 
 import com.nexus.seoulmate.exception.Response;
-import com.nexus.seoulmate.exception.status.SuccessStatus;
-import com.nexus.seoulmate.meeting.domain.Meeting;
-import com.nexus.seoulmate.member.domain.enums.Languages;
 import com.nexus.seoulmate.mypage.dto.HobbyUpdateRequest;
 import com.nexus.seoulmate.mypage.dto.MeetingSimpleDto;
 import com.nexus.seoulmate.mypage.dto.MyPageResponse;
@@ -13,7 +10,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -57,7 +53,7 @@ public class MyPageController {
 
     @Operation(summary = "취미 수정 API")
     @PutMapping("/update-hobby")
-    public Response<Object> updateHobbies(HobbyUpdateRequest hobbyUpdateRequest){
+    public Response<Object> updateHobbies(@RequestBody HobbyUpdateRequest hobbyUpdateRequest){
         myPageService.updateHobbies(hobbyUpdateRequest);
         return Response.success(HOBBY_UPDATE_SUCCESS, null);
     }
@@ -65,7 +61,7 @@ public class MyPageController {
     @Operation(summary = "언어 레벨테스트 재응시 API")
     @PatchMapping(value = "/update-language-level", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<Object> updateLanguageLevel(@RequestPart("audioFile") MultipartFile audioFile,
-                                                @RequestParam("language") Languages language){
+                                                @RequestParam("language") String language){
         myPageService.updateLanguageLevel(audioFile, language);
         return Response.success(LANGUAGE_LEVEL_UPDATE_SUCCESS, null);
     }

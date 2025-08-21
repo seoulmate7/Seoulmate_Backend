@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,4 +27,15 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     Page<ChatRoom> findMyRoomsOrderByLatestMessage(Long userId, RoomType type, Pageable pageable);
 
     Optional<ChatRoom> findByMeetingIdAndType(Long meetingId, RoomType type);
+
+    @Query("""
+select r from ChatRoom r
+join ChatRoomMember m1 on r.id = m1.roomId
+join ChatRoomMember m2 on r.id = m2.roomId
+where r.type = 'DIRECT'
+  and m1.userId = :userId1
+  and m2.userId = :userId2
+""")
+    Optional<ChatRoom> findDirectRoomByUsers(@Param("userId1") Long userId1,
+                                             @Param("userId2") Long userId2);
 }

@@ -7,7 +7,6 @@ import com.nexus.seoulmate.member.repository.HobbyRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.language.bm.Lang;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -41,17 +40,9 @@ public class MemberTestDataInitializer implements CommandLineRunner {
             languages1.put(Languages.KOREAN, 90);
             languages1.put(Languages.ENGLISH, 70);
 
-            // Hobby 엔티티 3개 조회
-            Hobby hobby1 = hobbyRepository.findByHobbyNameAndHobbyCategory("축구", HobbyCategory.SPORTS).orElse(null);
-            Hobby hobby2 = hobbyRepository.findByHobbyNameAndHobbyCategory("노래", HobbyCategory.HOBBY).orElse(null);
-            Hobby hobby3 = hobbyRepository.findByHobbyNameAndHobbyCategory("맛집투어", HobbyCategory.FOOD_DRINK).orElse(null);
+            List<Hobby> selectedHobbies1 = hobbyRepository.findByHobbyNameIn(List.of(new String[]{"축구", "노래", "스케이트보드"}));
 
-            List<Hobby> selectedHobbies1 = new ArrayList<>();
-            if (hobby1 != null) selectedHobbies1.add(hobby1);
-            if (hobby2 != null) selectedHobbies1.add(hobby2);
-            if (hobby3 != null) selectedHobbies1.add(hobby3);
-
-            Member member1 = Member.createGoogleUser(
+            Member member1 = Member.createLocalUser(
                     "test1@example.com",
                     "길동",
                     "홍",
@@ -63,8 +54,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
                     "https://example.com/cert1.jpg",
                     University.SOOKMYUNG,
                     languages1,
-                    VerificationStatus.VERIFIED,
-                    AuthProvider.LOCAL
+                    VerificationStatus.VERIFIED
             );
             membersToSave.add(member1);
         } else {
@@ -79,18 +69,10 @@ public class MemberTestDataInitializer implements CommandLineRunner {
             languages2.put(Languages.KOREAN, 75);
             languages2.put(Languages.ENGLISH, 99);
             languages2.put(Languages.JAPANESE, 60);
+            
+            List<Hobby> selectedHobbies2 = hobbyRepository.findByHobbyNameIn(List.of(new String[]{"노래", "와인", "한국어"}));
 
-            // 두 번째 사용자를 위한 다른 취미들
-            Hobby hobby4 = hobbyRepository.findByHobbyNameAndHobbyCategory("노래", HobbyCategory.HOBBY).orElse(null);
-            Hobby hobby5 = hobbyRepository.findByHobbyNameAndHobbyCategory("와인", HobbyCategory.FOOD_DRINK).orElse(null);
-            Hobby hobby6 = hobbyRepository.findByHobbyNameAndHobbyCategory("한국어", HobbyCategory.LANGUAGE).orElse(null);
-
-            List<Hobby> selectedHobbies2 = new ArrayList<>();
-            if (hobby4 != null) selectedHobbies2.add(hobby4);
-            if (hobby5 != null) selectedHobbies2.add(hobby5);
-            if (hobby6 != null) selectedHobbies2.add(hobby6);
-
-            Member member2 = Member.createGoogleUser(
+            Member member2 = Member.createLocalUser(
                     "test2@example.com",
                     "Robert",
                     "Daune",
@@ -102,8 +84,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
                     "https://example.com/cert2.jpg",
                     University.YONSEI,
                     languages2,
-                    VerificationStatus.VERIFIED,
-                    AuthProvider.LOCAL
+                    VerificationStatus.VERIFIED
             );
             membersToSave.add(member2);
         } else {

@@ -2,7 +2,6 @@ package com.nexus.seoulmate.member.service;
 
 import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.exception.status.ErrorStatus;
-import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.dto.signup.*;
 import lombok.RequiredArgsConstructor;
@@ -110,17 +109,7 @@ public class TempStorage {
             String bio = (String) raw.get("bio");
             String profileImage = (String) raw.get("profileImageUrl");  // profileImage -> profileImageUrl로 변경
 
-            List<Hobby> hobbies = null;
-            Object hobbiesObj = raw.get("hobbies");
-            if (hobbiesObj instanceof List<?> list) {
-                hobbies = list.stream()
-                        .filter(item -> item instanceof String)
-                        .map(item -> Hobby.builder()
-                                .hobbyName((String) item)
-                                .hobbyCategory(HobbyCategory.HOBBY)
-                                .build())
-                        .toList();
-            }
+            List<String> hobbies = (List<String>) raw.get("hobbies");;
 
             String univCertificate = (String) raw.get("univCertificate");
 

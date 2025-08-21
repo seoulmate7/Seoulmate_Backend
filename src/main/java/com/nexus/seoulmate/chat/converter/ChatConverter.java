@@ -40,7 +40,7 @@ public class ChatConverter {
                 .build();
     }
 
-    public ChatRoomDTO.RoomListItem toListItemGroup(ChatRoom room, Message latest) {
+    public ChatRoomDTO.RoomListItem toListItemGroup(ChatRoom room, Message latest, int unreadCount) {
         return ChatRoomDTO.RoomListItem.builder()
                 .roomId(room.getId())
                 .type(room.getType().name())
@@ -50,10 +50,11 @@ public class ChatConverter {
                 .lastMessageType(latest != null ? latest.getType().name() : null)
                 .lastMessage(latest != null ? summarize(latest) : null)
                 .lastMessageAt(latest != null ? latest.getCreatedAt() : null)
+                .unreadCount(unreadCount)
                 .build();
     }
 
-    public ChatRoomDTO.RoomListItem toListItemDirect(ChatRoom room, Long partnerId, String partnerName, Message latest) {
+    public ChatRoomDTO.RoomListItem toListItemDirect(ChatRoom room, Long partnerId, String partnerName, Message latest, int unreadCount) {
         return ChatRoomDTO.RoomListItem.builder()
                 .roomId(room.getId())
                 .type(room.getType().name())
@@ -63,6 +64,7 @@ public class ChatConverter {
                 .lastMessageType(latest != null ? latest.getType().name() : null)
                 .lastMessage(latest != null ? summarize(latest) : null)
                 .lastMessageAt(latest != null ? latest.getCreatedAt() : null)
+                .unreadCount(unreadCount)
                 .build();
     }
 

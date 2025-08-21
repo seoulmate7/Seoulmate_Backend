@@ -25,10 +25,6 @@ public class Member {
     @Column(name = "USER_ID")
     private Long userId;
 
-    @OneToOne
-    @JoinColumn(name = "GOOGLE_INFO_ID")
-    private GoogleInfo googleInfoId;
-
     @Column(nullable = false, length = 50)
     private String email;
 
@@ -53,7 +49,7 @@ public class Member {
     @Column(nullable = false)
     private String profileImage;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "MEMBER_LANGUAGE", joinColumns = @JoinColumn(name = "USER_ID"))
     @MapKeyEnumerated(EnumType.STRING)
     @MapKeyColumn(name = "LANGUAGE")
@@ -63,7 +59,7 @@ public class Member {
     private Map<Languages, Integer> languages = new HashMap<>();
     // 언어 + 언어 레벨
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @Builder.Default
     private List<Hobby> hobbies = new ArrayList<>();
 
@@ -90,10 +86,10 @@ public class Member {
     @Column(nullable = false)
     private UserStatus userStatus; // 탈퇴인지 아닌지
 
-    public static Member createGoogleUser(String email, String firstName, String lastName,
+    public static Member createLocalUser(String email, String firstName, String lastName,
                                         LocalDate DOB, Countries country, String bio, String profileImage, List<Hobby> hobbies,
                                         String univCertificate, University univ, Map<Languages, Integer> languages,
-                                        VerificationStatus verificationStatus, AuthProvider authProvider){
+                                        VerificationStatus verificationStatus){
         Member user = new Member();
         user.email = email;
         user.password = "oauth2"; // 의미 없는 값
@@ -109,7 +105,31 @@ public class Member {
         user.languages = languages;
         user.univVerification = verificationStatus;
         user.role = Role.USER;  // 정해진 값
-        user.authProvider = authProvider;
+        user.authProvider = AuthProvider.LOCAL;
+        user.userStatus = UserStatus.ACTIVE;  // 정해진 값
+        return user;
+    }
+
+    public static Member createGoogleUser(String email, String firstName, String lastName,
+                                        LocalDate DOB, Countries country, String bio, String profileImage, List<Hobby> hobbies,
+                                        String univCertificate, University univ, Map<Languages, Integer> languages,
+                                        VerificationStatus verificationStatus){
+        Member user = new Member();
+        user.email = email;
+        user.password = "oauth2"; // 의미 없는 값
+        user.firstName = firstName;
+        user.lastName = lastName;
+        user.DOB = DOB;
+        user.country = country;
+        user.bio = bio;
+        user.profileImage = profileImage;
+        user.hobbies = hobbies;
+        user.univCertificate = univCertificate;
+        user.univ = univ;
+        user.languages = languages;
+        user.univVerification = verificationStatus;
+        user.role = Role.USER;  // 정해진 값
+        user.authProvider = AuthProvider.GOOGLE;
         user.userStatus = UserStatus.ACTIVE;  // 정해진 값
         return user;
     }
@@ -129,5 +149,13 @@ public class Member {
     public void changeHobbies(List<Hobby> newHobbies) {
         this.hobbies.clear();        // 기존 것 전부 삭제
         this.hobbies.addAll(newHobbies); // 새로 입력된 취미 등록
+    }
+
+    public void admitUnivCertificate(){
+        this.univVerification = VerificationStatus.VERIFIED;
+    }
+
+    public void rejectUnivCertificate(){
+        this.univVerification = VerificationStatus.NOT_SUBMITTED;
     }
 }
