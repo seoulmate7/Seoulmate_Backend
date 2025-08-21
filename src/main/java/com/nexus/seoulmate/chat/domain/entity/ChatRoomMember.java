@@ -23,4 +23,6 @@ public class ChatRoomMember extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    private Long lastReadMessageId;
 }

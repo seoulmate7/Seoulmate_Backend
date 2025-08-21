@@ -1,6 +1,5 @@
 package com.nexus.seoulmate.member.dto.signup;
 
-import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.enums.*;
 
 import lombok.AllArgsConstructor;
@@ -26,7 +25,7 @@ public class MemberCreateRequest {
     private String bio;
 
     private String profileImage;
-    private List<Hobby> hobbies;
+    private List<String> hobbies;
 
     private String univCertificate;
     private University univ;

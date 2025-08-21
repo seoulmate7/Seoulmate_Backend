@@ -52,6 +52,27 @@ public class ChatServiceImpl implements ChatService {
             throw new CustomException(ErrorStatus.CHAT_INVALID_PARTNER);
         }
 
+        Optional<ChatRoom> existing = chatRoomRepository.findDirectRoomByUsers(meId, partnerId);
+        if (existing.isPresent()) {
+            ChatRoom room = existing.get();
+            List<ChatRoomMember> members = chatRoomMemberRepository.findByRoomId(room.getId());
+
+            Map<Long, Member> userMap = memberRepository.findAllById(
+                    members.stream().map(ChatRoomMember::getUserId).toList()
+            ).stream().collect(Collectors.toMap(Member::getUserId, m -> m));
+
+            List<ChatRoomDTO.Participant> participants = members.stream()
+                    .map(cm -> chatConverter.toParticipant(
+                            userMap.get(cm.getUserId()),
+                            cm.getUserId(),
+                            cm.getRole().name(),
+                            cm.getUserId().equals(meId)
+                    ))
+                    .toList();
+
+            return chatConverter.toRoomSummaryDirect(room, meId, participants);
+        }
+
         Member partner = memberRepository.findById(partnerId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.USER_NOT_FOUND));
 
@@ -187,10 +208,18 @@ public class ChatServiceImpl implements ChatService {
         if (rooms.isEmpty()) return List.of();
 
         List<Long> roomIds = rooms.stream().map(ChatRoom::getId).toList();
+        // 최신 메시지
         Map<Long, Message> latestByRoom = messageRepository.findLatestByRoomIds(roomIds)
                 .stream()
                 .collect(Collectors.toMap(Message::getRoomId, m -> m));
 
+        // 미읽음 개수
+        Map<Long, Long> unreadMap = messageRepository.findUnreadCounts(meId, roomIds)
+                .stream()
+                .collect(Collectors.toMap(MessageRepository.UnreadCountView::getRoomId,
+                        MessageRepository.UnreadCountView::getUnread));
+
+        // Direct Room → 상대방 ID 매핑
         Map<Long, Long> partnerIdByRoom = new HashMap<>();
         var directIds = rooms.stream()
                 .filter(r -> r.getType() == RoomType.DIRECT)
@@ -221,15 +250,16 @@ public class ChatServiceImpl implements ChatService {
         List<ChatRoomDTO.RoomListItem> results = new ArrayList<>(rooms.size());
         for (ChatRoom r : rooms) {
             Message latest = latestByRoom.get(r.getId());
+            int unread = unreadMap.getOrDefault(r.getId(), 0L).intValue();
+
             if (r.getType() == RoomType.GROUP) {
-                results.add(chatConverter.toListItemGroup(r, latest));
+                results.add(chatConverter.toListItemGroup(r, latest, unread));
             } else {
                 Long pid = partnerIdByRoom.get(r.getId());
                 String pname = pid != null ? nameByUser.get(pid) : null;
-                results.add(chatConverter.toListItemDirect(r, pid, pname, latest));
+                results.add(chatConverter.toListItemDirect(r, pid, pname, latest, unread));
             }
         }
-
         return results;
     }
 
@@ -403,5 +433,23 @@ public class ChatServiceImpl implements ChatService {
                 .toList();
 
         return chatConverter.toRoomSummaryGroup(room, meId, participants);
+    }
+
+    @Transactional
+    public void markAsRead(Long roomId, Long upToMessageId) {
+        Member me = memberService.getCurrentUser();
+        Long meId = me.getUserId();
+
+        if (!chatRoomMemberRepository.existsByRoomIdAndUserId(roomId, meId)) {
+            throw new CustomException(ErrorStatus.CHAT_NOT_MEMBER);
+        }
+
+        Long targetMsgId = (upToMessageId != null)
+                ? upToMessageId
+                : messageRepository.findTopByRoomIdOrderByIdDesc(roomId)
+                .map(Message::getId)
+                .orElse(0L);
+
+        chatRoomMemberRepository.updateLastRead(roomId, meId, targetMsgId);
     }
 }
