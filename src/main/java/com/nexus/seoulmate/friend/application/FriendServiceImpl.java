@@ -1,7 +1,7 @@
 package com.nexus.seoulmate.friend.application;
 
 import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
 import com.nexus.seoulmate.friend.converter.FriendConverter;
 import com.nexus.seoulmate.friend.domain.entity.FriendRequest;
 import com.nexus.seoulmate.friend.domain.entity.FriendRequestStatus;

@@ -1,8 +1,8 @@
 package com.nexus.seoulmate.exception;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
-import com.nexus.seoulmate.exception.status.SuccessStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.SuccessStatus;
 import lombok.Getter;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)         // null 값을 가지는 필드는 Json 응답에 미포함

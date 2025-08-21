@@ -1,6 +1,5 @@
 package com.nexus.seoulmate.meeting.api.dto.request.officiaReq;
 
-import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "공식 모임 수정 요청 DTO")

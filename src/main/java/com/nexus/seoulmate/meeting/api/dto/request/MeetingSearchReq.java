@@ -3,8 +3,6 @@ package com.nexus.seoulmate.meeting.api.dto.request;
 import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import com.nexus.seoulmate.member.domain.enums.Languages;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 public record MeetingSearchReq(
         @Schema(description = "상위 카테고리", example = "스포츠")

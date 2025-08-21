@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.nexus.seoulmate.exception.status.SuccessStatus.*;
+import static com.nexus.seoulmate.global.status.SuccessStatus.*;
 
 @Slf4j
 @RestController

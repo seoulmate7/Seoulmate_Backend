@@ -1,9 +1,7 @@
 package com.nexus.seoulmate.mypage.repository;
 
-import com.nexus.seoulmate.meeting.domain.MeetingType;
 import com.nexus.seoulmate.order.domain.OrderStatus;
 import com.nexus.seoulmate.mypage.dto.MeetingSimpleDto;
-import com.nexus.seoulmate.payment.domain.PaymentStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;

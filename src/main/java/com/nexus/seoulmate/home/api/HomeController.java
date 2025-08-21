@@ -1,7 +1,7 @@
 package com.nexus.seoulmate.home.api;
 
 import com.nexus.seoulmate.exception.Response;
-import com.nexus.seoulmate.exception.status.SuccessStatus;
+import com.nexus.seoulmate.global.status.SuccessStatus;
 import com.nexus.seoulmate.home.api.dto.response.HomeFeedRes;
 import com.nexus.seoulmate.home.api.dto.response.MeetingBasicInfoRes;
 import com.nexus.seoulmate.home.application.HomeService;

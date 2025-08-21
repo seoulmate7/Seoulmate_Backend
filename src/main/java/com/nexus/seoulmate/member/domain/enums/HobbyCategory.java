@@ -3,7 +3,7 @@ package com.nexus.seoulmate.member.domain.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
 
 public enum HobbyCategory {
     SPORTS("스포츠"),

@@ -1,7 +1,7 @@
 package com.nexus.seoulmate.notification.api;
 
 import com.nexus.seoulmate.exception.Response;
-import com.nexus.seoulmate.exception.status.SuccessStatus;
+import com.nexus.seoulmate.global.status.SuccessStatus;
 import com.nexus.seoulmate.notification.api.dto.response.NotificationRes;
 import com.nexus.seoulmate.notification.application.NotificationPushService;
 import com.nexus.seoulmate.notification.application.NotificationService;

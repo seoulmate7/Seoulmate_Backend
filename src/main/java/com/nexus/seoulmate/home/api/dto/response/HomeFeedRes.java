@@ -1,7 +1,6 @@
 package com.nexus.seoulmate.home.api.dto.response;
 
 import com.nexus.seoulmate.member.domain.enums.Role;
-import com.nexus.seoulmate.member.domain.enums.UserStatus;
 import com.nexus.seoulmate.member.domain.enums.VerificationStatus;
 
 import java.util.List;

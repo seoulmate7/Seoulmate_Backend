@@ -1,8 +1,7 @@
 package com.nexus.seoulmate.order.api;
 
 import com.nexus.seoulmate.exception.Response;
-import com.nexus.seoulmate.exception.status.SuccessStatus;
-import com.nexus.seoulmate.member.repository.MemberRepository;
+import com.nexus.seoulmate.global.status.SuccessStatus;
 import com.nexus.seoulmate.order.api.dto.response.CreateOrderResDto;
 import com.nexus.seoulmate.order.application.OrderService;
 import com.nexus.seoulmate.order.domain.Order;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
-    private final MemberRepository memberRepository;
 
     @Operation(summary = "주문 생성 API")
     @PostMapping("/{meetingId}")
