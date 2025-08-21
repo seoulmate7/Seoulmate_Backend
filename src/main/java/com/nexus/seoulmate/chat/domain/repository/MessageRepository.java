@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface MessageRepository extends JpaRepository <Message,Long> {
     @Query("""
@@ -32,4 +33,25 @@ public interface MessageRepository extends JpaRepository <Message,Long> {
                              Pageable pageable);
 
     boolean existsByRoomIdAndIdLessThan(Long roomId, Long id);
+
+    Optional<Message> findTopByRoomIdOrderByIdDesc(Long roomId);
+
+    @Query("""
+    select m.roomId as roomId, count(m) as unread
+    from Message m
+      join ChatRoomMember crm
+        on crm.roomId = m.roomId and crm.userId = :meId
+    where m.roomId in :roomIds
+      and m.id > coalesce(crm.lastReadMessageId, 0)
+      and m.senderId <> :meId
+    group by m.roomId
+    """)
+    List<UnreadCountView> findUnreadCounts(@Param("meId") Long meId,
+                                           @Param("roomIds") Collection<Long> roomIds);
+
+    interface UnreadCountView {
+        Long getRoomId();
+        Long getUnread();
+    }
+
 }

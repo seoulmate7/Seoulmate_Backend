@@ -71,7 +71,8 @@ public enum SuccessStatus {
     CHAT_ROOMS_FETCHED(HttpStatus.OK,"CHAT200", "내 채팅방 목록 조회에 성공했습니다."),
     CHAT_MESSAGE_SENT(HttpStatus.OK,"CHAT200", "메시지가 성공적으로 전송되었습니다."),
     CHAT_MESSAGES_FETCHED(HttpStatus.OK,"CHAT200", "채팅 메시지 목록 조회에 성공했습니다."),
-    CHAT_ROOM_JOINED(HttpStatus.OK, "CHAT200", "그룹 채팅방에 합류했습니다.");
+    CHAT_ROOM_JOINED(HttpStatus.OK, "CHAT200", "그룹 채팅방에 합류했습니다."),
+    CHAT_MESSAGES_MARKED_AS_READ(HttpStatus.OK, "CHAT200","채팅 메시지가 읽음 처리되었습니다");
 
     private final HttpStatus status;
     private final String code;

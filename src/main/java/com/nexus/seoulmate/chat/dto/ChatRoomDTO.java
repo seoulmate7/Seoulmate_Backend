@@ -59,6 +59,8 @@ public class ChatRoomDTO {
         private String lastMessage;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         private LocalDateTime lastMessageAt;
+
+        private int unreadCount;
     }
 
     @Getter
