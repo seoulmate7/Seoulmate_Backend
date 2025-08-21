@@ -18,6 +18,7 @@ import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatServiceImpl implements ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
@@ -267,6 +269,9 @@ public class ChatServiceImpl implements ChatService {
     public MessageDTO.Sent sendMessage(Long roomId, MessageDTO.SendRequest req) {
         Member me = memberService.getCurrentUser();
         Long meId = me.getUserId();
+        log.info("[CHAT] persist try roomId={}, meId={}, type={}, content='{}'",
+                roomId, meId, req.getType(), req.getContent());
+
         String senderName = chatConverter.formatName(me);;
 
         ChatRoom room = chatRoomRepository.findById(roomId)
@@ -289,8 +294,10 @@ public class ChatServiceImpl implements ChatService {
                         .content(req.getContent())
                         .build()
         );
+        log.info("[CHAT] saved messageId={} roomId={}", message.getId(), roomId);
         MessageDTO.Sent sent = chatConverter.toSent(message, senderName);
 
+        log.info("[CHAT] publish event AFTER_COMMIT roomId={} dto={}", roomId, sent);
         publisher.publishEvent(new ChatEvents.MessageSaved(roomId, sent));
 
         return sent;
