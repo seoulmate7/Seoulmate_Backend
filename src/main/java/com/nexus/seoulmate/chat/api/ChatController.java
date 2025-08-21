@@ -109,4 +109,17 @@ public class ChatController {
         return ResponseEntity.ok(Response.success(SuccessStatus.CHAT_ROOM_JOINED, summary));
     }
 
+    @PatchMapping("/rooms/{roomId}/read")
+    @Operation(
+            summary = "읽음 처리",
+            description = "방에 들어갔거나 메시지를 끝까지 읽었을 때 호출. upToMessageId 미전달 시 최신 메시지까지 읽음으로 처리."
+    )
+    public ResponseEntity<Response<Void>> markAsRead(
+            @PathVariable Long roomId,
+            @RequestParam(required = false) Long upToMessageId
+    ) {
+        chatService.markAsRead(roomId, upToMessageId);
+        return ResponseEntity.ok(Response.success(SuccessStatus.CHAT_MESSAGES_MARKED_AS_READ, null));
+    }
+
 }
