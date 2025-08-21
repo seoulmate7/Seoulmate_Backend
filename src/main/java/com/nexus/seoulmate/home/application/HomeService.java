@@ -33,8 +33,8 @@ public class HomeService {
         // 본인 학교 이름이 제목에 포함된 official 모임 1개
         Meeting regular = meetingHomeRepository.findOfficialByTitleContainsUniversity(univ);
 
-        // 사용자 취미 카테고리와 같은 모임 5개
-        List<Meeting> recommended = meetingHomeRepository.findRecommendedForUser(member.getUserId(), 5);
+        // 사용자 취미 카테고리와 같은 모임 3개
+        List<Meeting> recommended = meetingHomeRepository.findRecommendedForUser(member.getUserId(), 3);
 
         // 카테고리 집계
         var categoryCounts = meetingHomeRepository.countAllGroupByCategory().stream()
@@ -42,8 +42,8 @@ public class HomeService {
                         row.category(), row.category().getDisplayName(), row.count()
                 )).toList();
 
-        // 한국어 클래스
-        List<Meeting> koreanClasses = meetingHomeRepository.findKoreanClasses(10);
+        // 한국어 클래스 3개만
+        List<Meeting> koreanClasses = meetingHomeRepository.findKoreanClasses(3);
 
             // JSESSIONID 쿠키 찾기
             customOAuth2UserService.changeJsessionId(request);
