@@ -79,12 +79,13 @@ public class ChatConverter {
         };
     }
 
-    public MessageDTO.Sent toSent(Message m, String senderName) {
+    public MessageDTO.Sent toSent(Message m, Member sender) {
         return MessageDTO.Sent.builder()
                 .messageId(m.getId())
                 .roomId(m.getRoomId())
                 .senderId(m.getSenderId())
-                .senderName(senderName)
+                .senderName(formatName(sender))
+                .senderProfileUrl(sender.getProfileImage())
                 .type(m.getType().name())
                 .content(m.getContent())
                 .createdAt(m.getCreatedAt() != null ? m.getCreatedAt() : LocalDateTime.now())

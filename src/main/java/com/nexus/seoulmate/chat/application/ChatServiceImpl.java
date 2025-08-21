@@ -271,13 +271,6 @@ public class ChatServiceImpl implements ChatService {
     public MessageDTO.Sent sendMessage(Long roomId, MessageDTO.SendRequest req , Principal principal) {
         Member me = getCurrentUserFrom(principal);
         Long meId = me.getUserId();
-        log.info("[CHAT] persist try roomId={}, meId={}, type={}, content='{}'",
-                roomId, meId, req.getType(), req.getContent());
-
-        String senderName = chatConverter.formatName(me);;
-
-        ChatRoom room = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new CustomException(ErrorStatus.CHAT_ROOM_NOT_FOUND));
 
         if (!chatRoomMemberRepository.existsByRoomIdAndUserId(roomId, meId)) {
             throw new CustomException(ErrorStatus.CHAT_NOT_MEMBER);
@@ -296,10 +289,8 @@ public class ChatServiceImpl implements ChatService {
                         .content(req.getContent())
                         .build()
         );
-        log.info("[CHAT] saved messageId={} roomId={}", message.getId(), roomId);
-        MessageDTO.Sent sent = chatConverter.toSent(message, senderName);
+        MessageDTO.Sent sent = chatConverter.toSent(message, me);
 
-        log.info("[CHAT] publish event AFTER_COMMIT roomId={} dto={}", roomId, sent);
         publisher.publishEvent(new ChatEvents.MessageSaved(roomId, sent));
 
         return sent;
@@ -468,62 +459,42 @@ public class ChatServiceImpl implements ChatService {
                 principal);
 
         if (!(principal instanceof org.springframework.security.core.Authentication auth) || !auth.isAuthenticated()) {
-            log.warn("[WS-AUTH] Principal missing or not authenticated. principal={}", principal);
             throw new CustomException(ErrorStatus.UNAUTHORIZED);
         }
 
-        log.debug("[WS-AUTH] Authentication class={}, name={}, authenticated={}",
-                auth.getClass().getName(), auth.getName(), auth.isAuthenticated());
-
         Object p = auth.getPrincipal();
-        log.debug("[WS-AUTH] Principal object class={}, value={}",
-                (p != null ? p.getClass().getName() : "null"), p);
-
         String email = null;
 
-        // 1) OAuth2User
-        if (p instanceof org.springframework.security.oauth2.core.user.OAuth2User o) {
-            Object v = o.getAttribute("email");
-            log.debug("[WS-AUTH] OAuth2User attribute email={}", v);
-            if (v != null) email = String.valueOf(v);
-        }
-
-        // 2) UserDetails
-        if (email == null && p instanceof org.springframework.security.core.userdetails.UserDetails ud) {
-            log.debug("[WS-AUTH] UserDetails username={}", ud.getUsername());
-            email = ud.getUsername();
-        }
-
-        // 3) Map 계열
-        if (email == null && p instanceof java.util.Map<?, ?> m) {
-            Object v = m.get("email");
-            log.debug("[WS-AUTH] Map principal email={}", v);
-            if (v != null) email = String.valueOf(v);
-        }
+//        // 1) OAuth2User
+//        if (p instanceof org.springframework.security.oauth2.core.user.OAuth2User o) {
+//            Object v = o.getAttribute("email");
+//            log.debug("[WS-AUTH] OAuth2User attribute email={}", v);
+//            if (v != null) email = String.valueOf(v);
+//        }
+//
+//        // 2) UserDetails
+//        if (email == null && p instanceof org.springframework.security.core.userdetails.UserDetails ud) {
+//            log.debug("[WS-AUTH] UserDetails username={}", ud.getUsername());
+//            email = ud.getUsername();
+//        }
+//
+//        // 3) Map 계열
+//        if (email == null && p instanceof java.util.Map<?, ?> m) {
+//            Object v = m.get("email");
+//            log.debug("[WS-AUTH] Map principal email={}", v);
+//            if (v != null) email = String.valueOf(v);
+//        }
 
         // 4) 커스텀 객체 getEmail()
         if (email == null && p != null) {
             try {
                 var mth = p.getClass().getMethod("getEmail");
                 Object v = mth.invoke(p);
-                log.debug("[WS-AUTH] Custom principal getEmail()={}", v);
                 if (v != null) email = String.valueOf(v);
             } catch (NoSuchMethodException ignore) {
-                log.debug("[WS-AUTH] Principal has no getEmail() method. class={}", p.getClass().getName());
             } catch (Exception e) {
                 log.error("[WS-AUTH] getEmail() reflection error", e);
             }
-        }
-
-        // 5) fallback: auth.getName()
-        if (email == null || email.isBlank()) {
-            log.debug("[WS-AUTH] Using auth.getName() fallback. value={}", auth.getName());
-            email = auth.getName();
-        }
-
-        if (email == null || email.isBlank()) {
-            log.error("[WS-AUTH] Could not resolve email from principal: {}", p);
-            throw new CustomException(ErrorStatus.UNAUTHORIZED);
         }
 
         log.info("[WS-AUTH] Resolved email={}", email);

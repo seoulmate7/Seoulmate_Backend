@@ -36,19 +36,7 @@ public class ChatWebSocketController {
             Principal principal
     ) {
         log.info("[WS] send enter roomId={}, payload={}", roomId, request);
-
-        if (principal == null) {
-            log.warn("[WS-PRINCIPAL] principal is null");
-        } else {
-            log.info("[WS-PRINCIPAL] type={}, name={}, toString={}",
-                    principal.getClass().getName(),
-                    principal.getName(),
-                    principal);
-        }
-
         chatService.sendMessage(roomId, request, principal);
-        log.info("[WS] send exit roomId={}", roomId);
-        // 주의: 실제 브로드캐스트는 AFTER_COMMIT 리스너 → Redis → Subscriber → /topic/room.{roomId}
     }
 
     /**
