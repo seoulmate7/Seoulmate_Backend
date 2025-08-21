@@ -7,7 +7,6 @@ import com.nexus.seoulmate.member.repository.HobbyRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.language.bm.Lang;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -51,8 +50,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
             if (hobby2 != null) selectedHobbies1.add(hobby2);
             if (hobby3 != null) selectedHobbies1.add(hobby3);
 
-            Member member1 = Member.createGoogleUser(
-                    null,
+            Member member1 = Member.createLocalUser(
                     "test1@example.com",
                     "길동",
                     "홍",
@@ -64,8 +62,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
                     "https://example.com/cert1.jpg",
                     University.SOOKMYUNG,
                     languages1,
-                    VerificationStatus.VERIFIED,
-                    AuthProvider.LOCAL
+                    VerificationStatus.VERIFIED
             );
             membersToSave.add(member1);
         } else {
@@ -91,8 +88,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
             if (hobby5 != null) selectedHobbies2.add(hobby5);
             if (hobby6 != null) selectedHobbies2.add(hobby6);
 
-            Member member2 = Member.createGoogleUser(
-                    null,
+            Member member2 = Member.createLocalUser(
                     "test2@example.com",
                     "Robert",
                     "Daune",
@@ -104,8 +100,7 @@ public class MemberTestDataInitializer implements CommandLineRunner {
                     "https://example.com/cert2.jpg",
                     University.YONSEI,
                     languages2,
-                    VerificationStatus.VERIFIED,
-                    AuthProvider.LOCAL
+                    VerificationStatus.VERIFIED
             );
             membersToSave.add(member2);
         } else {
