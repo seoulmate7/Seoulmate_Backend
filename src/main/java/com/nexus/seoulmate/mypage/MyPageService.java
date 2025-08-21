@@ -75,6 +75,7 @@ public class MyPageService {
     }
 
     // 프로필 한 줄 소개 수정
+    @Transactional
     public void updateProfileBio(String newBio){
         Member member = memberService.getCurrentUser();
 
@@ -85,6 +86,7 @@ public class MyPageService {
     }
 
     // 취미 수정
+    @Transactional
     public void updateHobbies(HobbyUpdateRequest dto){
         Member member = memberService.getCurrentUser();
 
@@ -103,7 +105,7 @@ public class MyPageService {
         }
         
         member.changeHobbies(newHobbies);
-        memberRepository.save(member);
+        // memberRepository.save(member);
     }
 
     // 언어 레벨테스트 재응시

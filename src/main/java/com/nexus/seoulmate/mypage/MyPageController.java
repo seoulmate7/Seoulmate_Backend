@@ -1,7 +1,6 @@
 package com.nexus.seoulmate.mypage;
 
 import com.nexus.seoulmate.exception.Response;
-import com.nexus.seoulmate.member.domain.enums.Languages;
 import com.nexus.seoulmate.mypage.dto.HobbyUpdateRequest;
 import com.nexus.seoulmate.mypage.dto.MyPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,7 +45,7 @@ public class MyPageController {
 
     @Operation(summary = "취미 수정 API")
     @PutMapping("/update-hobby")
-    public Response<Object> updateHobbies(HobbyUpdateRequest hobbyUpdateRequest){
+    public Response<Object> updateHobbies(@RequestBody HobbyUpdateRequest hobbyUpdateRequest){
         myPageService.updateHobbies(hobbyUpdateRequest);
         return Response.success(HOBBY_UPDATE_SUCCESS, null);
     }
