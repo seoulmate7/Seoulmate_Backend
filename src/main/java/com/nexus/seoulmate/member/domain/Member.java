@@ -25,10 +25,6 @@ public class Member {
     @Column(name = "USER_ID")
     private Long userId;
 
-    @OneToOne
-    @JoinColumn(name = "GOOGLE_INFO_ID")
-    private GoogleInfo googleInfoId;
-
     @Column(nullable = false, length = 50)
     private String email;
 
@@ -90,12 +86,11 @@ public class Member {
     @Column(nullable = false)
     private UserStatus userStatus; // 탈퇴인지 아닌지
 
-    public static Member createGoogleUser(GoogleInfo googleInfoId, String email, String firstName, String lastName,
+    public static Member createLocalUser(String email, String firstName, String lastName,
                                         LocalDate DOB, Countries country, String bio, String profileImage, List<Hobby> hobbies,
                                         String univCertificate, University univ, Map<Languages, Integer> languages,
-                                        VerificationStatus verificationStatus, AuthProvider authProvider){
+                                        VerificationStatus verificationStatus){
         Member user = new Member();
-        user.googleInfoId = googleInfoId;
         user.email = email;
         user.password = "oauth2"; // 의미 없는 값
         user.firstName = firstName;
@@ -110,7 +105,31 @@ public class Member {
         user.languages = languages;
         user.univVerification = verificationStatus;
         user.role = Role.USER;  // 정해진 값
-        user.authProvider = authProvider;
+        user.authProvider = AuthProvider.LOCAL;
+        user.userStatus = UserStatus.ACTIVE;  // 정해진 값
+        return user;
+    }
+
+    public static Member createGoogleUser(String email, String firstName, String lastName,
+                                        LocalDate DOB, Countries country, String bio, String profileImage, List<Hobby> hobbies,
+                                        String univCertificate, University univ, Map<Languages, Integer> languages,
+                                        VerificationStatus verificationStatus){
+        Member user = new Member();
+        user.email = email;
+        user.password = "oauth2"; // 의미 없는 값
+        user.firstName = firstName;
+        user.lastName = lastName;
+        user.DOB = DOB;
+        user.country = country;
+        user.bio = bio;
+        user.profileImage = profileImage;
+        user.hobbies = hobbies;
+        user.univCertificate = univCertificate;
+        user.univ = univ;
+        user.languages = languages;
+        user.univVerification = verificationStatus;
+        user.role = Role.USER;  // 정해진 값
+        user.authProvider = AuthProvider.GOOGLE;
         user.userStatus = UserStatus.ACTIVE;  // 정해진 값
         return user;
     }

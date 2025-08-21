@@ -1,6 +1,5 @@
 package com.nexus.seoulmate.exception.status;
 
-import com.google.api.Http;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -22,6 +21,7 @@ public enum ErrorStatus {
     // Member
     NULL_PARAMETER(HttpStatus.BAD_REQUEST, "SIGNUP 400", "파라미터가 null입니다."),
     HOBBY_NOT_FOUND(HttpStatus.BAD_REQUEST, "HOBBY 400", "취미를 찾을 수 없습니다."),
+    HOBBY_SAVE_FAILED(HttpStatus.BAD_REQUEST, "HOBBY 400", "존재하지 않는 취미가 포함되어 있습니다."),
 
     // Member > Fluent 관련 예외
     FLUENT_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "FLUENT 401", "Fluent API 로그인에 실패했습니다."),

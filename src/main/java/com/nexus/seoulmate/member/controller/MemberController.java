@@ -1,6 +1,5 @@
 package com.nexus.seoulmate.member.controller;
 
-import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.exception.status.ErrorStatus;
 import com.nexus.seoulmate.member.domain.GoogleInfo;
 import com.nexus.seoulmate.member.domain.enums.*;
@@ -71,7 +70,7 @@ public class MemberController {
 
         // DB에서 가져온 GoogleInfo 객체를 사용하여 정보 저장
         GoogleInfo googleInfo = googleInfoOpt.get();
-        String profileImageUrl = memberService.uploadProfileImage(googleInfo.getGoogleId(), profileImage);
+        String profileImageUrl = memberService.uploadProfileImage(profileImage);
 
         Countries country;
         try {
@@ -158,7 +157,7 @@ public class MemberController {
         // 현재 로그인한 사용자의 googleId 가져오기
         String googleId = getGoogleIdFromOAuth2User(oAuth2User);
 
-        String univCertificateUrl = memberService.uploadUnivCertificate(googleId, univCertificate);
+        String univCertificateUrl = memberService.uploadUnivCertificate(univCertificate);
 
         // String을 University enum으로 변환 (한글 표시명 또는 enum 상수명 모두 지원)
         University university;
@@ -195,8 +194,7 @@ public class MemberController {
             }
         }
         
-        if (oAuth2User instanceof CustomOAuth2User) {
-            CustomOAuth2User customUser = (CustomOAuth2User) oAuth2User;
+        if (oAuth2User instanceof CustomOAuth2User customUser) {
             return customUser.getOAuth2Response().getProviderId();
         } else if (oAuth2User != null) {
             // 일반 OAuth2User에서 providerId 추출 시도

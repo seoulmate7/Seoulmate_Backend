@@ -22,7 +22,7 @@ public class AdminController {
     @PostMapping("/admit/{userId}")
     private Response<Object> admitUnivCertificate(@PathVariable("userId") Long userId){
         Member user = adminService.processCertificate(userId);
-        user.rejectUnivCertificate();
+        user.admitUnivCertificate();
         return Response.success(PROCESS_SUCCESS, null);
     }
 

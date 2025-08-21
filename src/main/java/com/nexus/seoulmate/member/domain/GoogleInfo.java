@@ -13,6 +13,10 @@ public class GoogleInfo {
     @Column(name = "GOOGLE_INFO_ID")
     private Long googleInfoId;
 
+    @OneToOne
+    @JoinColumn(name = "USER_ID")
+    private Member userId;
+
     private String sessionId;
 
     @Column(nullable = false)
@@ -24,8 +28,12 @@ public class GoogleInfo {
     @Column(nullable = false, length = 20)
     private String firstName;
 
-    @Column(nullable = false, length = 20)
+    @Column(length = 20)
     private String lastName;
+
+    public void saveUserId(Member userId){
+        this.userId = userId;
+    }
 
     public void updateSessionId(String sessionId){
         this.sessionId = "JSESSIONID=" + sessionId;

@@ -14,19 +14,25 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Member findByUserId(Long userId);
     Optional<Member> findByEmail(String email);
 
+    @Query("SELECT m FROM Member m " +
+           "LEFT JOIN FETCH m.languages " +
+           "LEFT JOIN FETCH m.hobbies " +
+           "WHERE m.email = :email")
+    Optional<Member> findByEmailWithDetails(@Param("email") String email);
+
     @Query("SELECT m FROM Member m LEFT JOIN FETCH m.languages WHERE m.userId = :userId")
     Optional<Member> findWithLanguagesById(@Param("userId") Long userId);
 
     Page<Member> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String first, String last, Pageable pageable);
 
     @Query("""
-    SELECT m FROM Member m 
-    WHERE m.id <> :currentUserId 
-      AND m.id NOT IN (
-        SELECT f.userId2.id FROM Friendship f WHERE f.userId1.id = :currentUserId
+    SELECT m FROM Member m
+    WHERE m.userId <> :currentUserId
+      AND m.userId NOT IN (
+        SELECT f.userId2.userId FROM Friendship f WHERE f.userId1.userId = :currentUserId
       )
-      AND m.id NOT IN (
-        SELECT f.userId1.id FROM Friendship f WHERE f.userId2.id = :currentUserId
+      AND m.userId NOT IN (
+        SELECT f.userId1.userId FROM Friendship f WHERE f.userId2.userId = :currentUserId
       )""")
     List<Member> findAllExcludingFriendsAndSelf(@Param("currentUserId") Long currentUserId);
 
