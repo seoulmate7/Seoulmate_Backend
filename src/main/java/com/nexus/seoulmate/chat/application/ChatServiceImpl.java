@@ -465,25 +465,23 @@ public class ChatServiceImpl implements ChatService {
         Object p = auth.getPrincipal();
         String email = null;
 
-//        // 1) OAuth2User
-//        if (p instanceof org.springframework.security.oauth2.core.user.OAuth2User o) {
-//            Object v = o.getAttribute("email");
-//            log.debug("[WS-AUTH] OAuth2User attribute email={}", v);
-//            if (v != null) email = String.valueOf(v);
-//        }
-//
-//        // 2) UserDetails
-//        if (email == null && p instanceof org.springframework.security.core.userdetails.UserDetails ud) {
-//            log.debug("[WS-AUTH] UserDetails username={}", ud.getUsername());
-//            email = ud.getUsername();
-//        }
-//
-//        // 3) Map 계열
-//        if (email == null && p instanceof java.util.Map<?, ?> m) {
-//            Object v = m.get("email");
-//            log.debug("[WS-AUTH] Map principal email={}", v);
-//            if (v != null) email = String.valueOf(v);
-//        }
+        // 1) OAuth2User
+        if (p instanceof org.springframework.security.oauth2.core.user.OAuth2User o) {
+            Object v = o.getAttribute("email");
+            if (v != null) email = String.valueOf(v);
+        }
+
+        // 2) UserDetails
+        if (email == null && p instanceof org.springframework.security.core.userdetails.UserDetails ud) {
+            email = ud.getUsername();
+        }
+
+        // 3) Map 계열
+        if (email == null && p instanceof java.util.Map<?, ?> m) {
+            Object v = m.get("email");
+            log.debug("[WS-AUTH] Map principal email={}", v);
+            if (v != null) email = String.valueOf(v);
+        }
 
         // 4) 커스텀 객체 getEmail()
         if (email == null && p != null) {
