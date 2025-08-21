@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -67,9 +68,10 @@ public class ChatController {
     )
     public ResponseEntity<Response<MessageDTO.Sent>> sendMessage(
             @PathVariable Long roomId,
-            @RequestBody MessageDTO.SendRequest request
+            @RequestBody MessageDTO.SendRequest request,
+            Principal principal
     ) {
-        var result = chatService.sendMessage(roomId, request);
+        var result = chatService.sendMessage(roomId, request,principal);
         return ResponseEntity.ok(Response.success(SuccessStatus.CHAT_MESSAGE_SENT, result));
     }
 
