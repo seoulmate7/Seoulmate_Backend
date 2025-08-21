@@ -1,8 +1,9 @@
 package com.nexus.seoulmate.notification.application;
 
 import com.nexus.seoulmate.notification.api.dto.NotificationPushDto;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class NotificationPushService {
 
     private static final long TIMEOUT_MS = 0L; //  무제한

@@ -11,6 +11,7 @@ import com.nexus.seoulmate.member.repository.GoogleInfoRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -21,17 +22,12 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
     private final TempStorage tempStorage;
     private final GoogleInfoRepository googleInfoRepository;
-
-    public CustomOAuth2UserService(MemberRepository memberRepository, TempStorage tempStorage, GoogleInfoRepository googleInfoRepository) {
-        this.memberRepository = memberRepository;
-        this.tempStorage = tempStorage;
-        this.googleInfoRepository = googleInfoRepository;
-    }
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {

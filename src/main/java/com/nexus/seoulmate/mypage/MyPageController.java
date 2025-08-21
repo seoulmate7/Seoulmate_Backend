@@ -5,6 +5,7 @@ import com.nexus.seoulmate.mypage.dto.HobbyUpdateRequest;
 import com.nexus.seoulmate.mypage.dto.MeetingSimpleDto;
 import com.nexus.seoulmate.mypage.dto.MyPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -21,14 +22,11 @@ import static com.nexus.seoulmate.exception.status.SuccessStatus.*;
 @Slf4j
 @RestController
 @RequestMapping("/my-page")
+@RequiredArgsConstructor
 @Tag(name = "마이페이지", description = "마이페이지 관련 API")
 public class MyPageController {
 
     private final MyPageService myPageService;
-
-    public MyPageController(MyPageService myPageService) {
-        this.myPageService = myPageService;
-    }
 
     @Operation(summary = "마이페이지 조회 API")
     @GetMapping

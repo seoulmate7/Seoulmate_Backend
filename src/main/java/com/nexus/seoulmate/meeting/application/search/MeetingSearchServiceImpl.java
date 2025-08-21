@@ -1,7 +1,5 @@
 package com.nexus.seoulmate.meeting.application.search;
 
-import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
 import com.nexus.seoulmate.meeting.api.dto.request.MeetingSearchReq;
 import com.nexus.seoulmate.meeting.api.dto.response.MeetingListRes;
 import com.nexus.seoulmate.meeting.domain.Meeting;

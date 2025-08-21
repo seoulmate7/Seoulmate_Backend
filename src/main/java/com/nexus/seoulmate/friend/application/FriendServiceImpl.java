@@ -12,7 +12,6 @@ import com.nexus.seoulmate.friend.dto.FriendRequestDTO;
 import com.nexus.seoulmate.friend.dto.FriendResponseDTO;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
-import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.member.service.MemberService;
 import com.nexus.seoulmate.notification.event.FriendRequestedEvent;
@@ -24,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
