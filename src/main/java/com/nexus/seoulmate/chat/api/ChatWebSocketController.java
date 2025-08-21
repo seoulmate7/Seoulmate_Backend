@@ -4,6 +4,7 @@ import com.nexus.seoulmate.chat.application.ChatService;
 import com.nexus.seoulmate.chat.dto.ChatRoomDTO;
 import com.nexus.seoulmate.chat.dto.MessageDTO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class ChatWebSocketController {
 
     private final ChatService chatService;
@@ -31,7 +33,9 @@ public class ChatWebSocketController {
             @DestinationVariable Long roomId,
             @Payload MessageDTO.SendRequest request
     ) {
+        log.info("[WS] send enter roomId={}, payload={}", roomId, request);
         chatService.sendMessage(roomId, request);
+        log.info("[WS] send exit roomId={}", roomId);
         // 주의: 실제 브로드캐스트는 AFTER_COMMIT 리스너 → Redis → Subscriber → /topic/room.{roomId}
     }
 
