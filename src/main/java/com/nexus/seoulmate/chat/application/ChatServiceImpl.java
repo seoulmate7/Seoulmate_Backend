@@ -26,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -267,8 +268,8 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Transactional
-    public MessageDTO.Sent sendMessage(Long roomId, MessageDTO.SendRequest req) {
-        Member me = getCurrentUserForMessaging();
+    public MessageDTO.Sent sendMessage(Long roomId, MessageDTO.SendRequest req , Principal principal) {
+        Member me = getCurrentUserFrom(principal);
         Long meId = me.getUserId();
         log.info("[CHAT] persist try roomId={}, meId={}, type={}, content='{}'",
                 roomId, meId, req.getType(), req.getContent());
@@ -461,68 +462,71 @@ public class ChatServiceImpl implements ChatService {
         chatRoomMemberRepository.updateLastRead(roomId, meId, targetMsgId);
     }
 
-    private Member getCurrentUserForMessaging() {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        log.debug("[WS-AUTH] Authentication = {}", auth);
+    private Member getCurrentUserFrom(Principal principal) {
+        log.info("[WS-AUTH] principal class={}, value={}",
+                (principal != null ? principal.getClass().getName() : "null"),
+                principal);
 
-        if (auth == null || !auth.isAuthenticated()) {
-            log.warn("[WS-AUTH] No authentication or not authenticated");
+        if (!(principal instanceof org.springframework.security.core.Authentication auth) || !auth.isAuthenticated()) {
+            log.warn("[WS-AUTH] Principal missing or not authenticated. principal={}", principal);
             throw new CustomException(ErrorStatus.UNAUTHORIZED);
         }
 
-        Object principal = auth.getPrincipal();
-        log.debug("[WS-AUTH] Principal class = {}, value = {}",
-                principal != null ? principal.getClass().getName() : "null", principal);
+        log.debug("[WS-AUTH] Authentication class={}, name={}, authenticated={}",
+                auth.getClass().getName(), auth.getName(), auth.isAuthenticated());
+
+        Object p = auth.getPrincipal();
+        log.debug("[WS-AUTH] Principal object class={}, value={}",
+                (p != null ? p.getClass().getName() : "null"), p);
 
         String email = null;
 
-        // 1) 표준 OAuth2User (DefaultOAuth2User 포함)
-        if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oAuth2User) {
-            Object v = oAuth2User.getAttribute("email");
-            if (v != null) {
-                email = String.valueOf(v);
-                log.info("[WS-AUTH] Extracted email from OAuth2User: {}", email);
-            }
+        // 1) OAuth2User
+        if (p instanceof org.springframework.security.oauth2.core.user.OAuth2User o) {
+            Object v = o.getAttribute("email");
+            log.debug("[WS-AUTH] OAuth2User attribute email={}", v);
+            if (v != null) email = String.valueOf(v);
         }
 
-        // 2) UserDetails (폼 로그인 등)
-        if (email == null && principal instanceof org.springframework.security.core.userdetails.UserDetails ud) {
+        // 2) UserDetails
+        if (email == null && p instanceof org.springframework.security.core.userdetails.UserDetails ud) {
+            log.debug("[WS-AUTH] UserDetails username={}", ud.getUsername());
             email = ud.getUsername();
-            log.info("[WS-AUTH] Extracted email from UserDetails: {}", email);
         }
 
-        // 3) Map 계열 Principal
-        if (email == null && principal instanceof java.util.Map<?,?> map) {
-            Object v = map.get("email");
-            if (v != null) {
-                email = String.valueOf(v);
-                log.info("[WS-AUTH] Extracted email from Map principal: {}", email);
-            }
+        // 3) Map 계열
+        if (email == null && p instanceof java.util.Map<?, ?> m) {
+            Object v = m.get("email");
+            log.debug("[WS-AUTH] Map principal email={}", v);
+            if (v != null) email = String.valueOf(v);
         }
 
-        // 4) 리플렉션 기반 커스텀 객체
-        if (email == null && principal != null) {
+        // 4) 커스텀 객체 getEmail()
+        if (email == null && p != null) {
             try {
-                var m = principal.getClass().getMethod("getEmail");
-                Object v = m.invoke(principal);
-                if (v != null) {
-                    email = String.valueOf(v);
-                    log.info("[WS-AUTH] Extracted email from custom principal via reflection: {}", email);
-                }
+                var mth = p.getClass().getMethod("getEmail");
+                Object v = mth.invoke(p);
+                log.debug("[WS-AUTH] Custom principal getEmail()={}", v);
+                if (v != null) email = String.valueOf(v);
             } catch (NoSuchMethodException ignore) {
-                log.debug("[WS-AUTH] No getEmail() on principal {}", principal.getClass().getName());
+                log.debug("[WS-AUTH] Principal has no getEmail() method. class={}", p.getClass().getName());
             } catch (Exception e) {
-                log.error("[WS-AUTH] Failed reflection call on getEmail()", e);
+                log.error("[WS-AUTH] getEmail() reflection error", e);
             }
         }
 
+        // 5) fallback: auth.getName()
+        if (email == null || email.isBlank()) {
+            log.debug("[WS-AUTH] Using auth.getName() fallback. value={}", auth.getName());
+            email = auth.getName();
+        }
 
         if (email == null || email.isBlank()) {
-            log.error("[WS-AUTH] Could not resolve email from principal: {}", principal);
+            log.error("[WS-AUTH] Could not resolve email from principal: {}", p);
             throw new CustomException(ErrorStatus.UNAUTHORIZED);
         }
 
-        log.debug("[WS-AUTH] Looking up member by email: {}", email);
+        log.info("[WS-AUTH] Resolved email={}", email);
 
         return memberRepository.findByEmailWithDetails(email)
                 .orElseThrow(() -> {
