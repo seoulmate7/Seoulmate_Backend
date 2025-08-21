@@ -11,6 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HobbyRequest {
-    @Schema(description = "취미 목록", example = "[\"축구\", \"한국어\", \"댄스\"]")
+    @Schema(description = "취미 목록", example = "[\"축구\", \"한국어\", \"노래\"]")
     private List<String> hobbies;
 }

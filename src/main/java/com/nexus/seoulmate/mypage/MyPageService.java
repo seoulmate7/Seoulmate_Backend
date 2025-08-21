@@ -1,6 +1,7 @@
 package com.nexus.seoulmate.mypage;
 
 import com.nexus.seoulmate.aws.service.AmazonS3Service;
+import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.domain.enums.Languages;
@@ -18,9 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.nexus.seoulmate.exception.status.ErrorStatus.HOBBY_SAVE_FAILED;
 
 @Service
 @RequiredArgsConstructor
@@ -50,14 +52,10 @@ public class MyPageService {
     }
 
     private String formatName(Member member) {
-        switch (member.getCountry()) {
-            case KOREA:
-            case CHINA:
-            case JAPAN:
-                return member.getLastName() + member.getFirstName();
-            default:
-                return member.getFirstName() + " " + member.getLastName();
-        }
+        return switch (member.getCountry()) {
+            case KOREA, CHINA, JAPAN -> member.getLastName() + member.getFirstName();
+            default -> member.getFirstName() + " " + member.getLastName();
+        };
     }
 
     // 프로필 사진 수정
@@ -90,22 +88,14 @@ public class MyPageService {
     public void updateHobbies(HobbyUpdateRequest dto){
         Member member = memberService.getCurrentUser();
 
-        List<Hobby> newHobbies = new ArrayList<>();
+        List<Hobby> newHobbies = hobbyRepository.findByHobbyNameIn(dto.getHobbies());
 
-        // DB에서 새로운 Hobby 엔티티 조회
-        if(dto.getHobbies() != null && !dto.getHobbies().isEmpty()){
-            for (String hobby : dto.getHobbies()){
-                Hobby newHobby = hobbyRepository.findByHobbyName(hobby);
-                if (newHobby != null) {
-                    newHobbies.add(newHobby); 
-                } else {
-                    throw new IllegalArgumentException("존재하지 않는 취미 : " + hobby);
-                }
-            }
+        if (newHobbies.size() != dto.getHobbies().size()){
+            throw new CustomException(HOBBY_SAVE_FAILED); // 존재하지 않는 취미가 포함되어 있습니다. 
         }
         
         member.changeHobbies(newHobbies);
-        // memberRepository.save(member);
+        memberRepository.save(member);
     }
 
     // 언어 레벨테스트 재응시

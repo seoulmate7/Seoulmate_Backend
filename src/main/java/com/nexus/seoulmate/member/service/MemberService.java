@@ -19,10 +19,10 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.nexus.seoulmate.exception.status.ErrorStatus.HOBBY_SAVE_FAILED;
 import static com.nexus.seoulmate.exception.status.ErrorStatus.UNAUTHORIZED;
 import static com.nexus.seoulmate.exception.status.ErrorStatus.USER_NOT_FOUND;
 
@@ -59,6 +59,13 @@ public class MemberService {
 
     // 3. 취미 선택
     public void selectHobby(HobbyRequest hobbyRequest, String googleId){
+        
+        List<Hobby> newHobbies = hobbyRepository.findByHobbyNameIn(hobbyRequest.getHobbies());
+
+        if (newHobbies.size() != hobbyRequest.getHobbies().size()){
+            throw new CustomException(HOBBY_SAVE_FAILED); // 존재하지 않는 취미가 포함되어 있습니다. 
+        }
+
         tempStorage.save(hobbyRequest, googleId);
     }
 
@@ -80,15 +87,7 @@ public class MemberService {
     public void completeSignup(String googleId, HttpServletRequest request) {
         MemberCreateRequest memberCreateRequest = tempStorage.collect(googleId);
 
-        // 기존 Hobby 엔티티들을 조회
-        List<Hobby> existingHobbies = new ArrayList<>();
-        if (memberCreateRequest.getHobbies() != null) {
-            for (Hobby hobby : memberCreateRequest.getHobbies()) {
-                // hobbyName으로 기존 Hobby 엔티티 조회
-                hobbyRepository.findByHobbyNameAndHobbyCategory(hobby.getHobbyName(), hobby.getHobbyCategory())
-                        .ifPresent(existingHobbies::add);
-            }
-        }
+        List<Hobby> newHobbies = hobbyRepository.findByHobbyNameIn(memberCreateRequest.getHobbies());
 
         Member member = Member.createGoogleUser(
                 memberCreateRequest.getEmail(),
@@ -98,7 +97,7 @@ public class MemberService {
                 memberCreateRequest.getCountry(),
                 memberCreateRequest.getBio(),
                 memberCreateRequest.getProfileImage(),
-                existingHobbies,
+                newHobbies,
                 memberCreateRequest.getUnivCertificate(),
                 memberCreateRequest.getUniv(),
                 memberCreateRequest.getLanguages(),
