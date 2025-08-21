@@ -47,8 +47,18 @@ public class StompAuthBridgeConfig implements WebSocketMessageBrokerConfigurer {
                             }
                         }
                     }
+                }else {
+                    var user = acc.getUser();
+                    if (user instanceof Authentication auth) {
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    }
                 }
                 return message;
+            }
+
+            @Override
+            public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
+                SecurityContextHolder.clearContext();
             }
         });
     }
