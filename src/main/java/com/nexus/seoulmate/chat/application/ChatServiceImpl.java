@@ -313,7 +313,7 @@ public class ChatServiceImpl implements ChatService {
 
         List<Message> desc = messageRepository.findRecent(roomId, cursor, pageable);
         if (desc.isEmpty()) {
-            return chatConverter.toMessagePage(List.of(), null, false);
+            return chatConverter.toMessagePage(List.of(), null, false, meId);
         }
 
         // 발신자 정보 일괄 조회
@@ -327,11 +327,10 @@ public class ChatServiceImpl implements ChatService {
                 .map(m -> chatConverter.toMessageItem(m, senderMap.get(m.getSenderId()), meId))
                 .collect(Collectors.toList());
 
-        // nextCursor = 현재 응답 중 가장 오래된 메시지 id (desc의 마지막)
         Long oldestId = desc.get(desc.size() - 1).getId();
         boolean hasMore = messageRepository.existsByRoomIdAndIdLessThan(roomId, oldestId);
 
-        return chatConverter.toMessagePage(items, oldestId, hasMore);
+        return chatConverter.toMessagePage(items, oldestId, hasMore, meId);
     }
 
     @Override
@@ -454,10 +453,6 @@ public class ChatServiceImpl implements ChatService {
     }
 
     private Member getCurrentUserFrom(Principal principal) {
-        log.info("[WS-AUTH] principal class={}, value={}",
-                (principal != null ? principal.getClass().getName() : "null"),
-                principal);
-
         if (!(principal instanceof org.springframework.security.core.Authentication auth) || !auth.isAuthenticated()) {
             throw new CustomException(ErrorStatus.UNAUTHORIZED);
         }
@@ -479,7 +474,6 @@ public class ChatServiceImpl implements ChatService {
         // 3) Map 계열
         if (email == null && p instanceof java.util.Map<?, ?> m) {
             Object v = m.get("email");
-            log.debug("[WS-AUTH] Map principal email={}", v);
             if (v != null) email = String.valueOf(v);
         }
 
@@ -494,9 +488,6 @@ public class ChatServiceImpl implements ChatService {
                 log.error("[WS-AUTH] getEmail() reflection error", e);
             }
         }
-
-        log.info("[WS-AUTH] Resolved email={}", email);
-
         return memberRepository.findByEmailWithDetails(email)
                 .orElseThrow(() -> {
                     return new CustomException(ErrorStatus.USER_NOT_FOUND);

@@ -106,7 +106,7 @@ public class ChatConverter {
                 .build();
     }
 
-    public MessageDTO.Page toMessagePage(List<MessageDTO.MessageItem> items, Long nextCursor, boolean hasMore) {
+    public MessageDTO.Page toMessagePage(List<MessageDTO.MessageItem> items, Long nextCursor, boolean hasMore,Long myUserId) {
         List<MessageDTO.MessageItem> asc = items.stream()
                 .sorted((a, b) -> a.getMessageId().compareTo(b.getMessageId()))
                 .collect(Collectors.toList());
@@ -115,6 +115,7 @@ public class ChatConverter {
                 .items(asc)
                 .nextCursor(nextCursor)
                 .hasMore(hasMore)
+                .myUserId(myUserId)
                 .build();
     }
 
