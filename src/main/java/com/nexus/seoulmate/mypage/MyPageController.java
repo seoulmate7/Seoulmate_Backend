@@ -5,17 +5,14 @@ import com.nexus.seoulmate.mypage.dto.HobbyUpdateRequest;
 import com.nexus.seoulmate.mypage.dto.MeetingSimpleDto;
 import com.nexus.seoulmate.mypage.dto.MyPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.List;
 
 import static com.nexus.seoulmate.global.status.SuccessStatus.*;
