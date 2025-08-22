@@ -4,7 +4,7 @@ import com.nexus.seoulmate.chat.application.ChatService;
 import com.nexus.seoulmate.chat.dto.ChatRoomDTO;
 import com.nexus.seoulmate.chat.dto.MessageDTO;
 import com.nexus.seoulmate.exception.Response;
-import com.nexus.seoulmate.exception.status.SuccessStatus;
+import com.nexus.seoulmate.global.status.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

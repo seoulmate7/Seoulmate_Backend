@@ -1,8 +1,8 @@
 package com.nexus.seoulmate.member.controller;
 
 import com.nexus.seoulmate.exception.Response;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
-import com.nexus.seoulmate.exception.status.SuccessStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.SuccessStatus;
 import com.nexus.seoulmate.member.domain.GoogleInfo;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.dto.GoogleResponse;

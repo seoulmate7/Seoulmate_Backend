@@ -1,7 +1,7 @@
 package com.nexus.seoulmate.member.service;
 
 import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
 import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.dto.signup.*;
 import lombok.RequiredArgsConstructor;

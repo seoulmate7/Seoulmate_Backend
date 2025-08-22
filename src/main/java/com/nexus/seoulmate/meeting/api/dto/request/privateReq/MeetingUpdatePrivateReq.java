@@ -1,6 +1,5 @@
 package com.nexus.seoulmate.meeting.api.dto.request.privateReq;
 
-import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import com.nexus.seoulmate.member.domain.enums.Languages;
 import io.swagger.v3.oas.annotations.media.Schema;
 

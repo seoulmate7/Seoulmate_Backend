@@ -5,7 +5,6 @@ import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.payment.domain.Payment;
 import jakarta.persistence.*;
 import lombok.*;
-import com.nexus.seoulmate.order.domain.OrderStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

@@ -2,9 +2,9 @@ package com.nexus.seoulmate.notification.application;
 
 import com.nexus.seoulmate.member.service.MemberService;
 import com.nexus.seoulmate.notification.api.dto.NotificationPushDto;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 

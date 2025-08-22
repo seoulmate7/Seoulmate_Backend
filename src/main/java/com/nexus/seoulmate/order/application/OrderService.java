@@ -1,7 +1,7 @@
 package com.nexus.seoulmate.order.application;
 
 import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
 import com.nexus.seoulmate.meeting.domain.Meeting;
 import com.nexus.seoulmate.meeting.domain.repository.MeetingRepository;
 import com.nexus.seoulmate.member.domain.Member;

@@ -1,7 +1,7 @@
 package com.nexus.seoulmate.payment.application;
 
 import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
 import com.nexus.seoulmate.notification.event.PaymentCaptureEvent;
 import com.nexus.seoulmate.order.domain.Order;
 import com.nexus.seoulmate.order.domain.repository.OrderRepository;

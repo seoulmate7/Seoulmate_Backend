@@ -1,6 +1,6 @@
 package com.nexus.seoulmate.exception;
 
-import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
