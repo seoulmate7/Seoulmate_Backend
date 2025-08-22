@@ -6,8 +6,8 @@ import com.nexus.seoulmate.meeting.api.dto.request.privateReq.MeetingUpdatePriva
 import com.nexus.seoulmate.meeting.api.dto.response.MeetingDetailPrivateRes;
 
 public interface PrivateMeetingService {
-    Response<Long> createMeeting(MeetingCreatePrivateReq req, Long userId);
-    Response<MeetingDetailPrivateRes> getPrivateMeetingDetail(Long id, Long userId);
-    Response<Long> updateMeeting(Long meetingId, MeetingUpdatePrivateReq req, Long userId);
-    Response<Long> deleteMeeting(Long meetingId, Long userId);
+    Response<Long> createMeeting(MeetingCreatePrivateReq req);
+    Response<MeetingDetailPrivateRes> getPrivateMeetingDetail(Long id);
+    Response<Long> updateMeeting(Long meetingId, MeetingUpdatePrivateReq req);
+    Response<Long> deleteMeeting(Long meetingId);
 }
