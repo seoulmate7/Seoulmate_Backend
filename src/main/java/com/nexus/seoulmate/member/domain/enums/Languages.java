@@ -3,9 +3,7 @@ package com.nexus.seoulmate.member.domain.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
-
-import java.util.stream.Stream;
+import com.nexus.seoulmate.global.status.ErrorStatus;
 
 public enum Languages {
     ENGLISH("영어"),

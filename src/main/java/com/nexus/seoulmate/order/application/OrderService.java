@@ -1,7 +1,7 @@
 package com.nexus.seoulmate.order.application;
 
 import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
 import com.nexus.seoulmate.meeting.domain.Meeting;
 import com.nexus.seoulmate.meeting.domain.repository.MeetingRepository;
 import com.nexus.seoulmate.member.domain.Member;
@@ -10,8 +10,10 @@ import com.nexus.seoulmate.member.service.MemberService;
 import com.nexus.seoulmate.order.domain.Order;
 import com.nexus.seoulmate.order.domain.OrderStatus;
 import com.nexus.seoulmate.order.domain.repository.OrderRepository;
+import com.nexus.seoulmate.payment.application.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +23,9 @@ public class OrderService {
     private final MeetingRepository meetingRepository;
     private final MemberRepository memberRepository;
     private final MemberService memberService;
+    private final PaymentService paymentService;
 
+    @Transactional
     public Order createOrder(Long meetingId) {
 
         Long userId = memberService.getCurrentId();
@@ -39,8 +43,14 @@ public class OrderService {
         // 주문 생성
         int amount = meeting.getPrice();
         Order order = Order.create(member, meeting, amount);
+        orderRepository.save(order);
 
-        return orderRepository.save(order);
+        // 0원이면 내부 결제 완료 처리
+        if(amount == 0){
+            paymentService.processFreePayment(order);
+        }
+
+        return order;
     }
 
         public Order getOrderByUid(String orderUid){

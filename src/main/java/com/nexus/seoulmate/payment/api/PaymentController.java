@@ -1,8 +1,8 @@
 package com.nexus.seoulmate.payment.api;
 
 import com.nexus.seoulmate.exception.Response;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
-import com.nexus.seoulmate.exception.status.SuccessStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.SuccessStatus;
 import com.nexus.seoulmate.payment.api.dto.WebhookPayload;
 import com.nexus.seoulmate.payment.api.dto.request.PaymentVerifyRequest;
 import com.nexus.seoulmate.payment.application.PaymentService;

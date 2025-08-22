@@ -22,9 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
 
-import static com.nexus.seoulmate.exception.status.ErrorStatus.HOBBY_SAVE_FAILED;
-import static com.nexus.seoulmate.exception.status.ErrorStatus.UNAUTHORIZED;
-import static com.nexus.seoulmate.exception.status.ErrorStatus.USER_NOT_FOUND;
+import static com.nexus.seoulmate.global.status.ErrorStatus.HOBBY_SAVE_FAILED;
+import static com.nexus.seoulmate.global.status.ErrorStatus.UNAUTHORIZED;
+import static com.nexus.seoulmate.global.status.ErrorStatus.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

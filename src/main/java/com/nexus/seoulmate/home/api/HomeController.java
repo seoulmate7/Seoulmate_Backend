@@ -1,13 +1,11 @@
 package com.nexus.seoulmate.home.api;
 
 import com.nexus.seoulmate.exception.Response;
-import com.nexus.seoulmate.exception.status.SuccessStatus;
+import com.nexus.seoulmate.global.status.SuccessStatus;
 import com.nexus.seoulmate.home.api.dto.response.HomeFeedRes;
 import com.nexus.seoulmate.home.api.dto.response.MeetingBasicInfoRes;
 import com.nexus.seoulmate.home.application.HomeService;
 import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
-import com.nexus.seoulmate.member.repository.MemberRepository;
-import com.nexus.seoulmate.member.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -43,25 +41,3 @@ public class HomeController {
         return Response.success(SuccessStatus.SUCCESS, list);
     }
 }
-
-//    @SecurityRequirement(name = "sessionId")
-//    public Response<Map<String, Object>> getSeoulmateInfo(HttpServletRequest request) {
-//        try {
-//            Member currentUser = memberService.getCurrentUser();
-//
-//            Map<String, Object> data = new HashMap<>();
-//            data.put("email", currentUser.getEmail());
-//            data.put("memberId", currentUser.getUserId());
-//            data.put("role", currentUser.getRole());
-//            data.put("schoolVerification", currentUser.getUnivVerification());
-//
-//            // JSESSIONID 쿠키 찾기
-//            customOAuth2UserService.changeJsessionId(request);
-//            String jsessionId = memberService.getSessionId(request);
-//            data.put("jsessionId", "JSESSIONID=" + jsessionId);
-//
-//            return Response.success(SuccessStatus.SUCCESS, data);
-//        } catch (Exception e) {
-//            return Response.fail(ErrorStatus.UNAUTHORIZED);
-//        }
-//    }

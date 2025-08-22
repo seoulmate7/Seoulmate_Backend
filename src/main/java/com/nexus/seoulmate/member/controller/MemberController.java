@@ -1,6 +1,6 @@
 package com.nexus.seoulmate.member.controller;
 
-import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
 import com.nexus.seoulmate.member.domain.GoogleInfo;
 import com.nexus.seoulmate.member.domain.enums.*;
 import com.nexus.seoulmate.member.dto.CustomOAuth2User;
@@ -9,7 +9,7 @@ import com.nexus.seoulmate.member.repository.GoogleInfoRepository;
 import com.nexus.seoulmate.member.service.FluentProxyService;
 import com.nexus.seoulmate.member.service.MemberService;
 import com.nexus.seoulmate.exception.Response;
-import com.nexus.seoulmate.exception.status.SuccessStatus;
+import com.nexus.seoulmate.global.status.SuccessStatus;
 import com.nexus.seoulmate.member.dto.signup.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -26,7 +26,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static com.nexus.seoulmate.exception.status.SuccessStatus.*;
+import static com.nexus.seoulmate.global.status.SuccessStatus.LEVEL_TEST_SUCCESS;
+import static com.nexus.seoulmate.global.status.SuccessStatus.SUBMIT_LEVEL_TEST_SUCCESS;
 
 @RestController
 @RequestMapping("/signup")

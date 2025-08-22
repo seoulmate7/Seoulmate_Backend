@@ -5,7 +5,6 @@ import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.payment.domain.Payment;
 import jakarta.persistence.*;
 import lombok.*;
-import com.nexus.seoulmate.order.domain.OrderStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -67,12 +66,17 @@ public class Order {
                 .build();
     }
 
+    // 0원 결제시 order, payment 연결
+    public void attachPayment(Payment payment) {
+        this.payment = payment;
+    }
+
     // 결제 완료 처리
     public void markPaid(){
         this.status = OrderStatus.PAID;
     }
 
-    // 주문 취소 처리
+    // 주문 취소 처리 (보류)
     public void markCancelled(){
         this.status = OrderStatus.CANCELLED;
     }

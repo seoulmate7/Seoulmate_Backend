@@ -8,9 +8,8 @@ import com.nexus.seoulmate.chat.domain.repository.MessageRepository;
 import com.nexus.seoulmate.chat.dto.ChatRoomDTO;
 import com.nexus.seoulmate.chat.dto.MessageDTO;
 import com.nexus.seoulmate.chat.event.ChatEvents;
-import com.nexus.seoulmate.chat.redis.ChatPublisher;
 import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
 import com.nexus.seoulmate.meeting.domain.Meeting;
 import com.nexus.seoulmate.meeting.domain.MeetingType;
 import com.nexus.seoulmate.meeting.domain.repository.MeetingRepository;
@@ -41,7 +40,6 @@ public class ChatServiceImpl implements ChatService {
     private final MemberRepository memberRepository;
     private final MemberService memberService;
     private final ChatConverter chatConverter;
-    private final ChatPublisher chatPublisher;
     private final ApplicationEventPublisher publisher;
     private final MeetingRepository meetingRepository;
 

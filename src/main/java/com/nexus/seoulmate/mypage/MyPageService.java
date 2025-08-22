@@ -27,7 +27,7 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 
-import static com.nexus.seoulmate.exception.status.ErrorStatus.HOBBY_SAVE_FAILED;
+import static com.nexus.seoulmate.global.status.ErrorStatus.HOBBY_SAVE_FAILED;
 
 @Service
 @RequiredArgsConstructor

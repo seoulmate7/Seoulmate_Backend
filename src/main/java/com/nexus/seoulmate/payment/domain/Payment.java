@@ -3,7 +3,6 @@ package com.nexus.seoulmate.payment.domain;
 import com.nexus.seoulmate.order.domain.Order;
 import jakarta.persistence.*;
 import lombok.*;
-import org.checkerframework.checker.units.qual.C;
 
 import java.time.LocalDateTime;
 

@@ -13,7 +13,7 @@ public class GoogleInfo {
     @Column(name = "GOOGLE_INFO_ID")
     private Long googleInfoId;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")
     private Member userId;
 

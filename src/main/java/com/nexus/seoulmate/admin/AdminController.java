@@ -8,7 +8,7 @@ import com.nexus.seoulmate.member.domain.Member;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import static com.nexus.seoulmate.exception.status.SuccessStatus.*;
+import static com.nexus.seoulmate.global.status.SuccessStatus.PROCESS_SUCCESS;
 
 @RestController
 @RequestMapping("/admin")
