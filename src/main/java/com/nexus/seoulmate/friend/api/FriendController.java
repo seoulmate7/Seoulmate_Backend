@@ -1,7 +1,7 @@
 package com.nexus.seoulmate.friend.api;
 
 import com.nexus.seoulmate.exception.Response;
-import com.nexus.seoulmate.exception.status.SuccessStatus;
+import com.nexus.seoulmate.global.status.SuccessStatus;
 import com.nexus.seoulmate.friend.application.FriendService;
 import com.nexus.seoulmate.friend.dto.FriendRequestDTO;
 import com.nexus.seoulmate.friend.dto.FriendResponseDTO;

@@ -79,12 +79,13 @@ public class ChatConverter {
         };
     }
 
-    public MessageDTO.Sent toSent(Message m, String senderName) {
+    public MessageDTO.Sent toSent(Message m, Member sender) {
         return MessageDTO.Sent.builder()
                 .messageId(m.getId())
                 .roomId(m.getRoomId())
                 .senderId(m.getSenderId())
-                .senderName(senderName)
+                .senderName(formatName(sender))
+                .senderProfileUrl(sender.getProfileImage())
                 .type(m.getType().name())
                 .content(m.getContent())
                 .createdAt(m.getCreatedAt() != null ? m.getCreatedAt() : LocalDateTime.now())
@@ -105,7 +106,7 @@ public class ChatConverter {
                 .build();
     }
 
-    public MessageDTO.Page toMessagePage(List<MessageDTO.MessageItem> items, Long nextCursor, boolean hasMore) {
+    public MessageDTO.Page toMessagePage(List<MessageDTO.MessageItem> items, Long nextCursor, boolean hasMore,Long myUserId) {
         List<MessageDTO.MessageItem> asc = items.stream()
                 .sorted((a, b) -> a.getMessageId().compareTo(b.getMessageId()))
                 .collect(Collectors.toList());
@@ -114,6 +115,7 @@ public class ChatConverter {
                 .items(asc)
                 .nextCursor(nextCursor)
                 .hasMore(hasMore)
+                .myUserId(myUserId)
                 .build();
     }
 

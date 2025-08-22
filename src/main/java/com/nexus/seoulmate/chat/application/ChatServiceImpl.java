@@ -8,9 +8,8 @@ import com.nexus.seoulmate.chat.domain.repository.MessageRepository;
 import com.nexus.seoulmate.chat.dto.ChatRoomDTO;
 import com.nexus.seoulmate.chat.dto.MessageDTO;
 import com.nexus.seoulmate.chat.event.ChatEvents;
-import com.nexus.seoulmate.chat.redis.ChatPublisher;
 import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
 import com.nexus.seoulmate.meeting.domain.Meeting;
 import com.nexus.seoulmate.meeting.domain.MeetingType;
 import com.nexus.seoulmate.meeting.domain.repository.MeetingRepository;
@@ -26,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,7 +40,6 @@ public class ChatServiceImpl implements ChatService {
     private final MemberRepository memberRepository;
     private final MemberService memberService;
     private final ChatConverter chatConverter;
-    private final ChatPublisher chatPublisher;
     private final ApplicationEventPublisher publisher;
     private final MeetingRepository meetingRepository;
 
@@ -267,16 +266,9 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Transactional
-    public MessageDTO.Sent sendMessage(Long roomId, MessageDTO.SendRequest req) {
-        Member me = getCurrentUserForMessaging();
+    public MessageDTO.Sent sendMessage(Long roomId, MessageDTO.SendRequest req , Principal principal) {
+        Member me = getCurrentUserFrom(principal);
         Long meId = me.getUserId();
-        log.info("[CHAT] persist try roomId={}, meId={}, type={}, content='{}'",
-                roomId, meId, req.getType(), req.getContent());
-
-        String senderName = chatConverter.formatName(me);;
-
-        ChatRoom room = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new CustomException(ErrorStatus.CHAT_ROOM_NOT_FOUND));
 
         if (!chatRoomMemberRepository.existsByRoomIdAndUserId(roomId, meId)) {
             throw new CustomException(ErrorStatus.CHAT_NOT_MEMBER);
@@ -295,10 +287,8 @@ public class ChatServiceImpl implements ChatService {
                         .content(req.getContent())
                         .build()
         );
-        log.info("[CHAT] saved messageId={} roomId={}", message.getId(), roomId);
-        MessageDTO.Sent sent = chatConverter.toSent(message, senderName);
+        MessageDTO.Sent sent = chatConverter.toSent(message, me);
 
-        log.info("[CHAT] publish event AFTER_COMMIT roomId={} dto={}", roomId, sent);
         publisher.publishEvent(new ChatEvents.MessageSaved(roomId, sent));
 
         return sent;
@@ -321,7 +311,7 @@ public class ChatServiceImpl implements ChatService {
 
         List<Message> desc = messageRepository.findRecent(roomId, cursor, pageable);
         if (desc.isEmpty()) {
-            return chatConverter.toMessagePage(List.of(), null, false);
+            return chatConverter.toMessagePage(List.of(), null, false, meId);
         }
 
         // 발신자 정보 일괄 조회
@@ -335,11 +325,10 @@ public class ChatServiceImpl implements ChatService {
                 .map(m -> chatConverter.toMessageItem(m, senderMap.get(m.getSenderId()), meId))
                 .collect(Collectors.toList());
 
-        // nextCursor = 현재 응답 중 가장 오래된 메시지 id (desc의 마지막)
         Long oldestId = desc.get(desc.size() - 1).getId();
         boolean hasMore = messageRepository.existsByRoomIdAndIdLessThan(roomId, oldestId);
 
-        return chatConverter.toMessagePage(items, oldestId, hasMore);
+        return chatConverter.toMessagePage(items, oldestId, hasMore, meId);
     }
 
     @Override
@@ -461,69 +450,42 @@ public class ChatServiceImpl implements ChatService {
         chatRoomMemberRepository.updateLastRead(roomId, meId, targetMsgId);
     }
 
-    private Member getCurrentUserForMessaging() {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        log.debug("[WS-AUTH] Authentication = {}", auth);
-
-        if (auth == null || !auth.isAuthenticated()) {
-            log.warn("[WS-AUTH] No authentication or not authenticated");
+    private Member getCurrentUserFrom(Principal principal) {
+        if (!(principal instanceof org.springframework.security.core.Authentication auth) || !auth.isAuthenticated()) {
             throw new CustomException(ErrorStatus.UNAUTHORIZED);
         }
 
-        Object principal = auth.getPrincipal();
-        log.debug("[WS-AUTH] Principal class = {}, value = {}",
-                principal != null ? principal.getClass().getName() : "null", principal);
-
+        Object p = auth.getPrincipal();
         String email = null;
 
-        // 1) 표준 OAuth2User (DefaultOAuth2User 포함)
-        if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oAuth2User) {
-            Object v = oAuth2User.getAttribute("email");
-            if (v != null) {
-                email = String.valueOf(v);
-                log.info("[WS-AUTH] Extracted email from OAuth2User: {}", email);
-            }
+        // 1) OAuth2User
+        if (p instanceof org.springframework.security.oauth2.core.user.OAuth2User o) {
+            Object v = o.getAttribute("email");
+            if (v != null) email = String.valueOf(v);
         }
 
-        // 2) UserDetails (폼 로그인 등)
-        if (email == null && principal instanceof org.springframework.security.core.userdetails.UserDetails ud) {
+        // 2) UserDetails
+        if (email == null && p instanceof org.springframework.security.core.userdetails.UserDetails ud) {
             email = ud.getUsername();
-            log.info("[WS-AUTH] Extracted email from UserDetails: {}", email);
         }
 
-        // 3) Map 계열 Principal
-        if (email == null && principal instanceof java.util.Map<?,?> map) {
-            Object v = map.get("email");
-            if (v != null) {
-                email = String.valueOf(v);
-                log.info("[WS-AUTH] Extracted email from Map principal: {}", email);
-            }
+        // 3) Map 계열
+        if (email == null && p instanceof java.util.Map<?, ?> m) {
+            Object v = m.get("email");
+            if (v != null) email = String.valueOf(v);
         }
 
-        // 4) 리플렉션 기반 커스텀 객체
-        if (email == null && principal != null) {
+        // 4) 커스텀 객체 getEmail()
+        if (email == null && p != null) {
             try {
-                var m = principal.getClass().getMethod("getEmail");
-                Object v = m.invoke(principal);
-                if (v != null) {
-                    email = String.valueOf(v);
-                    log.info("[WS-AUTH] Extracted email from custom principal via reflection: {}", email);
-                }
+                var mth = p.getClass().getMethod("getEmail");
+                Object v = mth.invoke(p);
+                if (v != null) email = String.valueOf(v);
             } catch (NoSuchMethodException ignore) {
-                log.debug("[WS-AUTH] No getEmail() on principal {}", principal.getClass().getName());
             } catch (Exception e) {
-                log.error("[WS-AUTH] Failed reflection call on getEmail()", e);
+                log.error("[WS-AUTH] getEmail() reflection error", e);
             }
         }
-
-
-        if (email == null || email.isBlank()) {
-            log.error("[WS-AUTH] Could not resolve email from principal: {}", principal);
-            throw new CustomException(ErrorStatus.UNAUTHORIZED);
-        }
-
-        log.debug("[WS-AUTH] Looking up member by email: {}", email);
-
         return memberRepository.findByEmailWithDetails(email)
                 .orElseThrow(() -> {
                     return new CustomException(ErrorStatus.USER_NOT_FOUND);

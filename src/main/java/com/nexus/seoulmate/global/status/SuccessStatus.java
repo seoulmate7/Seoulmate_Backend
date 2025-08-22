@@ -1,4 +1,4 @@
-package com.nexus.seoulmate.exception.status;
+package com.nexus.seoulmate.global.status;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

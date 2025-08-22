@@ -9,7 +9,7 @@ import com.nexus.seoulmate.member.domain.enums.Languages;
 import lombok.RequiredArgsConstructor;
 
 import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
 import org.springframework.http.*;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -46,13 +46,6 @@ public class FluentProxyService {
             case KOREAN -> postId = "P163524106";
             case ENGLISH -> postId = "P174024107";
         }
-
-        // 3. 오디오파일 업로드
-        String bucketName = "bucket-seoulmate-250826";
-        String bucketFolderName = "example-folder";
-
-        // String audioUrl = "https://storage.googleapis.com/bucket-seoulmate-250826/example-folder/english-89.wav";
-        // String audioUrl = uploadAudioFile(audioFile, bucketName, bucketFolderName);
         String audioUrl = amazonS3Service.uploadAudio(audioFile).getUrl();
 
         // 4. 채점 요청 및 결과 받기

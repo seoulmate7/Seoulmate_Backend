@@ -1,33 +1,26 @@
 package com.nexus.seoulmate.member.handler;
 
 import com.nexus.seoulmate.member.domain.GoogleInfo;
-import com.nexus.seoulmate.member.domain.Member;
-import com.nexus.seoulmate.member.domain.enums.VerificationStatus;
 import com.nexus.seoulmate.member.dto.CustomOAuth2User;
 import com.nexus.seoulmate.member.dto.OAuth2Response;
 import com.nexus.seoulmate.member.repository.GoogleInfoRepository;
-import com.nexus.seoulmate.member.repository.MemberRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private final GoogleInfoRepository googleInfoRepository;
-    private final MemberRepository memberRepository;
-
-    public CustomAuthenticationSuccessHandler(GoogleInfoRepository googleInfoRepository, MemberRepository memberRepository) {
-        this.googleInfoRepository = googleInfoRepository;
-        this.memberRepository = memberRepository;
-    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {

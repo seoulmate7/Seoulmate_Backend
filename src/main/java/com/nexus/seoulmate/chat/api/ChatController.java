@@ -4,7 +4,7 @@ import com.nexus.seoulmate.chat.application.ChatService;
 import com.nexus.seoulmate.chat.dto.ChatRoomDTO;
 import com.nexus.seoulmate.chat.dto.MessageDTO;
 import com.nexus.seoulmate.exception.Response;
-import com.nexus.seoulmate.exception.status.SuccessStatus;
+import com.nexus.seoulmate.global.status.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -67,9 +68,10 @@ public class ChatController {
     )
     public ResponseEntity<Response<MessageDTO.Sent>> sendMessage(
             @PathVariable Long roomId,
-            @RequestBody MessageDTO.SendRequest request
+            @RequestBody MessageDTO.SendRequest request,
+            Principal principal
     ) {
-        var result = chatService.sendMessage(roomId, request);
+        var result = chatService.sendMessage(roomId, request,principal);
         return ResponseEntity.ok(Response.success(SuccessStatus.CHAT_MESSAGE_SENT, result));
     }
 

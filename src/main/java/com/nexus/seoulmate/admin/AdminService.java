@@ -1,7 +1,7 @@
 package com.nexus.seoulmate.admin;
 
 import com.nexus.seoulmate.exception.CustomException;
-import com.nexus.seoulmate.exception.status.ErrorStatus;
+import com.nexus.seoulmate.global.status.ErrorStatus;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.domain.enums.VerificationStatus;
 import com.nexus.seoulmate.member.repository.MemberRepository;

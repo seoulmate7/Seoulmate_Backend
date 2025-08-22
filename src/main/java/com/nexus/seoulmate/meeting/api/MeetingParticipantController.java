@@ -1,7 +1,7 @@
 package com.nexus.seoulmate.meeting.api;
 
 import com.nexus.seoulmate.exception.Response;
-import com.nexus.seoulmate.exception.status.SuccessStatus;
+import com.nexus.seoulmate.global.status.SuccessStatus;
 import com.nexus.seoulmate.meeting.api.dto.response.ParticipantsResDto;
 import com.nexus.seoulmate.meeting.application.participant.MeetingParticipantService;
 import io.swagger.v3.oas.annotations.Operation;
