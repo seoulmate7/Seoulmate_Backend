@@ -24,10 +24,8 @@ public class OrderController {
     @Operation(summary = "주문 생성 API")
     @PostMapping("/{meetingId}")
     public ResponseEntity<Response<CreateOrderResDto>> createOrder(
-            @PathVariable Long meetingId,
-            @RequestHeader("userId") Long userId // 로그인 구현 후 수정 예정
-    ){
-        Order order = orderService.createOrder(meetingId, userId);
+            @PathVariable Long meetingId){
+        Order order = orderService.createOrder(meetingId);
         CreateOrderResDto resDto = new CreateOrderResDto(
                 order.getOrderUid(),
                 order.getMerchantUid(),
