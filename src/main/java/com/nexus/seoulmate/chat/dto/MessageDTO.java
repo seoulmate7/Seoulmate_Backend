@@ -62,6 +62,7 @@ public class MessageDTO {
         private List<MessageItem> items;
         private Long nextCursor;
         private boolean hasMore;
+        private Long myUserId;
     }
 
 }
