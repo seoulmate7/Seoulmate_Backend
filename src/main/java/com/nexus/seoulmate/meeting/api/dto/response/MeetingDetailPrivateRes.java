@@ -23,6 +23,7 @@ public record MeetingDetailPrivateRes(
     public record HostInfo(
             Long id,
             String name,
-            String profile_image
+            String profile_image,
+            int language_level
     ){}
 }

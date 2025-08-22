@@ -97,7 +97,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
         Languages meetingLang = req.language(); // null값 허용하지 않음
         Integer hostLangLevel = null;
         if(meetingLang != null && member.getLanguages() != null){
-            hostLangLevel = member.getLanguages().get(meetingLang.name());
+            hostLangLevel = member.getLanguages().get(meetingLang);
         }
 
         // string -> int 변환 및 검증
@@ -149,7 +149,8 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
                 new MeetingDetailPrivateRes.HostInfo(
                         host.getUserId(),
                         host.getFirstName() + " " + host.getLastName(),
-                        host.getProfileImage()
+                        host.getProfileImage(),
+                        meeting.getLanguageLevel() == null ? 0 : meeting.getLanguageLevel()
                 ),
                 meeting.getLocation(),
                 meeting.getHobbyCategory(),
@@ -199,7 +200,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
         Languages meetingLang = req.language();
         Integer hostLangLevel = null;
         if(meetingLang != null && meeting.getUserId().getLanguages() != null) {
-            hostLangLevel = meeting.getUserId().getLanguages().get(meetingLang.name());
+            hostLangLevel = meeting.getUserId().getLanguages().get(meetingLang);
         }
 
         // string -> int 변환 및 검증
