@@ -6,7 +6,6 @@ import com.nexus.seoulmate.member.domain.enums.HobbyCategory;
 import com.nexus.seoulmate.member.domain.enums.Languages;
 import com.nexus.seoulmate.member.domain.enums.Role;
 import com.nexus.seoulmate.member.repository.HobbyRepository;
-import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.exception.CustomException;
 import com.nexus.seoulmate.exception.Response;
 import com.nexus.seoulmate.global.status.ErrorStatus;
@@ -17,6 +16,8 @@ import com.nexus.seoulmate.meeting.api.dto.response.MeetingDetailPrivateRes;
 import com.nexus.seoulmate.meeting.domain.Meeting;
 import com.nexus.seoulmate.meeting.domain.MeetingType;
 import com.nexus.seoulmate.meeting.domain.repository.MeetingRepository;
+import com.nexus.seoulmate.member.repository.MemberRepository;
+import com.nexus.seoulmate.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,11 +33,12 @@ import java.util.regex.Pattern;
 public class PrivateMeetingServiceImpl implements PrivateMeetingService {
 
     private final MeetingRepository meetingRepository;
-    private final MemberRepository memberRepository;
     private final HobbyRepository hobbyRepository;
+    private final MemberService memberService;
 
     // 숫자 문자열 검증
     private static final Pattern NUMERIC = Pattern.compile("^\\d+$");
+    private final MemberRepository memberRepository;
 
     private int parsePositiveInt(String raw, String fieldName){
         if(raw == null){
@@ -67,9 +69,9 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
 
     @Override
     @Transactional
-    public Response<Long> createMeeting(MeetingCreatePrivateReq req, Long userId) {
-        Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
+    public Response<Long> createMeeting(MeetingCreatePrivateReq req) {
+        Long userId = memberService.getCurrentId();
+        Member member = memberRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorStatus.MEMBER_NOT_FOUND));
 
         if (member.getRole() == Role.ADMIN) {
             throw new CustomException(ErrorStatus.INVALID_MEETING_TYPE); // ADMIN은 private 생성 불가
@@ -78,7 +80,6 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH);
         LocalDate meetingDay = LocalDate.parse(req.meeting_day(), formatter);
         LocalTime startTime = LocalTime.parse(req.start_time());
-
 
         // 세부 취미 조회
         String raw = req.primaryHobbyName();
@@ -129,7 +130,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
     }
 
     @Transactional(readOnly = true)
-    public Response<MeetingDetailPrivateRes> getPrivateMeetingDetail(Long meetingId, Long userId) {
+    public Response<MeetingDetailPrivateRes> getPrivateMeetingDetail(Long meetingId) {
         Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
@@ -166,11 +167,12 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
     }
     @Override
     @Transactional
-    public Response<Long> updateMeeting(Long meetingId, MeetingUpdatePrivateReq req, Long userId) {
+    public Response<Long> updateMeeting(Long meetingId, MeetingUpdatePrivateReq req) {
         Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
-        if (!meeting.getUserId().getUserId().equals(userId)) {
+        Long meId = memberService.getCurrentId();
+        if (!meeting.getUserId().getUserId().equals(meId)) {
             throw new CustomException(ErrorStatus.FORBIDDEN);
         }
 
@@ -229,11 +231,12 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
 
     @Override
     @Transactional
-    public Response<Long> deleteMeeting(Long meetingId, Long userId) {
+    public Response<Long> deleteMeeting(Long meetingId) {
         Meeting meeting = meetingRepository.findWithUserById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.MEETING_NOT_FOUND));
 
-        if (!meeting.getUserId().getUserId().equals(userId)) {
+        Long meId = memberService.getCurrentId();
+        if (!meeting.getUserId().getUserId().equals(meId)) {
             throw new CustomException(ErrorStatus.FORBIDDEN);
         }
 

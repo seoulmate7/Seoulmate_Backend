@@ -21,9 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -264,16 +266,9 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Transactional
-    public MessageDTO.Sent sendMessage(Long roomId, MessageDTO.SendRequest req) {
-        Member me = memberService.getCurrentUser();
+    public MessageDTO.Sent sendMessage(Long roomId, MessageDTO.SendRequest req , Principal principal) {
+        Member me = getCurrentUserFrom(principal);
         Long meId = me.getUserId();
-        log.info("[CHAT] persist try roomId={}, meId={}, type={}, content='{}'",
-                roomId, meId, req.getType(), req.getContent());
-
-        String senderName = chatConverter.formatName(me);;
-
-        ChatRoom room = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new CustomException(ErrorStatus.CHAT_ROOM_NOT_FOUND));
 
         if (!chatRoomMemberRepository.existsByRoomIdAndUserId(roomId, meId)) {
             throw new CustomException(ErrorStatus.CHAT_NOT_MEMBER);
@@ -292,10 +287,8 @@ public class ChatServiceImpl implements ChatService {
                         .content(req.getContent())
                         .build()
         );
-        log.info("[CHAT] saved messageId={} roomId={}", message.getId(), roomId);
-        MessageDTO.Sent sent = chatConverter.toSent(message, senderName);
+        MessageDTO.Sent sent = chatConverter.toSent(message, me);
 
-        log.info("[CHAT] publish event AFTER_COMMIT roomId={} dto={}", roomId, sent);
         publisher.publishEvent(new ChatEvents.MessageSaved(roomId, sent));
 
         return sent;
@@ -457,4 +450,55 @@ public class ChatServiceImpl implements ChatService {
 
         chatRoomMemberRepository.updateLastRead(roomId, meId, targetMsgId);
     }
+
+    private Member getCurrentUserFrom(Principal principal) {
+        log.info("[WS-AUTH] principal class={}, value={}",
+                (principal != null ? principal.getClass().getName() : "null"),
+                principal);
+
+        if (!(principal instanceof org.springframework.security.core.Authentication auth) || !auth.isAuthenticated()) {
+            throw new CustomException(ErrorStatus.UNAUTHORIZED);
+        }
+
+        Object p = auth.getPrincipal();
+        String email = null;
+
+        // 1) OAuth2User
+        if (p instanceof org.springframework.security.oauth2.core.user.OAuth2User o) {
+            Object v = o.getAttribute("email");
+            if (v != null) email = String.valueOf(v);
+        }
+
+        // 2) UserDetails
+        if (email == null && p instanceof org.springframework.security.core.userdetails.UserDetails ud) {
+            email = ud.getUsername();
+        }
+
+        // 3) Map 계열
+        if (email == null && p instanceof java.util.Map<?, ?> m) {
+            Object v = m.get("email");
+            log.debug("[WS-AUTH] Map principal email={}", v);
+            if (v != null) email = String.valueOf(v);
+        }
+
+        // 4) 커스텀 객체 getEmail()
+        if (email == null && p != null) {
+            try {
+                var mth = p.getClass().getMethod("getEmail");
+                Object v = mth.invoke(p);
+                if (v != null) email = String.valueOf(v);
+            } catch (NoSuchMethodException ignore) {
+            } catch (Exception e) {
+                log.error("[WS-AUTH] getEmail() reflection error", e);
+            }
+        }
+
+        log.info("[WS-AUTH] Resolved email={}", email);
+
+        return memberRepository.findByEmailWithDetails(email)
+                .orElseThrow(() -> {
+                    return new CustomException(ErrorStatus.USER_NOT_FOUND);
+                });
+    }
+
 }

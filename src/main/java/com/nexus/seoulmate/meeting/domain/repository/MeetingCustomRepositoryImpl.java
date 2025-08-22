@@ -3,6 +3,7 @@ package com.nexus.seoulmate.meeting.domain.repository;
 import com.nexus.seoulmate.meeting.api.dto.request.MeetingSearchReq;
 import com.nexus.seoulmate.meeting.domain.Meeting;
 import com.nexus.seoulmate.meeting.domain.MeetingType;
+import com.nexus.seoulmate.member.domain.enums.Languages;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +21,8 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository{
 
     @Override
     public List<Meeting> findBySearchCondition(MeetingSearchReq req){
-        String jpql = "SELECT m FROM Meeting m WHERE 1=1";
-
-        // 조건이 있으면 문자열 붙임
-        StringBuilder queryBuilder = new StringBuilder(jpql);
+        // 기본 서치
+        StringBuilder queryBuilder = new StringBuilder("SELECT m FROM Meeting m WHERE 1=1");
         Map<String, Object> params = new HashMap<>();
 
         // 카테고리
@@ -44,29 +43,44 @@ public class MeetingCustomRepositoryImpl implements MeetingCustomRepository{
             params.put("keyword", req.keyword().trim());
         }
 
-        // 언어 필터 (private만 적용)
-        if(req.language() != null){
-            queryBuilder.append(" AND (m.meetingType = :privateType AND m.language = :language)");
-            params.put("privateType", MeetingType.PRIVATE);
-            params.put("language", req.language());
-        }
+        // 언어 레벨 필터 (private에만)
+        queryBuilder.append(" AND (");
+        // official은 항상 통과
+        queryBuilder.append(" m.meetingType <> :privateType ");
+        // private 조건
+        queryBuilder.append(" OR (m.meetingType = :privateType ");
+        params.put("privateType", MeetingType.PRIVATE);
 
-        // 언어 레벨 필터 (private만 적용)
-        Integer minLv = req.minLevelDefault();
-        Integer maxLv = req.maxLevelDefault();
-        if(req.minLevel() != null || req.maxLevel() != null){
-            int min = Math.min(minLv, maxLv);
-            int max = Math.max(minLv, maxLv);
+        if(req.koreanSelected()){
+            // 한국어
+            queryBuilder.append(" AND m.language = :langKorean ");
+            queryBuilder.append(" AND (m.languageLevel IS NULL OR m.languageLevel BETWEEN :koMin AND :koMax) ");
+            params.put("langKorean", Languages.KOREAN);
+            params.put("koMin", req.koMinDefault());
+            params.put("koMax", req.koMaxDefault());
+        } else if (req.englishSelected()){
+            // 영어
+            queryBuilder.append(" AND m.language = :langEnglish ");
+            queryBuilder.append(" AND (m.languageLevel IS NULL OR m.languageLevel BETWEEN :enMin AND :enMax) ");
+            params.put("langEnglish", Languages.ENGLISH);
+            params.put("enMin", req.enMinDefault());
+            params.put("enMax", req.enMaxDefault());
+        } else{
+            // 언어 미선택
             queryBuilder.append("""
-                    AND (
-                          m.meetingType <> :privateType2
-                       OR (m.languageLevel IS NULL OR m.languageLevel BETWEEN :minLevel AND :maxLevel)
-                    )
+                AND (
+                       (m.language = :langKorean AND (m.languageLevel IS NULL OR m.languageLevel BETWEEN :koMin AND :koMax))
+                    OR (m.language = :langEnglish AND (m.languageLevel IS NULL OR m.languageLevel BETWEEN :enMin AND :enMax))
+                )
                 """);
-            params.put("privateType2", MeetingType.PRIVATE);
-            params.put("minLevel", min);
-            params.put("maxLevel", max);
+            params.put("langKorean", Languages.KOREAN);
+            params.put("langEnglish", Languages.ENGLISH);
+            params.put("koMin", req.koMinDefault());
+            params.put("koMax", req.koMaxDefault());
+            params.put("enMin", req.enMinDefault());
+            params.put("enMax", req.enMaxDefault());
         }
+        queryBuilder.append(") )");
 
         // 게시 날짜순 정렬
         queryBuilder.append(" ORDER BY m.created DESC");

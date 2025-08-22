@@ -1,5 +1,6 @@
 package com.nexus.seoulmate.notification.application;
 
+import com.nexus.seoulmate.member.service.MemberService;
 import com.nexus.seoulmate.notification.api.dto.NotificationPushDto;
 
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,13 @@ public class NotificationPushService {
     private static final long TIMEOUT_MS = 0L; //  무제한
     private final Map<Long, Set<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
+    private final MemberService memberService;
+
+    public SseEmitter subscribeForCurrentUser() {
+        Long userId = memberService.getCurrentId();
+        return subscribe(userId);
+    }
+
     // 클라이언트가 /notifications/stream으로 접속
     public SseEmitter subscribe(Long userId) {
 
@@ -28,18 +36,23 @@ public class NotificationPushService {
         emitters.computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet()).add(emitter);
 
         // 로그 코드 추가
-        log.info(" [SSE-구독] userId={} SSE 연결 요청", userId);
+        log.info("[SSE-구독] userId={} SSE 연결 요청", userId);
         try { emitter.send(SseEmitter.event().name("init").data("connected")); } catch (IOException ignored) {}
-        emitter.onCompletion(() -> System.out.println("[SSE] onCompletion userId=" + userId));
-        emitter.onTimeout(() -> System.out.println("[SSE] onTimeout userId=" + userId));
-        emitter.onError(e -> System.out.println("[SSE] onError userId=" + userId + " " + e));
 
-        // 연결 종료, 타임아웃, 에러 시 정리
-        emitter.onCompletion(() -> remove(userId, emitter));
-        emitter.onTimeout(() -> remove(userId, emitter));
-        emitter.onError(e -> remove(userId, emitter));
+        emitter.onCompletion(() -> {
+            log.info("[SSE] onCompletion userId={}", userId);
+            remove(userId, emitter);
+        });
+        emitter.onTimeout(() -> {
+            log.info("[SSE] onTimeout userId={}", userId);
+            remove(userId, emitter);
+        });
+        emitter.onError(e -> {
+            log.warn("[SSE] onError userId={} {} - {}", userId, e.getClass().getSimpleName(), e.getMessage());
+            remove(userId, emitter);
+        });
 
-        log.info(" [SSE-구독완료] userId={} SSE emitter 등록 완료", userId);
+        log.info("[SSE-구독완료] userId={} SSE emitter 등록 완료", userId);
         return emitter;
     }
 

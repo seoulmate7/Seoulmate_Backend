@@ -17,7 +17,10 @@ public class MeetingSearchServiceImpl implements MeetingSearchService{
 
     @Override
     public List<MeetingListRes> searchMeetings(MeetingSearchReq req){
-        List<Meeting> meetings = meetingRepository.findBySearchCondition(req);
+        // 선택 언어만 남기고 반대 언어 값 제거
+        MeetingSearchReq r = req.normalized();
+
+        List<Meeting> meetings = meetingRepository.findBySearchCondition(r);
 
         return meetings.stream()
                 .map(m -> new MeetingListRes(

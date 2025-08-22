@@ -170,6 +170,12 @@ public class MemberService {
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 
+    // 현재 로그인한 사용자의 userId만 반환
+    public Long getCurrentId() {
+        return getCurrentUser().getUserId();
+    }
+
+
     // 현재 로그인한 사용자의 이메일 가져오기
     public String getCurrentUserEmail() {
         var auth = SecurityContextHolder.getContext().getAuthentication();

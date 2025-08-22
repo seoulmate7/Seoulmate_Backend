@@ -13,6 +13,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -31,12 +32,11 @@ public class ChatWebSocketController {
     @MessageMapping("/rooms/{roomId}/send")
     public void send(
             @DestinationVariable Long roomId,
-            @Payload MessageDTO.SendRequest request
+            @Payload MessageDTO.SendRequest request,
+            Principal principal
     ) {
         log.info("[WS] send enter roomId={}, payload={}", roomId, request);
-        chatService.sendMessage(roomId, request);
-        log.info("[WS] send exit roomId={}", roomId);
-        // 주의: 실제 브로드캐스트는 AFTER_COMMIT 리스너 → Redis → Subscriber → /topic/room.{roomId}
+        chatService.sendMessage(roomId, request, principal);
     }
 
     /**

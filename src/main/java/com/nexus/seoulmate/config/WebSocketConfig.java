@@ -12,7 +12,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry reg) {
-        reg.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
+        reg.addEndpoint("/ws")
+                        .addInterceptors(new org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor())
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
     }
 
     @Override
