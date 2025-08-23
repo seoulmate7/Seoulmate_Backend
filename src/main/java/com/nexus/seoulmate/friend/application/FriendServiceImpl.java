@@ -63,7 +63,8 @@ public class FriendServiceImpl implements FriendService {
         eventPublisher.publishEvent(new FriendRequestedEvent(
                 receiver.getUserId(),
                 sender.getUserId(),
-                sender.getFirstName()
+                sender.getFirstName(),
+                sender.getProfileImage()
         ));
     }
 
@@ -89,7 +90,8 @@ public class FriendServiceImpl implements FriendService {
             eventPublisher.publishEvent(new FriendRequestedEvent(
                     requester.getUserId(),
                     accepter.getUserId(),
-                    accepter.getFirstName()
+                    accepter.getFirstName(),
+                    accepter.getProfileImage()
             ));
         }
     }

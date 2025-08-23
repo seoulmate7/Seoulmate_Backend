@@ -6,7 +6,6 @@ import com.nexus.seoulmate.notification.api.dto.response.NotificationRes;
 import com.nexus.seoulmate.notification.application.NotificationPushService;
 import com.nexus.seoulmate.notification.application.NotificationService;
 import com.nexus.seoulmate.notification.domain.LinkTargetType;
-import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;

@@ -26,6 +26,7 @@ public class NotificationService {
     public Page<NotificationRes> findAllForCurrentUser(LinkTargetType type, Pageable pageable) {
         Long receiverId = memberService.getCurrentId();
         LinkTargetType linkTargetType = (type == null) ? LinkTargetType.MEETING : type;
+
         return notificationRepository.findByReceiverAndType(receiverId, linkTargetType, pageable)
                 .map(n -> new NotificationRes(
                         n.getId(),
@@ -35,9 +36,22 @@ public class NotificationService {
                         n.getTargetType(),
                         n.getTargetId(),
                         n.isRead(),
-                        n.getCreatedAt()
-
+                        n.getCreatedAt(),
+                        resolveActorImageUrl(n)
                 ));
+    }
+
+    private String resolveActorImageUrl(Notification n) {
+        if(n.getTargetType() == LinkTargetType.FRIEND) {
+            // targetId == 친구 요청자, 수락자
+            return memberService.findProfileImageUrlById(n.getTargetId());
+        } else if (n.getTargetType() == LinkTargetType.MEETING) {
+            // meetingId에 대해 가장 최근 결제한 참가자
+            return notificationRepository
+                    .findLatestPaidParticipantImageBefore(n.getTargetId(), n.getCreatedAt())
+                    .orElse(null);
+        }
+        return null;
     }
 
     // 읽음 처리 + 다른 탭 이벤트 동기화

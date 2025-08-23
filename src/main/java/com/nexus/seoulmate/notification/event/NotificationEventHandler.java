@@ -64,7 +64,7 @@ public class NotificationEventHandler {
         Notification n = new Notification().initWithTarget(
                 event.requesterId(),
                 NotificationTemplates.friendAcceptedTitle(),
-                NotificationTemplates.friendRequestedContent(event.acceptorName()),
+                NotificationTemplates.friendAcceptedContent(event.acceptorName()),
                 LinkTargetType.FRIEND,
                 event.acceptorId()
         );
