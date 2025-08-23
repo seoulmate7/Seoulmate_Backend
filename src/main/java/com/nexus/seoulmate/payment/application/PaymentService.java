@@ -90,6 +90,10 @@ public class PaymentService {
     // 0원 결제 내부 처리
     @Transactional
     public void processFreePayment(Order order){
+
+        order = orderRepository.findDetailById(order.getOrderId())
+                .orElseThrow(() -> new CustomException(ErrorStatus.ORDER_NOT_FOUND));
+
         // 중복 paid 방지
         if(order.getStatus() == OrderStatus.PAID){
             return;
