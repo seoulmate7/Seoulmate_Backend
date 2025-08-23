@@ -54,10 +54,9 @@ public class PaymentService {
             Order order = orderRepository.findDetailByMerchantUid(merchantUid)
                     .orElseThrow(() -> new CustomException(ErrorStatus.ORDER_NOT_FOUND));
 
-            // 0원이면 아임포트 검증 대신 내부 무료 결제 처리
-            if(order.getAmount() == 0) {
-                processFreePayment(order);
-                return;
+            // 0원이면 오류
+            if(order.getAmount() == 0){
+                throw new CustomException(ErrorStatus.FREE_PAYMENT_USE_FREE_API);
             }
 
             // 금액 검증

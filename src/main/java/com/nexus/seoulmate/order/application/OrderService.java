@@ -45,11 +45,6 @@ public class OrderService {
         Order order = Order.create(member, meeting, amount);
         orderRepository.save(order);
 
-        // 0원이면 내부 결제 완료 처리
-        if(amount == 0){
-            paymentService.processFreePayment(order);
-        }
-
         return order;
     }
 

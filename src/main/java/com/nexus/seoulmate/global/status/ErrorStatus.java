@@ -65,6 +65,7 @@ public enum ErrorStatus {
     AMOUNT_TAMPERED(HttpStatus.BAD_REQUEST, "PAYMENT400", "결제 금액이 일치하기 않습니다."),
     PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "PAYMENT400", "결제가 실패했습니다."),
     IAMPORT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT500", "아임포트 API 오류 발생"),
+    FREE_PAYMENT_USE_FREE_API(HttpStatus.BAD_REQUEST, "PAYMENT400", "무료 결제는 /payment/free/{orderUid}로 호출하세요."),
 
     // MyPage
 
