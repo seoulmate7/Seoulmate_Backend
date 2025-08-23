@@ -8,11 +8,13 @@ import com.nexus.seoulmate.notification.domain.LinkTargetType;
 import com.nexus.seoulmate.notification.domain.Notification;
 import com.nexus.seoulmate.notification.domain.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -44,12 +46,14 @@ public class NotificationService {
     private String resolveActorImageUrl(Notification n) {
         if(n.getTargetType() == LinkTargetType.FRIEND) {
             // targetId == 친구 요청자, 수락자
-            return memberService.findProfileImageUrlById(n.getTargetId());
+            String url = memberService.findProfileImageUrlById(n.getTargetId());
+            log.info("FRIEND 알림 이미지 userId={} → {}", n.getTargetId(), url);
+            return url;
         } else if (n.getTargetType() == LinkTargetType.MEETING) {
             // meetingId에 대해 가장 최근 결제한 참가자
-            return notificationRepository
-                    .findLatestPaidParticipantImageBefore(n.getTargetId(), n.getCreatedAt())
-                    .orElse(null);
+            var img = notificationRepository.findLatestPaidParticipantImageBefore(n.getTargetId(), n.getCreatedAt());
+            log.info("MEETING 알림 이미지 meetingId={} → {}", n.getTargetId(), img.orElse("없음"));
+            return img.orElse(null);
         }
         return null;
     }
