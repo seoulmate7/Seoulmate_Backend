@@ -197,5 +197,10 @@ public class MemberService {
 
         return oAuth2User.getAttribute("sub");
     }
+
+    // 프로필 이미지 조회용 메서드
+    public String findProfileImageUrlById(Long userId){
+        return memberRepository.findProfileImageById(userId).orElse(null);
+    }
 }
 

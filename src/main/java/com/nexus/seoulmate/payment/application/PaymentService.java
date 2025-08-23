@@ -72,10 +72,12 @@ public class PaymentService {
                 // 이벤트 (커밋 후 알림 저장 및 sse 푸시)
                 Long meetingId = order.getMeeting().getId();
                 Long hostId = order.getMeeting().getHost().getUserId();
+                Long participantId = order.getParticipant().getUserId();
                 String participantName = order.getParticipant().getFirstName();
+                String participantImageUrl = order.getParticipant().getProfileImage();
 
                 // 알림 생성, 푸시
-                eventPublisher.publishEvent(new PaymentCaptureEvent(meetingId, hostId, participantName, PAID));
+                eventPublisher.publishEvent(new PaymentCaptureEvent(meetingId, hostId, participantId, participantName, participantImageUrl, PAID));
 
             } else {
                 throw new CustomException(ErrorStatus.PAYMENT_FAILED);
@@ -120,7 +122,10 @@ public class PaymentService {
         // 알림 유료결제랑 동일하게
         Long meetingId = order.getMeeting().getId();
         Long hostId = order.getMeeting().getHost().getUserId();
+        Long participantId = order.getParticipant().getUserId();
         String participantName = order.getParticipant().getFirstName();
-        eventPublisher.publishEvent(new PaymentCaptureEvent(meetingId, hostId, participantName, PAID));
+        String participantImageUrl = order.getParticipant().getProfileImage();
+
+        eventPublisher.publishEvent(new PaymentCaptureEvent(meetingId, hostId, participantId, participantName, participantImageUrl, PAID));
     }
 }

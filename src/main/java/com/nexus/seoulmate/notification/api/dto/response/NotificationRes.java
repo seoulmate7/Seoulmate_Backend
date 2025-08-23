@@ -15,6 +15,7 @@ public class NotificationRes {
     private final Long targetId;
     private boolean isRead;
     private LocalDateTime createdAt;
+    private final String actorImageUrl;
 
     public NotificationRes(Long id,
                            String title,
@@ -23,7 +24,8 @@ public class NotificationRes {
                            LinkTargetType targetType,
                            Long targetId,
                            boolean isRead,
-                           LocalDateTime createdAt) {
+                           LocalDateTime createdAt,
+                           String actorImageUrl) {
         this.id = id;
         this.title = title;
         this.message = message;
@@ -32,5 +34,6 @@ public class NotificationRes {
         this.targetId = targetId;
         this.isRead = isRead;
         this.createdAt = createdAt;
+        this.actorImageUrl = actorImageUrl;
     }
 }
