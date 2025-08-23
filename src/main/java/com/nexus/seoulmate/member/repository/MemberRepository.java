@@ -77,4 +77,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
                                         @Param("q") String query,
                                         Pageable pageable);
 
+
+    // 프로필 이미지 조회하는 메서드
+    @Query("select m.profileImage from Member m where m.userId = :userId")
+    Optional<String> findProfileImageById(@Param("userId") Long userId);
 }

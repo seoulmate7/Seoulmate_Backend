@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
@@ -29,4 +30,18 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
         and n.receiverId = :receiverId
     """)
     Optional<Notification> findByIdAndReceiverId(Long id, Long receiverId);
+
+    @Query(value = """
+            select m.profile_image
+            from orders o
+            join member m on m.user_id = o.user_id
+            join payment p on p.order_id = o.order_id
+            where o.meeting_id = :meetingId
+              and o.status = 'PAID'
+              and p.status = 'PAID'
+            order by ABS(TIMESTAMPDIFF(SECOND, COALESCE(p.paid_at, o.create_at), :before)) ASC,
+                     COALESCE(p.paid_at, o.create_at) DESC
+            limit 1
+            """, nativeQuery = true)
+    Optional<String> findLatestPaidParticipantImageBefore(Long meetingId, LocalDateTime before);
 }
