@@ -15,6 +15,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Optional<Order> findByOrderUid(String orderUid);
 
+    @Query("""
+    select o
+      from Order o
+      join fetch o.meeting m
+      join fetch m.userId
+      join fetch o.member
+      where o.orderId = :id
+""")
+    Optional<Order> findDetailById(@Param("id") Long id);
+
     // 실제 검증 때 사용할 상세 로딩용 메서드
     @Query("""
      select o
