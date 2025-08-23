@@ -14,6 +14,7 @@ import com.nexus.seoulmate.member.domain.Hobby;
 import com.nexus.seoulmate.member.domain.Member;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.member.service.MemberService;
+import com.nexus.seoulmate.notification.event.FriendAcceptedEvent;
 import com.nexus.seoulmate.notification.event.FriendRequestedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -87,7 +88,7 @@ public class FriendServiceImpl implements FriendService {
             Member requester = friendRequest.getSender(); // 요청
             Member accepter = friendRequest.getReceiver(); // 수락
 
-            eventPublisher.publishEvent(new FriendRequestedEvent(
+            eventPublisher.publishEvent(new FriendAcceptedEvent(
                     requester.getUserId(),
                     accepter.getUserId(),
                     accepter.getFirstName(),

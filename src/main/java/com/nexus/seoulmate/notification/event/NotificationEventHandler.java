@@ -8,12 +8,14 @@ import com.nexus.seoulmate.notification.domain.repository.NotificationRepository
 import com.nexus.seoulmate.notification.support.NotificationTemplates;
 import com.nexus.seoulmate.payment.domain.PaymentStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class NotificationEventHandler {
@@ -46,6 +48,7 @@ public class NotificationEventHandler {
 
     // 친구 신청 도착 (수신자에게 저장 후 푸시)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onFriendRequested(FriendRequestedEvent event) {
         Notification n = new Notification().initWithTarget(
                 event.receiverId(),
@@ -56,10 +59,12 @@ public class NotificationEventHandler {
         );
         n = notificationRepository.save(n);
         notificationPushService.pushNew(n.getReceiverId(), toPush(n));
+        log.info("[NOTIF] FRIEND_REQUESTED saved receiver={} sender={}", event.receiverId(), event.senderId());
     }
 
     // 친구 신청 수락 (요청자에게 저장 후 푸시)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onFriendAccepted(FriendAcceptedEvent event) {
         Notification n = new Notification().initWithTarget(
                 event.requesterId(),
@@ -70,6 +75,7 @@ public class NotificationEventHandler {
         );
         n = notificationRepository.save(n);
         notificationPushService.pushNew(n.getReceiverId(), toPush(n));
+        log.info("[NOTIF] FRIEND_ACCEPTED saved requester={} acceptor={}", event.requesterId(), event.acceptorId());
     }
 
     private NotificationPushDto toPush(Notification n) {
