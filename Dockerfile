@@ -1,9 +1,12 @@
 FROM openjdk:17-jdk
 
-RUN apt-get update \
- && apt-get install -y tzdata \
- && rm -rf /var/lib/apt/lists/*
 ENV TZ=Asia/Seoul
+
+RUN microdnf -y update \
+ && microdnf -y install tzdata \
+ && ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
+ && echo 'Asia/Seoul' > /etc/timezone \
+ && microdnf clean all
 
 WORKDIR /app
 
