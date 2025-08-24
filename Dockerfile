@@ -1,5 +1,10 @@
 FROM openjdk:17-jdk
 
+RUN apt-get update \
+ && apt-get install -y tzdata \
+ && rm -rf /var/lib/apt/lists/*
+ENV TZ=Asia/Seoul
+
 WORKDIR /app
 
 COPY wait-for-it.sh /app/wait-for-it.sh
