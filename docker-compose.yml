@@ -12,6 +12,7 @@ services:
     env_file:
       - .env
     environment:
+      TZ: Asia/Seoul
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
@@ -25,8 +26,10 @@ services:
   mysql:
     image: mysql:8
     environment:
+      TZ: Asia/Seoul
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
+    command: ["mysqld", "--default-time-zone=+09:00"]
     ports:
       - "3306:3306"
     volumes:
@@ -34,6 +37,8 @@ services:
 
   redis:
     image: redis:7-alpine
+    environment:
+      TZ: Asia/Seoul
     ports:
       - "6379:6379"
     volumes:

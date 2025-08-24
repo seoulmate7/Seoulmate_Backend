@@ -78,12 +78,10 @@ public class ChatServiceImpl implements ChatService {
         Member partner = memberRepository.findById(partnerId)
                 .orElseThrow(() -> new CustomException(ErrorStatus.USER_NOT_FOUND));
 
-        String partnerFullName = chatConverter.formatName(partner);
-
         ChatRoom room = ChatRoom.builder()
                 .type(RoomType.DIRECT)
-                .title(partnerFullName)
-                .chatImage(partner.getProfileImage())
+                .title(null)
+                .chatImage(null)
                 .build();
         chatRoomRepository.save(room);
 
@@ -241,11 +239,12 @@ public class ChatServiceImpl implements ChatService {
         }
 
         Map<Long, String> nameByUser = new HashMap<>();
+        Map<Long, String> imageByUser = new HashMap<>();
         if (!partnerIdByRoom.isEmpty()) {
             List<Long> pIds = new ArrayList<>(new HashSet<>(partnerIdByRoom.values()));
             memberRepository.findAllById(pIds).forEach(u -> {
-                String partnerFullName = chatConverter.formatName(u);
-                nameByUser.put(u.getUserId(), partnerFullName);
+                nameByUser.put(u.getUserId(), chatConverter.formatName(u));
+                imageByUser.put(u.getUserId(), u.getProfileImage());
             });
         }
 
@@ -259,7 +258,8 @@ public class ChatServiceImpl implements ChatService {
             } else {
                 Long pid = partnerIdByRoom.get(r.getId());
                 String pname = pid != null ? nameByUser.get(pid) : null;
-                results.add(chatConverter.toListItemDirect(r, pid, pname, latest, unread));
+                String pimg  = pid != null ? imageByUser.get(pid) : null;
+                results.add(chatConverter.toListItemDirect(r, pid, pname, pimg, latest, unread));
             }
         }
         return results;
