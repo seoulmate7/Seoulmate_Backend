@@ -54,6 +54,10 @@ public class FriendServiceImpl implements FriendService {
             throw new CustomException(ErrorStatus.FRIEND_REQUEST_SELF);
         }
 
+        if (friendshipRepository.findFriendshipByUsers(sender, receiver).isPresent()) {
+            throw new CustomException(ErrorStatus.FRIEND_RELATION_ALREADY_EXISTS);
+        }
+
         if (friendRequestRepository.existsBySenderAndReceiver(sender, receiver)) {
             throw new CustomException(ErrorStatus.FRIEND_REQUEST_ALREADY_EXISTS);
         }
@@ -156,6 +160,7 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
+    @Transactional
     public void deleteFriend(Long userId) {
         Member currentUser = memberService.getCurrentUser();
 
@@ -167,6 +172,8 @@ public class FriendServiceImpl implements FriendService {
                 .orElseThrow(() -> new CustomException(ErrorStatus.FRIEND_RELATION_NOT_FOUND));
 
         friendshipRepository.delete(friendship);
+
+        friendRequestRepository.deleteAllBetweenUsers(currentUser, targetUser);
     }
 
     @Override
