@@ -18,6 +18,9 @@ import com.nexus.seoulmate.meeting.domain.MeetingType;
 import com.nexus.seoulmate.meeting.domain.repository.MeetingRepository;
 import com.nexus.seoulmate.member.repository.MemberRepository;
 import com.nexus.seoulmate.member.service.MemberService;
+import com.nexus.seoulmate.order.domain.Order;
+import com.nexus.seoulmate.order.domain.repository.OrderRepository;
+import com.nexus.seoulmate.payment.application.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +38,9 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
     private final MeetingRepository meetingRepository;
     private final HobbyRepository hobbyRepository;
     private final MemberService memberService;
+
+    private final OrderRepository orderRepository;
+    private final PaymentService paymentService;
 
     // 숫자 문자열 검증
     private static final Pattern NUMERIC = Pattern.compile("^\\d+$");
@@ -113,7 +119,7 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
                 .location(req.location())
                 .minParticipants(min)
                 .maxParticipants(max)
-                .currentParticipants(0)
+                .currentParticipants(1) // 호스트 참가
                 .price(price)
                 .hobbyCategory(hobbyCategory) // 자동 세팅
                 .primaryHobby(primaryHobby) // 세부 취미 연결
@@ -126,6 +132,12 @@ public class PrivateMeetingServiceImpl implements PrivateMeetingService {
                 .build();
 
         meetingRepository.save(meeting);
+
+        // 호스트 paid 결제 처리
+        Order hostOrder = Order.create(member, meeting, 0);
+        orderRepository.save(hostOrder);
+        paymentService.processFreePayment(hostOrder);
+
         return Response.success(SuccessStatus.CREATE_MEETING, meeting.getId());
     }
 
