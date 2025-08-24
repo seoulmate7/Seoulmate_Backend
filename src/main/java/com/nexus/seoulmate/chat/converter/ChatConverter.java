@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -17,10 +18,16 @@ public class ChatConverter {
     public ChatRoomDTO.RoomSummary toRoomSummaryDirect(ChatRoom room,
                                                        Long myUserId,
                                                        List<ChatRoomDTO.Participant> participants) {
+
+        ChatRoomDTO.Participant partner = pickPartner(participants, myUserId);
+
+        String dynamicTitle = partner != null ? partner.getName() : room.getTitle();
+        String dynamicImage = partner != null ? partner.getProfileImageUrl() : room.getChatImage();
+
         return ChatRoomDTO.RoomSummary.builder()
                 .roomId(room.getId())
-                .title(room.getTitle())
-                .roomImageUrl(room.getChatImage())
+                .title(dynamicTitle)
+                .roomImageUrl(dynamicImage)
                 .type(room.getType().name()) // "DIRECT"
                 .myUserId(myUserId)
                 .participants(participants)
@@ -54,12 +61,21 @@ public class ChatConverter {
                 .build();
     }
 
-    public ChatRoomDTO.RoomListItem toListItemDirect(ChatRoom room, Long partnerId, String partnerName, Message latest, int unreadCount) {
+    public ChatRoomDTO.RoomListItem toListItemDirect(ChatRoom room, Long partnerId, String partnerName,String partnerProfileUrl, Message latest, int unreadCount) {
+
+        String title = (partnerName != null && !partnerName.isBlank())
+                ? partnerName
+                : room.getTitle();
+
+        String imageUrl = (partnerProfileUrl != null && !partnerProfileUrl.isBlank())
+                ? partnerProfileUrl
+                : room.getChatImage();
+
         return ChatRoomDTO.RoomListItem.builder()
                 .roomId(room.getId())
                 .type(room.getType().name())
-                .title(room.getTitle())
-                .roomImageUrl(room.getChatImage())
+                .title(title)
+                .roomImageUrl(imageUrl)
                 .partnerUserId(partnerId)
                 .lastMessageType(latest != null ? latest.getType().name() : null)
                 .lastMessage(latest != null ? summarize(latest) : null)
@@ -160,5 +176,13 @@ public class ChatConverter {
             default:
                 return member.getFirstName() + " " + member.getLastName();
         }
+    }
+
+    private ChatRoomDTO.Participant pickPartner(List<ChatRoomDTO.Participant> participants, Long myUserId) {
+        if (participants == null) return null;
+        return participants.stream()
+                .filter(p -> !Objects.equals(p.getUserId(), myUserId))
+                .findFirst()
+                .orElse(null);
     }
 }
